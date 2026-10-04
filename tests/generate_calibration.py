@@ -28,7 +28,7 @@ import json
 import sys
 from pathlib import Path
 
-from bendly.adapters.trubend import leggi_bnc
+from snapbend.adapters.trubend import leggi_bnc
 from reconstruct import _ANGLE_TOKEN
 
 _DEFAULT = Path(__file__).resolve().parent.parent / "calibrations" / "default.json"

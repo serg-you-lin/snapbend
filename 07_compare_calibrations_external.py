@@ -17,8 +17,8 @@ Richiede forge installato a fianco per il DXF: pip install -e ../dxf-forge
 
 from pathlib import Path
 
-from bendly import Bend, BentProfile
-from bendly.rules.deduction import (
+from snapbend import Bend, BentProfile
+from snapbend.rules.deduction import (
     external_flanges_to_centerline,
     external_to_centerline_flange,
 )

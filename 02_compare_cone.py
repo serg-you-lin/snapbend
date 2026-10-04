@@ -13,7 +13,7 @@ Richiede forge installato a fianco: pip install -e ../dxf-forge
 
 from pathlib import Path
 
-from bendly import Cone
+from snapbend import Cone
 
 # =============================================================================
 # PARAMETRI DI INPUT — diametri ESTERNI, in millimetri

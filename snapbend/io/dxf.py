@@ -72,7 +72,7 @@ def to_dxf(
     import forge
 
     result = to_forge_result(flat, tolerance=tolerance)
-    doc_out = forge.to_dxf(result)
+    doc_out = forge.to_dxf(result, allow_invalid=False)
 
     if annotate and flat.meta:
         _write_meta_block(doc_out, result, flat.label, flat.meta, flat.bends)
@@ -111,7 +111,7 @@ def write_section_dxf(
 
     flat = section.section()
     result = to_forge_result(flat, tolerance=tolerance)
-    doc_out = forge.to_dxf(result)
+    doc_out = forge.to_dxf(result, allow_invalid=False)
 
     _write_flange_quotes(doc_out, quotes, section.thickness, quote_clearance)
 
@@ -164,7 +164,7 @@ def write_part_dxf(
         {"SectionView": forge.RoleStyle(color=(0, 100, 0))}
         if section_flat is not None else None
     )
-    doc_out = forge.to_dxf(result, role_styles=role_styles)
+    doc_out = forge.to_dxf(result, role_styles=role_styles, allow_invalid=False)
 
     cut_bbox = result.clusters[0].outer.bbox if result.clusters else (0.0, 0.0, 0.0, 0.0)
     x0 = cut_bbox[0]

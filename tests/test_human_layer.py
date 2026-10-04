@@ -8,8 +8,8 @@ un involucro comodo, non un calcolo nuovo.
 
 import unittest
 
-from bendly import Bend, BentProfile, develop_from_external_flanges
-from bendly.rules.deduction import external_flanges_to_centerline
+from snapbend import Bend, BentProfile, develop_from_external_flanges
+from snapbend.rules.deduction import external_flanges_to_centerline
 
 
 class TestDevelopFromExternalFlanges(unittest.TestCase):
@@ -53,8 +53,8 @@ class TestDevelopFromExternalFlanges(unittest.TestCase):
         self.assertEqual(flat.bends[0].rule, "misurato")
 
     def test_e_in_bendly_all(self):
-        import bendly
-        self.assertIn("develop_from_external_flanges", bendly.__all__)
+        import snapbend
+        self.assertIn("develop_from_external_flanges", snapbend.__all__)
 
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ from pathlib import Path
 import ezdxf
 from ezdxf import bbox
 
-from bendly import Bend, BentProfile, Calibration
+from snapbend import Bend, BentProfile, Calibration
 
 # --- CONFIG ---
 # i DXF reali di officina 1 (non versionati, vedi .gitignore). Il path è

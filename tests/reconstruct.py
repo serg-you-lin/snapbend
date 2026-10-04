@@ -47,9 +47,9 @@ from typing import List, Optional, Tuple
 
 import ezdxf
 
-from bendly.rules.deduction import external_to_centerline_deduction
-from bendly.model.section import SECTION_INNER_RADIUS_MM, Section
-from bendly.adapters.trubend import leggi_bnc
+from snapbend.rules.deduction import external_to_centerline_deduction
+from snapbend.model.section import SECTION_INNER_RADIUS_MM, Section
+from snapbend.adapters.trubend import leggi_bnc
 
 # layer della linea di piega nei DXF TruBend -> angolo nello schema nomi
 # (piatto = 180, piega in su = 90, piega in giù = 270).

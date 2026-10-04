@@ -1,7 +1,7 @@
 import math
 import unittest
 
-from bendly import Cylinder
+from snapbend import Cylinder
 
 
 class TestCylinderMath(unittest.TestCase):
