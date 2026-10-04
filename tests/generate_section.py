@@ -1,7 +1,7 @@
 """
 tests/generate_section.py
 ---------------------------
-Generate the golden-set sections (L / U / Z / O) into data_4_cloude/sections/.
+Generate the golden-set sections (L / U / Z / O) into output/sections/.
 
 One section per shape x thickness (1, 3, 10), with a fixed 1 mm inner
 radius. The radius does NOT enter the flat-length calculation: it only
@@ -25,8 +25,8 @@ from pathlib import Path
 
 from snapbend.model.section import Section
 
-# same centerline segments and angles as the real TruBend DXF in
-# data_4_cloude/<SHAPE>/ and as the FORME dict in
+# same centerline segments and angles as the officina DXF in
+# tests/data/officina/<SHAPE>/ and as the FORME dict in
 # tests/test_golden_officina.py
 SHAPES = {
     "L": ([114.0, 114.0], [90.0]),
@@ -35,7 +35,7 @@ SHAPES = {
     "O": ([40.0, 40.0, 60.0, 30.0, 70.0], [90.0, 270.0, 270.0, 90.0]),
 }
 THICKNESSES = [1.0, 3.0, 10.0]
-OUT = Path("data_4_cloude/sections")
+OUT = Path("output/sections")
 
 
 def _round(entities):

@@ -1269,3 +1269,8 @@ golden, `test_bend`, `test_deduction` and `test_human_layer` load from there
 instead of `data_4_cloude/` and `calibrations/`, so a clean clone runs them
 all (before: 4 failures and 5 skips without the local files). The golden reads
 thickness and die from the file name only. Suite: 418 passed.
+
+`data_4_cloude/` itself left too, the same day: script `05` now compares the
+calibrations on `tests/data/officina/`, `tests/generate_section.py` writes to
+`output/sections/`, and nothing in snapbend reads the folder any more. The real
+shop data moved, untracked, next to the private officina tool that reads it.

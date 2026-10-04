@@ -72,7 +72,7 @@ e che stanno in `tests/test_golden_officina.py` (`FORME`).
 python tests/generate_section.py
 ```
 
-Scrive in `data_4_cloude/sections/` (rigenerabile, non versionato) sia
+Scrive in `output/sections/` (rigenerabile, ignorata da git) sia
 `.dxf` (via forge, per guardarle) sia `.json` (entita' neutre + parametri,
 per i test con `forge.load_geometry` senza passare da un file). Una
 sezione per forma x spessore (1, 3, 10): 12 in totale, meno quelle

@@ -1,7 +1,7 @@
 """
 05_compare_calibrations.py
 ---------------------------
-Per ogni pezzo di test in data_4_cloude/ stampa, fianco a fianco:
+Per ogni pezzo di officina in tests/data/officina/ stampa, fianco a fianco:
   - la lunghezza dello sviluppo REALE (DXF prodotto da TruBend)
   - quella della calibrazione "default"     (DIN 6935 + cava da tabella)
   - quella della calibrazione "tipo_misurato" (valori misurati dai .bnc)
@@ -21,10 +21,10 @@ from ezdxf import bbox
 from snapbend import Bend, BentProfile, Calibration
 
 # --- CONFIG ---
-# i DXF reali di officina 1 (non versionati, vedi .gitignore). Il path è
-# ancorato alla radice del repo, così lo script gira anche da un'altra CWD.
+# le copie tracciate dei DXF di officina 1 (MAP D59). Il path è ancorato
+# alla radice del repo, così lo script gira anche da un'altra CWD.
 ROOT = Path(__file__).resolve().parent
-DATA_DIR = ROOT / "data_4_cloude"
+DATA_DIR = ROOT / "tests" / "data" / "officina"
 
 FORME = {
     "L": [114.0, 114.0],
@@ -59,7 +59,7 @@ def sviluppo(calibration, forma, spess, cava) -> float:
 
 def main() -> None:
     default = Calibration.load("default")
-    misurato = Calibration.load("tipo_misurato")
+    misurato = Calibration.load("tipo_misurato", folder=DATA_DIR)
 
     print(f"{'file':44} {'sp':>3} {'cava':>4} "
           f"{'REALE':>9} {'default':>9} {'Δ':>7}  {'tipo_misurato':>13} {'Δ':>7}")

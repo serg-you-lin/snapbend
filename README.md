@@ -187,7 +187,7 @@ through `to_dxf()`, consume `.entities` / `.meta` / `.bends` directly.
   DIN 6935, K-factor; what a section is and why direction lives there).
 - **`TODO.md`** — what is still missing, by priority.
 - **`tests/`** — the executable specification: golden values from real shop parts
-  (`data_4_cloude/`, not versioned), regenerated only by the dedicated
+  (tracked copies in `tests/data/`), regenerated only by the dedicated
   `tests/generate_*.py` scripts.
 
 ## License

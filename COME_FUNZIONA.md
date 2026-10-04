@@ -85,8 +85,8 @@ Ogni piega, nel risultato, dice quale delle tre strade ha preso
 ### `inside_sum` — a parte
 
 Moltissime carpenterie non calcolano: sommano le quote **interne** e via
-(in Italia è la prassi dominante — vedi il disegno cliente in
-`data_4_cloude/Sviluppo_somma_interni.pdf`: staffa 8 mm, una piega,
+(in Italia è la prassi dominante — un disegno cliente che lo mostra:
+staffa 8 mm, una piega,
 sviluppo dichiarato `142 + 262 = 404`).
 
 `inside_sum` non è una regola di accorciamento: è la dichiarazione che

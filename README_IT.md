@@ -187,7 +187,7 @@ passare da `to_dxf()`, consuma `.entities` / `.meta` / `.bends` direttamente.
   allowance, DIN 6935, K-factor; cos'è una sezione e perché il verso vive lì).
 - **`TODO.md`** — cosa manca ancora, in ordine di priorità.
 - **`tests/`** — la specifica eseguibile: valori golden da pezzi reali di
-  officina (`data_4_cloude/`, non versionati), rigenerati solo dagli script
+  officina (copie tracciate in `tests/data/`), rigenerati solo dagli script
   dedicati `tests/generate_*.py`.
 
 ## Licenza
