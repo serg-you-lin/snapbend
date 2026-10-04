@@ -69,8 +69,8 @@ neutra), che vuole un raggio interno `r` e un fattore `K`. Li porta la
 **calibrazione** — un file con la tabella spessore→cava (da cui `r ≈ cava/6`),
 eventualmente il `K` per materiale, eventualmente accorciamenti già **misurati**
 (`MAP.md` D33). Non imposti niente per partire: senza `calibration` usa
-`"default"`, che non indovina la cava di nessuno — `r` ripiega su un raggio
-fisso dichiarato (1 mm) e il `K` lo stima DIN 6935 da `r/s` (`MAP.md` D36).
+`"default"`, che non indovina la cava di nessuno — `r` ripiega sullo spessore
+(raggio = spessore, dichiarato) e il `K` lo stima DIN 6935 da `r/s` (`MAP.md` D36, D62).
 `flat.bends[i].source` dice sempre da dove viene ogni numero, mai una stima
 travestita da dato reale.
 
@@ -82,7 +82,7 @@ flat = BentProfile(
     bends=[Bend(angle=90), Bend(angle=90)],     # solo l'angolo
     thickness=2, width=300,
     material="acciaio",                         # sceglie la riga in k_per_materiale della calibrazione
-    calibration="tipo_misurato",                # o omesso -> "default"; o "din6935", "esempio_din_3cave", "inside_sum"
+    calibration="tipo_misurato",                # o omesso -> "default"; o "din6935", "inside_sum"
 ).develop()
 
 print(flat.meta["total_length"])
@@ -160,19 +160,18 @@ D36/D39) — una calibrazione dichiara da sé quale dei quattro è col campo
 
 | `tipo_cliente` | Sei... | Dai a `snapbend`... | Calibrazione |
 |---|---|---|---|
-| `zero_config` | uno sconosciuto che l'ha appena scaricato, non legge nulla | niente | `default` (o omessa) — raggio fisso 1 mm, `K` stimato DIN |
-| `cava_propria` | un'officina con le tue cave ma senza CAM | solo la tabella spessore→cava (5 minuti, mai una misura) | copia `snapbend/data/calibrations/esempio_din_3cave.json`, ci metti le tue cave vere |
+| `zero_config` | uno sconosciuto che l'ha appena scaricato, non legge nulla | niente | `default` (o omessa) — raggio = spessore, `K` stimato DIN |
+| `cava_propria` | un'officina con le tue cave ma senza CAM | solo la tabella spessore→cava (5 minuti, mai una misura) | una tua calibrazione con `cava_per_spessore` compilata, nella tua cartella officina |
 | `somma_interna` | un'officina che vuole solo la somma delle quote interne, niente K-factor | niente, solo questa preferenza | `inside_sum` |
 | `misurato` | un'officina con CAM, che vuole avvicinarsi il più possibile per preventivare | cave + accorciamenti misurati (ore di lavoro vere, non gratis) | la tua `tipo_misurato.json` nella tua cartella officina — misurato dove c'è, stimato altrove |
 
 `pip install snapbend` e basta: le calibrazioni generiche e la tabella degli
 spessori viaggiano dentro il pacchetto, nessuna cartella, nessuna variabile
-d'ambiente, nessuna configurazione (MAP D61).
+d'ambiente, nessuna configurazione (MAP D61). Le calibrazioni incluse sono due: `default` e `inside_sum`.
 
 *Avanzato, facoltativo.* Un'officina con i suoi dati misurati può tenerli in
 una sua **cartella officina**, fuori dal pacchetto: `snapbend.set_officina(percorso)`
-in uno script (o, per chi la vuole, la variabile d'ambiente `SNAPBEND_OFFICINA`),
-e snapbend legge `<officina>/calibrations/<nome>.json` e
+in uno script, e snapbend legge `<officina>/calibrations/<nome>.json` e
 `<officina>/sheet_thicknesses.json` prima di quelli inclusi (MAP D60).
 
 ## Il contratto neutro con forge

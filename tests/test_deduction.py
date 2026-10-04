@@ -100,21 +100,21 @@ class TestCalibrazioni(unittest.TestCase):
         self.assertEqual(p.deduction_detail(3.0, 90.0, cava=16.0, material="ottone").rule, "din6935")
 
     def test_default_cava_da_tabella_se_data(self):
-        # esempio_din_3cave HA valori veri di cava (default oggi non ne ha
-        # nessuno, MAP.md D36: tutta la tabella a null)
-        p = Calibration.load("esempio_din_3cave")
+        # una calibrazione con una tabella cave vera (default non ne ha
+        # nessuna, MAP.md D36: tutta la tabella a null)
+        p = Calibration({"nome": "tre_cave", "cava_per_spessore": {"1": 8, "3": 20, "5": 32}})
         con_tabella = p.centerline_deduction(3.0, 90.0)          # cava dedotta (V20)
         con_cava = p.centerline_deduction(3.0, 90.0, cava=20.0)  # cava esplicita
         self.assertAlmostEqual(con_tabella, con_cava, places=9)
 
-    def test_default_senza_cava_nota_usa_raggio_fisso(self):
-        # MAP.md D36: default.json ha tutti gli spessori a null -> nessuna
-        # cava indovinata, raggio fisso dichiarato (1 mm), mai spessore.
+    def test_default_senza_cava_nota_raggio_uguale_spessore(self):
+        # default.json ha tutti gli spessori a null (D36) -> nessuna cava
+        # indovinata, raggio = spessore dichiarato (D62).
         p = Calibration.load("default")
         info = p.deduction_detail(3.0, 90.0)
         self.assertEqual(info.rule, "din6935")
-        self.assertIn("raggio 1", info.source)
-        atteso = deduction_din6935(1.0, 3.0, 90.0, "mezzeria")
+        self.assertIn("raggio 3 = spessore", info.source)
+        atteso = deduction_din6935(3.0, 3.0, 90.0, "mezzeria")
         self.assertAlmostEqual(info.value, atteso, places=9)
 
     def test_din6935_e_la_pura_norma(self):

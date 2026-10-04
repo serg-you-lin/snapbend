@@ -8,7 +8,7 @@ python tests/gen_index.py
 
 What this is: the lookup table of *what already exists* in the package, down to internal helpers. `docs/API.md` documents the public surface (`snapbend.<name>`) with full cards; this file lists every module-level function and class so nothing gets rewritten because it was not found. Signatures and docstring lines come straight from the source, so they cannot drift.
 
-`27` modules · `91` module-level functions · `20` classes · `4419` lines of code.
+`27` modules · `92` module-level functions · `20` classes · `4411` lines of code.
 
 Sections: [Lookup](#lookup) · [Duplicate names](#duplicate-names) · [Dependency rule](#dependency-rule) · [By module](#by-module) · [Internal dependencies](#internal-dependencies)
 
@@ -32,10 +32,10 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `BendingLine` | class | `snapbend/flat/model/bending_line.py:22` |  |
 | `BendResult` | class | `snapbend/core/bend.py:168` | Esito del calcolo di UNA piega dentro `BentProfile.develop()` (o di |
 | `BentProfile` | class | `snapbend/core/bend.py:200` | Profilo piegato: N flange (quote a MEZZERIA) unite da N-1 pieghe. |
-| `Calibration` | class | `snapbend/rules/deduction.py:239` | Una calibrazione = i dati di calcolo di un'officina. |
+| `Calibration` | class | `snapbend/rules/deduction.py:237` | Una calibrazione = i dati di calcolo di un'officina. |
 | `_canonical` | func | `snapbend/rules/read_section.py:402` | A section reads the same from either end. Pick a deterministic |
 | `_cap` | func | `snapbend/model/section.py:416` |  |
-| `centerline_to_external_flange` | func | `snapbend/rules/deduction.py:145` | Inversa di `external_to_centerline_flange`: da mezzeria a esterno-esterno. |
+| `centerline_to_external_flange` | func | `snapbend/rules/deduction.py:143` | Inversa di `external_to_centerline_flange`: da mezzeria a esterno-esterno. |
 | `_chain_vertex` | func | `snapbend/rules/read_section.py:474` |  |
 | `_check_orientation` | func | `snapbend/model/geometry.py:40` |  |
 | `_circular_inners` | func | `snapbend/flat/detect.py:400` | (contour, diameter, center) per ogni inner geometricamente circolare. |
@@ -43,7 +43,8 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `Cone` | class | `snapbend/core/cone.py:140` |  |
 | `Cylinder` | class | `snapbend/core/cylinder.py:79` |  |
 | `deduction_din6935` | func | `snapbend/rules/deduction.py:81` | Accorciamento di piega con K stimato DIN 6935 (scorciatoia di |
-| `DeductionInfo` | class | `snapbend/rules/deduction.py:199` | Accorciamento di piega + da dove viene il numero. |
+| `DeductionInfo` | class | `snapbend/rules/deduction.py:197` | Accorciamento di piega + da dove viene il numero. |
+| `default_radius` | func | `snapbend/rules/deduction.py:102` | Raggio interno quando non c'è né un raggio esplicito né una cava nota: |
 | `describe_features` | func | `snapbend/flat/detect.py:140` | Conteggio ricco per i tipi **noti di forge** — fori per tipo, pieghe |
 | `_detect_bending` | func | `snapbend/flat/detect.py:318` | Una piega attraversa il pezzo (`forge.geometry.splits_polygon`, prolungata di |
 | `_detect_engrave` | func | `snapbend/flat/detect.py:512` | Inferenza geometrica delle incisioni — NON ANCORA IMPLEMENTATA. |
@@ -65,9 +66,9 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_entities_bbox` | func | `snapbend/io/dxf.py:196` | Bbox degli entity grezzi (linee/archi, schema `FlatGeometry.entities`) |
 | `estimate_k_factor` | func | `snapbend/core/bend.py:83` | Stima un K-factor di partenza da materiale + rapporto R/T, secondo la |
 | `export_part` | func | `snapbend/human_layer.py:66` | Esporta un pezzo su un UNICO file DXF a livelli (Fase 3, MAP.md D32): |
-| `external_flanges_to_centerline` | func | `snapbend/rules/deduction.py:159` | Converte l'intero elenco di flange (come lo si passerebbe a |
+| `external_flanges_to_centerline` | func | `snapbend/rules/deduction.py:157` | Converte l'intero elenco di flange (come lo si passerebbe a |
 | `external_to_centerline_deduction` | func | `snapbend/rules/deduction.py:89` | Converte un accorciamento riferito alle quote esterne (come nei .bnc |
-| `external_to_centerline_flange` | func | `snapbend/rules/deduction.py:124` | Converte la lunghezza ESTERNO-ESTERNO di una flangia (apice virtuale |
+| `external_to_centerline_flange` | func | `snapbend/rules/deduction.py:122` | Converte la lunghezza ESTERNO-ESTERNO di una flangia (apice virtuale |
 | `_extract_data` | func | `snapbend/flat/detect.py:695` |  |
 | `_extract_data_from_source` | func | `snapbend/flat/detect.py:728` |  |
 | `_face_pair_distances` | func | `snapbend/rules/read_section.py:257` | Perpendicular distance between lines that genuinely face each other |
@@ -92,8 +93,8 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_mid` | func | `snapbend/rules/read_section.py:109` |  |
 | `_mode` | func | `snapbend/rules/read_section.py:317` |  |
 | `_normalize_features` | func | `snapbend/flat/detect.py:70` | Normalizza l'argomento `features` di detect_flat() in un set di stringhe. |
-| `officina_file` | func | `snapbend/rules/officina.py:42` | Un file dentro la cartella officina, se c'è una cartella officina e il file esiste. |
-| `officina_folder` | func | `snapbend/rules/officina.py:31` | La cartella officina scelta con `set_officina`, o quella di `SNAPBEND_OFFICINA`; None se nessuna. |
+| `officina_file` | func | `snapbend/rules/officina.py:36` | Un file dentro la cartella officina, se c'è una cartella officina e il file esiste. |
+| `officina_folder` | func | `snapbend/rules/officina.py:27` | La cartella officina scelta con `set_officina`; None se nessuna. |
 | `_order_chain` | func | `snapbend/rules/read_section.py:452` |  |
 | `_perp_distance` | func | `snapbend/rules/read_section.py:297` |  |
 | `polar_point` | func | `snapbend/model/geometry.py:30` | Punto a coordinate polari (angolo in gradi). |
@@ -112,13 +113,13 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `Section` | class | `snapbend/model/section.py:110` |  |
 | `SectionReading` | class | `snapbend/rules/read_section.py:88` |  |
 | `_sector_entities` | func | `snapbend/core/cone.py:77` | Settore anulare simmetrico rispetto a X, ampiezza angolare `angle` (gradi). |
-| `set_officina` | func | `snapbend/rules/officina.py:25` | Sceglie la cartella officina per questo programma (vince sulla variabile); None torna alla variabile. |
+| `set_officina` | func | `snapbend/rules/officina.py:21` | Sceglie la cartella officina per questo programma; None la toglie. |
 | `SheetThicknessTable` | class | `snapbend/rules/read_section.py:64` |  |
 | `_split_into_sides` | func | `snapbend/rules/read_section.py:412` |  |
 | `swap_xy` | func | `snapbend/model/geometry.py:47` | Riflette la geometria lungo la diagonale y=x (scambia gli assi X/Y) — il |
 | `_sweep_deg` | func | `snapbend/rules/read_section.py:118` | Signed sweep from a0 to a1 in (-360, 360), positive when ccw. |
 | `_thickness` | func | `snapbend/rules/read_section.py:224` |  |
-| `tipo_cliente_coerente` | func | `snapbend/rules/deduction.py:430` | Controlla che una calibrazione mantenga la promessa del suo |
+| `tipo_cliente_coerente` | func | `snapbend/rules/deduction.py:428` | Controlla che una calibrazione mantenga la promessa del suo |
 | `to_dxf` | func | `snapbend/io/dxf.py:53` | Scrive `flat` su file DXF via forge.to_dxf() — layer/colori coerenti |
 | `to_forge_result` | func | `snapbend/io/dxf.py:25` | Traduce `flat` in un ForgeResult passando da forge.load_geometry() + |
 | `_turn_deg` | func | `snapbend/model/section.py:67` | Signed rotation relative to going straight (>0 = to the left). |
@@ -373,7 +374,7 @@ _snapbend/rules_
 
 No module-level function or class.
 
-#### `snapbend/rules/deduction.py` — 487 lines
+#### `snapbend/rules/deduction.py` — 485 lines
 
 _snapbend/rules/deduction.py_
 
@@ -383,21 +384,22 @@ _snapbend/rules/deduction.py_
 - `deduction_din6935(radius: float, thickness: float, angle_deg: float, reference: str='mezzeria') -> float` — L81 — Accorciamento di piega con K stimato DIN 6935 (scorciatoia di
 - `external_to_centerline_deduction(external_deduction: float, thickness: float, angle_deg: float) -> float` — L89 — Converte un accorciamento riferito alle quote esterne (come nei .bnc
 - `radius_from_v_opening(v_opening: float) -> float` — L96 — Stima del raggio interno di piega in aria da una cava a V.
-- `external_to_centerline_flange(external_length: float, thickness: float, angle_before: Optional[float]=None, angle_after: Optional[float]=None) -> float` — L124 — Converte la lunghezza ESTERNO-ESTERNO di una flangia (apice virtuale
-- `centerline_to_external_flange(centerline_length: float, thickness: float, angle_before: Optional[float]=None, angle_after: Optional[float]=None) -> float` — L145 — Inversa di `external_to_centerline_flange`: da mezzeria a esterno-esterno.
-- `external_flanges_to_centerline(external_flanges: list[float], bend_angles: list[float], thickness: float) -> list[float]` — L159 — Converte l'intero elenco di flange (come lo si passerebbe a
-- **class** `DeductionInfo` — L199 — Accorciamento di piega + da dove viene il numero.
-- **class** `Calibration` — L239 — Una calibrazione = i dati di calcolo di un'officina.
+- `default_radius(thickness: float) -> float` — L102 — Raggio interno quando non c'è né un raggio esplicito né una cava nota:
+- `external_to_centerline_flange(external_length: float, thickness: float, angle_before: Optional[float]=None, angle_after: Optional[float]=None) -> float` — L122 — Converte la lunghezza ESTERNO-ESTERNO di una flangia (apice virtuale
+- `centerline_to_external_flange(centerline_length: float, thickness: float, angle_before: Optional[float]=None, angle_after: Optional[float]=None) -> float` — L143 — Inversa di `external_to_centerline_flange`: da mezzeria a esterno-esterno.
+- `external_flanges_to_centerline(external_flanges: list[float], bend_angles: list[float], thickness: float) -> list[float]` — L157 — Converte l'intero elenco di flange (come lo si passerebbe a
+- **class** `DeductionInfo` — L197 — Accorciamento di piega + da dove viene il numero.
+- **class** `Calibration` — L237 — Una calibrazione = i dati di calcolo di un'officina.
   - methods: `__init__`, `tipo_cliente`, `load`, `_field`, `v_opening_for_thickness`, `k_for_material`, `_measured_row`, `_has_measured_for_thickness`, `bend_allowance_din`, `centerline_deduction`, `deduction_detail`
-- `tipo_cliente_coerente(calibration: Calibration) -> list[str]` — L430 — Controlla che una calibrazione mantenga la promessa del suo
+- `tipo_cliente_coerente(calibration: Calibration) -> list[str]` — L428 — Controlla che una calibrazione mantenga la promessa del suo
 
-#### `snapbend/rules/officina.py` — 48 lines
+#### `snapbend/rules/officina.py` — 42 lines
 
 _snapbend/rules/officina.py_
 
-- `set_officina(path) -> None` — L25 — Sceglie la cartella officina per questo programma (vince sulla variabile); None torna alla variabile.
-- `officina_folder() -> Optional[Path]` — L31 — La cartella officina scelta con `set_officina`, o quella di `SNAPBEND_OFFICINA`; None se nessuna.
-- `officina_file(*parts: str) -> Optional[Path]` — L42 — Un file dentro la cartella officina, se c'è una cartella officina e il file esiste.
+- `set_officina(path) -> None` — L21 — Sceglie la cartella officina per questo programma; None la toglie.
+- `officina_folder() -> Optional[Path]` — L27 — La cartella officina scelta con `set_officina`; None se nessuna.
+- `officina_file(*parts: str) -> Optional[Path]` — L36 — Un file dentro la cartella officina, se c'è una cartella officina e il file esiste.
 
 #### `snapbend/rules/read_section.py` — 477 lines
 

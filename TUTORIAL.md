@@ -87,11 +87,11 @@ accorciamenti già **misurati** (`MAP.md` D33). Punti da tenere a mente:
 
 - **Non devi impostare niente per partire**: se non dici nulla, la
   calibrazione è `"default"` — non indovina nessuna cava (tabella tutta a
-  `null`, `MAP.md` D36), usa un raggio fisso dichiarato (1 mm) e il `K` lo
+  `null`, `MAP.md` D36), usa raggio = spessore (dichiarato, `MAP.md` D62) e il `K` lo
   stima DIN 6935 dal rapporto raggio/spessore. `flat.bends[i].source` dice
   sempre da dove viene il numero — mai un valore travestito da reale.
 - **La cava, se la dai, la sceglie la tabella** per spessore (`r ≈
-  cava/6`, più preciso del raggio fisso). La passi sulla piega
+  cava/6`, più preciso di raggio = spessore). La passi sulla piega
   (`Bend(angle=90, cava=20)`) solo se quel pezzo è stato piegato con una
   cava fuori standard.
 - **Il raggio in ordine di bontà**: esplicito (`Bend(radius=...)`, per
@@ -116,8 +116,8 @@ CAM che vuole avvicinarsi il più possibile per preventivare (→ `misurati`).
 
 Script:
 
-- `04_bend.py` — una squadra a L sviluppata con quattro calibrazioni
-  (`default`, `esempio_din_3cave`, `tipo_misurato`, `inside_sum`) fianco a
+- `04_bend.py` — una squadra a L sviluppata con le due calibrazioni incluse
+  (`default`, `inside_sum`) fianco a
   fianco, confrontate con lo sviluppo vero del `.bnc`. Guarda per ogni riga
   cosa ha usato (misurato / stima DIN) e con che cava. Chiude con
   `Bend.from_included()`: lo stesso angolo incluso (120°) passato in tre

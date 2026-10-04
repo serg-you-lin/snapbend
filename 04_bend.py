@@ -26,16 +26,12 @@ Non devi impostare niente per partire: se non dici nulla, il programma usa
 la calibrazione "default" (norma DIN 6935 + una tabella "spessore -> cava"
 gia' dentro). Ti da subito un numero.
 
-Una CALIBRAZIONE e' un file (calibrations/<nome>.json) con: la regola di
-calcolo + la tabella che dice, per ogni spessore, che cava si usa. Ne
-scegli una col nome:
+Una CALIBRAZIONE e' un file <nome>.json con: la regola di calcolo + la
+tabella che dice, per ogni spessore, che cava si usa. Nel pacchetto ce ne
+sono due, le scegli col nome (MAP D62):
 
-  "default"          DIN 6935 + tabella cava standard (valori orientativi,
-                     "DA SOSTITUIRE con quelli veri"). Per partire.
-  "esempio_din_3cave" un'officina che lavora in DIN con 3 sole cave. E' il
-                     modello di come si scrive la calibrazione di un cliente.
-  "tipo_misurato"    accorciamenti VERI, misurati da programmi TruBend
-                     reali. Dove un caso manca, ripiega su DIN.
+  "default"          DIN 6935, raggio = spessore dove la cava non e' nota.
+                     Per partire, senza configurare niente.
   "inside_sum"       lavori in quote interne: passi le flange interne, lo
                      sviluppo e' la loro somma esatta (raggio 0, accorc. 0).
   "<tua_officina>"   il file della tua officina, quando ce l'hai.
@@ -111,7 +107,7 @@ def main() -> None:
 
     print("Lo stesso pezzo, con calibrazioni diverse (la cava viene dalla loro tabella):")
     print()
-    for nome in ("default", "esempio_din_3cave", "tipo_misurato", "inside_sum"):
+    for nome in ("default", "inside_sum"):
         stampa(nome, sviluppo(nome))
     print()
 
@@ -140,17 +136,15 @@ def main() -> None:
 
     print("COSA SI VEDE")
     print("  - Non hai impostato NIENTE: 'default' ti da comunque un numero (DIN 6935).")
-    print("  - 'tipo_misurato' azzecca il vero: sono accorciamenti misurati per")
-    print("    spessore 3 + cava 16, presi dal .bnc.")
-    print("  - le altre ci vanno vicino: sono stime (DIN 6935, o la vecchia scuola),")
-    print("    non i numeri di quella pressa. Per il pezzo vero: calibra l'officina.")
+    print("  - sono stime (DIN 6935 con raggio = spessore, o la somma delle quote")
+    print("    interne), non i numeri di quella pressa.")
     print("  - ogni riga dice quale cava ha usato e da dove viene il numero.")
     print()
 
     # --- un DXF, giusto per vederlo (serve forge installato a fianco) ---
     try:
-        sviluppo("tipo_misurato").to_dxf(OUTPUT_DIR / "squadra_a_l.dxf")
-        print(f"DXF di controllo (tipo_misurato) in {OUTPUT_DIR.resolve()}")
+        sviluppo("default").to_dxf(OUTPUT_DIR / "squadra_a_l.dxf")
+        print(f"DXF di controllo (default) in {OUTPUT_DIR.resolve()}")
     except Exception as exc:
         print(f"(DXF non scritto: {exc})")
 

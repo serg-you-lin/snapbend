@@ -71,8 +71,8 @@ k-factor `K`. Both are supplied by a **calibration** — a file with a
 thickness→V-opening table (so `r ≈ V/6`), optionally a per-material `K`, and
 optionally already-**measured** deductions (`MAP.md` D33). You set nothing to
 start: with no `calibration` it uses `"default"`, which doesn't guess anyone's
-die — `r` falls back to a fixed, declared 1mm radius and `K` is estimated by
-DIN 6935 from `r/s` (`MAP.md` D36). `flat.bends[i].source` always says where
+die — `r` falls back to the thickness (radius = thickness, declared) and `K` is
+estimated by DIN 6935 from `r/s` (`MAP.md` D36, D62). `flat.bends[i].source` always says where
 each number came from, never a guess dressed up as real data.
 
 ```python
@@ -83,7 +83,7 @@ flat = BentProfile(
     bends=[Bend(angle=90), Bend(angle=90)],     # just the angle
     thickness=2, width=300,
     material="acciaio",                         # picks the row in the calibration's k_per_materiale
-    calibration="tipo_misurato",                # or omit -> "default"; or "din6935", "esempio_din_3cave", "inside_sum"
+    calibration="tipo_misurato",                # or omit -> "default"; or "din6935", "inside_sum"
 ).develop()
 
 print(flat.meta["total_length"])
@@ -160,19 +160,18 @@ content by `tipo_cliente_coerente()`:
 
 | `tipo_cliente` | You are... | You give `snapbend`... | Calibration |
 |---|---|---|---|
-| `zero_config` | a stranger who just downloaded this, no reading | nothing | `default` (or omit it) — fixed 1mm radius, DIN-estimated `K` |
-| `cava_propria` | a shop with your own dies but no CAM | only a thickness→die table (5 minutes, never a measurement) | copy `snapbend/data/calibrations/esempio_din_3cave.json`, fill in your real dies |
+| `zero_config` | a stranger who just downloaded this, no reading | nothing | `default` (or omit it) — radius = thickness, DIN-estimated `K` |
+| `cava_propria` | a shop with your own dies but no CAM | only a thickness→die table (5 minutes, never a measurement) | your own calibration with `cava_per_spessore` filled in, in your officina folder |
 | `somma_interna` | a shop that only wants raw interior-quote sums, no K-factor talk | nothing, just that preference | `inside_sum` |
 | `misurato` | a shop with CAM, quoting as close to real as possible | dies + measured deductions (real hours of work, not free) | your own `tipo_misurato.json` in your officina folder — measured where you have it, estimated elsewhere |
 
 `pip install snapbend` and nothing else: the generic calibrations and the
 table of sheet thicknesses ship inside the package, no folder, no environment
-variable, no setup (MAP D61).
+variable, no setup (MAP D61). The two built-in calibrations are `default` and `inside_sum`.
 
 *Advanced, optional.* A shop with its own measured data can keep it in an
 **officina folder** of its own, outside the package: `snapbend.set_officina(path)`
-in a script (or, for whoever wants it, the `SNAPBEND_OFFICINA` environment
-variable), and snapbend reads `<officina>/calibrations/<name>.json` and
+in a script, and snapbend reads `<officina>/calibrations/<name>.json` and
 `<officina>/sheet_thicknesses.json` before the built-in ones (MAP D60).
 
 ## The neutral contract with forge

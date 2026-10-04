@@ -250,15 +250,14 @@ class TestBentProfileValidation(unittest.TestCase):
     def test_defaults_to_default_calibration(self):
         # Nessuna calibrazione data -> "default": .develop() funziona senza
         # configurare niente (MAP.md D33). "default" non indovina nessuna
-        # cava (tutta a null, MAP.md D36): raggio fisso dichiarato, mai una
-        # stima scalata dallo spessore.
+        # cava (tutta a null, MAP.md D36): raggio = spessore, dichiarato (D62).
         flat = BentProfile(
             flanges=[50, 80], bends=[Bend(angle=90)],
             thickness=2, width=200,
         ).develop()
         b = flat.bends[0]
         self.assertEqual(b.rule, "din6935")     # default = stima DIN dal r/s
-        self.assertIn("raggio 1", b.source)
+        self.assertIn("raggio 2 = spessore", b.source)
         self.assertIn("nessuna cava nota", b.source)
 
 

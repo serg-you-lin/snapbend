@@ -234,9 +234,8 @@ Senza `folder`, `load` cerca nella cartella officina se ce n'è una
 (facoltativa, MAP D60), poi nelle calibrazioni incluse nel pacchetto
 (`snapbend/data/calibrations/`, MAP D61); `SheetThicknessTable.load()` fa lo stesso con
 `sheet_thicknesses.json`. La cartella officina si sceglie con
-`snapbend.set_officina(path)` dentro uno script (vince, vale per quel
-programma; `None` torna alla variabile) o con la variabile d'ambiente
-`SNAPBEND_OFFICINA`. `.load("din6935")`/`.load("inside_sum")`
+`snapbend.set_officina(path)` dentro uno script (vale per quel programma;
+`None` la toglie). `.load("din6935")`/`.load("inside_sum")`
 funzionano anche senza un file (`BARE_CALIBRATIONS`). **Raises**
 (`.load`): `FileNotFoundError` se il nome non è né un file né una
 calibrazione nuda.

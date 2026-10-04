@@ -129,13 +129,13 @@ class TestConeFaceted(unittest.TestCase):
 
     def test_default_bend_radius_comes_from_calibration(self):
         # MAP.md D45: senza facet_bend_radius esplicito, il raggio viene
-        # dalla calibration (default "default", D33/D36) — non piu' una
-        # stima scalata dallo spessore mai dichiarata.
+        # dalla calibration (default "default", D33): senza cava nota,
+        # raggio = spessore (D62).
         flat = Cone(
             top_diameter=200, bottom_diameter=150, height=100, thickness=2,
             faceted=True,
         ).develop()
-        self.assertAlmostEqual(flat.meta["facet_bend_radius"], 1.0)
+        self.assertAlmostEqual(flat.meta["facet_bend_radius"], 2.0)
 
     def test_explicit_facet_bend_radius_still_wins(self):
         flat = Cone(

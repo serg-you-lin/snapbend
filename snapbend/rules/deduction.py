@@ -99,12 +99,10 @@ def radius_from_v_opening(v_opening: float) -> float:
     return v_opening / 6.0
 
 
-# Raggio usato quando non c'è né un raggio esplicito né una cava nota per lo
-# spessore (MAP.md D36). NON è una stima scalata dallo spessore (mai
-# `r = spessore`: sembra informata ma è arbitraria e si muove in silenzio con
-# lo spessore) — è una costante fissa, uguale per ogni spessore, sempre
-# dichiarata in chiaro nel `source` del risultato.
-DEFAULT_UNKNOWN_RADIUS_MM = 1.0
+def default_radius(thickness: float) -> float:
+    """Raggio interno quando non c'è né un raggio esplicito né una cava nota:
+    raggio = spessore, dichiarato nel `source` del risultato (MAP.md D62)."""
+    return thickness
 
 
 # --------------------------------------------------------------------------
@@ -228,7 +226,7 @@ class DeductionInfo:
 # calibrazione: la dichiarazione di quale caso è, verificabile da codice
 # con `tipo_cliente_coerente()` — non un'etichetta decorativa.
 #
-#   zero_config    — A: nessun dato dato all'utente, raggio fisso dichiarato.
+#   zero_config    — A: nessun dato dato all'utente, raggio = spessore dichiarato.
 #   cava_propria   — B: solo la tabella spessore->cava, K stimato DIN.
 #   somma_interna  — C: bypassa raggio/K, somma le quote interne (metodo
 #                    "inside_sum").
@@ -270,7 +268,7 @@ class Calibration:
     def load(cls, name: str, folder: str | Path | None = None) -> "Calibration":
         """
         La calibrazione `name`: da `folder` se dato; altrimenti dalla cartella
-        officina (`SNAPBEND_OFFICINA`/calibrations), poi dagli esempi del repo,
+        officina se scelta con `set_officina`, poi da quelle del pacchetto,
         poi dalle calibrazioni nude (`din6935`, ...).
         """
         if folder is not None:
@@ -337,7 +335,7 @@ class Calibration:
         piega nello sviluppo, non entra nel totale."""
         if cava is None:
             cava = self.v_opening_for_thickness(thickness)
-        r = radius_from_v_opening(cava) if cava else DEFAULT_UNKNOWN_RADIUS_MM
+        r = radius_from_v_opening(cava) if cava else default_radius(thickness)
         return bend_allowance_din6935(r, thickness, angle_deg)
 
     def centerline_deduction(self, thickness: float, angle_deg: float,
@@ -392,9 +390,9 @@ class Calibration:
             # la calibrazione HA una tabella cave, solo non copre questo
             # spessore (assente, o presente con valore null): zero-config
             # deve funzionare comunque (MAP.md D33/D36), niente errore —
-            # raggio fisso dichiarato, mai una stima scalata dallo spessore.
-            r = DEFAULT_UNKNOWN_RADIUS_MM
-            r_src = f"raggio {r:g} fisso (nessuna cava nota per {thickness:g} mm)"
+            # raggio = spessore, dichiarato (D62).
+            r = default_radius(thickness)
+            r_src = f"raggio {r:g} = spessore (nessuna cava nota per {thickness:g} mm)"
         else:
             # nessuna tabella cave affatto: scelta esplicita di calibrazioni
             # "nude" come din6935 — lì l'utente deve dare cava=/radius= per
@@ -474,13 +472,13 @@ def tipo_cliente_coerente(calibration: Calibration) -> list[str]:
             # MAP.md D40: chi ha un CAM/pressa quasi certamente sa anche
             # quale cava usa per spessore — non costa niente chiederglielo.
             # Senza, ogni combinazione non misurata (spessore/cava/angolo
-            # nuovi) ripiega sul raggio fisso di zero_config invece che su
+            # nuovi) ripiega sul raggio = spessore di zero_config invece che su
             # una cava vera: un fallback inutilmente più grezzo di quanto
             # potrebbe essere per QUESTO utente.
             problemi.append(
                 "misurato ma 'cava_per_spessore' non ha nessun valore reale "
                 "— il fallback per le combinazioni non misurate userebbe il "
-                "raggio fisso (zero_config) invece della cava vera; "
+                "raggio = spessore (zero_config) invece della cava vera; "
                 "aggiungila, chi ha un CAM la conosce comunque."
             )
 

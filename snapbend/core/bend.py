@@ -218,8 +218,8 @@ class BentProfile:
                   cave, K per materiale, valori misurati) — MAP.md D33.
                   Default "default" = K da manuale + tabella cave standard,
                   così `.develop()` funziona senza configurare niente.
-                  Altri: "esempio_din_3cave", "inside_sum", o il nome di un
-                  file in calibrations/ (la tua officina).
+                  Altri: "inside_sum", "din6935", o il nome di un file
+                  nella cartella officina (`set_officina`).
                   `flat.bends[i].source` dice sempre da dove viene il numero.
     orientation:  "horizontal" (default, lunghezza sviluppata su X) |
                   "vertical" (su Y)
@@ -372,7 +372,7 @@ def resolve_facet_bend(
     `bend_allowance` invece di `deduction`/`setback` (qui niente si
     sottrae, si aggiunge).
     """
-    from ..rules.deduction import DEFAULT_UNKNOWN_RADIUS_MM, radius_from_v_opening
+    from ..rules.deduction import default_radius, radius_from_v_opening
 
     cava = calibration.v_opening_for_thickness(thickness)
     info = calibration.deduction_detail(thickness, angle_deg, cava=cava,
@@ -386,7 +386,7 @@ def resolve_facet_bend(
         # "misurato" ha vinto ma non porta un raggio derivabile (raro: la
         # combinazione esatta di questa faccetta risultava misurata) -
         # serve comunque un raggio per il bend allowance.
-        radius = radius_from_v_opening(cava) if cava else DEFAULT_UNKNOWN_RADIUS_MM
+        radius = radius_from_v_opening(cava) if cava else default_radius(thickness)
 
     if explicit_k is not None:
         k, rule, source, fallback = explicit_k, "esplicito", f"k_factor {explicit_k:g} esplicito (facet_k_factor)", False

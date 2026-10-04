@@ -1329,3 +1329,32 @@ to install its own deduction values, that is discussed then — and it belongs t
 the full product, *pippo* (drawing → flat pattern, `docs/ARCHITECTURE.md`),
 not to snapbend's entry path.
 
+### D62 — Reopening D36 and D60: radius = thickness by default; only `default` and `inside_sum` ship; no environment variable (4 Oct 2026)
+
+Federico, the same day as D61. Three changes:
+
+- **Radius = thickness** when neither an explicit radius nor a known die
+  exists (reopens D36's fixed 1 mm). His reason: an air bend's inner radius
+  follows the thickness, more or less; a fixed 1 mm is the same number for a
+  0.5 mm and a 15 mm sheet, which is physically less true than a radius that
+  scales with the sheet. `DEFAULT_UNKNOWN_RADIUS_MM` became
+  `default_radius(thickness)`; `source` says "raggio 3 = spessore". One data
+  point, not a verdict: on the L3 test part (3 mm, real TruBend flat 225.78 mm)
+  r=1 gave 225.54, r=thickness gives 225.24 — the real die there was V16
+  (r ≈ 2.7), so the gap is the DIN K estimate, not the radius. D11's 1 mm
+  symbolic radius of the test sections (`Section.default`) is a different
+  thing and is untouched.
+- **Only `default` and `inside_sum` ship.** `esempio_din_3cave` was a
+  simulated shop with three dies — a shop's data, not a generic one. Removed;
+  the test that needed a die table builds its own inline. A shop with its own
+  dies writes its own calibration.
+- **No environment variable.** `SNAPBEND_OFFICINA` is gone from the code and
+  from Federico's Windows user. The officina folder survives only as
+  `set_officina(path)` in a script; script `05` takes the folder as its
+  argument.
+
+Shop configuration is a later stage, deliberately: the generic rule already
+gives a reasonable flat, and how a shop's values should enter (per die, per
+machine, measured) is not known yet. Building that now would freeze a shape
+nobody understands. When a real shop asks, it is designed then — in pippo.
+

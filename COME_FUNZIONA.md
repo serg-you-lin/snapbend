@@ -55,12 +55,11 @@ nomi diversi per **da dove prendi `r` e `K`**, non calcoli diversi.
 3. Se conosci il raggio interno e non la cava (bombato, coniatura, stampo a
    raggio): `Bend(angle=90, radius=8)`.
 4. **Se non sai né la cava né il raggio** (spessore assente dalla tabella,
-   o presente con `null`): un **raggio fisso dichiarato, 1 mm**
-   (`DEFAULT_UNKNOWN_RADIUS_MM`, `MAP.md` D36) — mai `raggio = spessore`
-   né un'altra stima scalata dallo spessore, che sembrerebbe informata ma
-   sarebbe inventata. È la situazione di partenza di chi usa `default`
+   o presente con `null`): **raggio = spessore**, dichiarato
+   (`default_radius`, `MAP.md` D62) — più o meno è così che piega una
+   lamiera in aria. È la situazione di partenza di chi usa `default`
    senza aver toccato niente (caso **A** più sotto): un numero grezzo ma
-   onesto, sempre scritto in chiaro nel risultato ("raggio 1 fisso,
+   onesto, sempre scritto in chiaro nel risultato ("raggio 3 = spessore,
    nessuna cava nota per...").
 
 ### Il fattore `K` — in ordine di bontà
@@ -104,12 +103,12 @@ un'officina: la tabella cave, e — se ce l'hai — il K per materiale e gli
 accorciamenti misurati. Tutti i campi tranne la tabella cave sono
 opzionali.
 
-**Dove sta.** Le calibrazioni generiche (`default`, `esempio_din_3cave`,
-`inside_sum`) e la tabella spessori sono dentro il pacchetto
+**Dove sta.** Le calibrazioni incluse (`default`, `inside_sum`) e la
+tabella spessori sono dentro il pacchetto
 (`snapbend/data/`): chi installa snapbend non configura niente (MAP D61).
 *Avanzato, facoltativo:* un'officina con i suoi dati li tiene in una sua
-**cartella officina** — `snapbend.set_officina(percorso)` in uno script (vince,
-vale per quel programma) o la variabile d'ambiente `SNAPBEND_OFFICINA` — e
+**cartella officina** — `snapbend.set_officina(percorso)` in uno script, vale
+per quel programma — e
 snapbend cerca prima `<officina>/calibrations/<nome>.json` (e
 `<officina>/sheet_thicknesses.json`), poi quelle incluse, poi le calibrazioni
 nude (`din6935`). MAP D60.
@@ -136,7 +135,7 @@ passi `calibration`, usa quello. Non indovina **nessuna** cava: la tabella
 `cava_per_spessore` elenca gli spessori comuni tutti a `null` — un elenco
 di taglie da riempire, non un valore inventato spacciato per vero.
 
-Quindi il default = **raggio fisso dichiarato (1 mm) + K stimato DIN 6935**
+Quindi il default = **raggio = spessore, dichiarato + K stimato DIN 6935**
 (dal rapporto raggio/spessore): un numero subito, dichiarato grezzo, mai
 travestito da dato reale. Ogni piega scrive nel `source` da dove viene.
 
@@ -147,8 +146,8 @@ nome standard di ognuno è il campo `tipo_cliente` della calibrazione
 
 | `tipo_cliente` | Chi è | Cosa dà a `snapbend` | Calibrazione |
 |---|---|---|---|
-| `zero_config` | sconosciuto, scarica e usa, non legge nulla | niente | `default` (o omessa) — raggio fisso 1 mm, K stima DIN |
-| `cava_propria` | carpenteria vicina, ha le sue cave ma non il CAM | solo `cava_per_spessore` reale (5 minuti, mai una misura) | copia di `esempio_din_3cave.json` — raggio dalla cava vera, K stima DIN |
+| `zero_config` | sconosciuto, scarica e usa, non legge nulla | niente | `default` (o omessa) — raggio = spessore, K stima DIN |
+| `cava_propria` | carpenteria vicina, ha le sue cave ma non il CAM | solo `cava_per_spessore` reale (5 minuti, mai una misura) | una sua calibrazione con le cave vere, nella cartella officina — raggio dalla cava vera, K stima DIN |
 | `somma_interna` | vuole solo la somma delle quote interne, zero K-factor | niente, solo la sua convenzione | `inside_sum.json` — bypassa raggio e K |
 | `misurato` | ha il CAM, vuole avvicinarsi per preventivare | cava + accorciamenti **misurati** (ore di lavoro dedicato, non gratis) | come `tipo_misurato.json` — misurato dove c'è, stima altrove |
 
@@ -196,7 +195,7 @@ repo, perché i `.bnc` sono dati del CAM (MAP D59).
 - **Stima DIN 6935, cava nota** (nessun K dato) → un'idea ragionevole.
   Sull'acciaio ci va vicino (sui dati di officina 1: ~0.05 mm sull'1 mm,
   ~0.4 mm sul 3 mm, fino a qualche mm sugli spessori grossi, 15-20 mm).
-- **Stima DIN 6935, raggio fisso** (nessuna cava nota, caso A) → la più
+- **Stima DIN 6935, raggio = spessore** (nessuna cava nota, caso A) → la più
   grezza delle tre: onesta e dichiarata, ma senza la cava vera l'errore
   non è misurato. Basta la cava (caso B) per togliersi di mezzo questa
   fascia d'errore.

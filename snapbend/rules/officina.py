@@ -2,10 +2,9 @@
 snapbend/rules/officina.py
 --------------------------
 La cartella officina: i dati di chi usa snapbend (calibrazioni, spessori a
-magazzino), fuori dal repo (MAP.md D60). Si sceglie in uno di due modi, il
-primo vince: `set_officina(path)` in uno script, o la variabile d'ambiente
-`SNAPBEND_OFFICINA`. Senza nessuno dei due si usano gli esempi generici del
-repo.
+magazzino), fuori dal pacchetto (MAP.md D60, D62). Facoltativa: si sceglie
+con `set_officina(path)` in uno script; senza, valgono i dati inclusi nel
+pacchetto.
 
     <officina>/calibrations/<nome>.json
     <officina>/sheet_thicknesses.json
@@ -13,30 +12,25 @@ repo.
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Optional
-
-OFFICINA_ENV = "SNAPBEND_OFFICINA"
 
 _chosen: Optional[Path] = None
 
 
 def set_officina(path) -> None:
-    """Sceglie la cartella officina per questo programma (vince sulla variabile); None torna alla variabile."""
+    """Sceglie la cartella officina per questo programma; None la toglie."""
     global _chosen
     _chosen = None if path is None else Path(path)
 
 
 def officina_folder() -> Optional[Path]:
-    """La cartella officina scelta con `set_officina`, o quella di `SNAPBEND_OFFICINA`; None se nessuna."""
-    value = str(_chosen) if _chosen is not None else os.environ.get(OFFICINA_ENV, "").strip()
-    if not value:
+    """La cartella officina scelta con `set_officina`; None se nessuna."""
+    if _chosen is None:
         return None
-    folder = Path(value)
-    if not folder.is_dir():
-        raise FileNotFoundError(f"cartella officina {value}: non esiste")
-    return folder
+    if not _chosen.is_dir():
+        raise FileNotFoundError(f"cartella officina {_chosen}: non esiste")
+    return _chosen
 
 
 def officina_file(*parts: str) -> Optional[Path]:

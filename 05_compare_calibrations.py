@@ -1,7 +1,11 @@
 """
 05_compare_calibrations.py
 ---------------------------
-Per ogni pezzo della cartella officina (SNAPBEND_OFFICINA, MAP D60) stampa, fianco a fianco:
+Per ogni pezzo di una cartella officina (MAP D60), data come argomento:
+
+    python 05_compare_calibrations.py <cartella officina>
+
+stampa, fianco a fianco:
   - la lunghezza dello sviluppo REALE (DXF prodotto da TruBend)
   - quella della calibrazione "default"     (DIN 6935 + cava da tabella)
   - quella della calibrazione "tipo_misurato" (valori misurati dai .bnc)
@@ -13,20 +17,21 @@ calibration= . Nessuna matematica in questo script.
 import glob
 import os
 import re
+import sys
 from pathlib import Path
 
 import ezdxf
 from ezdxf import bbox
 
-from snapbend import Bend, BentProfile, Calibration
-from snapbend.rules.officina import officina_folder
+from snapbend import Bend, BentProfile, Calibration, set_officina
 
 # --- CONFIG ---
 # i DXF veri dei pezzi di prova, nelle sottocartelle L/U/Z/O della cartella
 # officina; la calibrazione "tipo_misurato" viene da lì anche lei.
-DATA_DIR = officina_folder()
-if DATA_DIR is None:
-    raise SystemExit("imposta SNAPBEND_OFFICINA: la cartella officina con i pezzi L/U/Z/O e calibrations/")
+if len(sys.argv) != 2:
+    raise SystemExit("uso: python 05_compare_calibrations.py <cartella officina con i pezzi L/U/Z/O e calibrations/>")
+DATA_DIR = Path(sys.argv[1])
+set_officina(DATA_DIR)
 
 FORME = {
     "L": [114.0, 114.0],

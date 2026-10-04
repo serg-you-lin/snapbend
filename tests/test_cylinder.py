@@ -174,12 +174,10 @@ class TestCylinderFaceted(unittest.TestCase):
 
     def test_default_bend_radius_comes_from_calibration(self):
         # MAP.md D45: senza facet_bend_radius esplicito, il raggio viene
-        # dalla calibration dell'officina (default = "default", D33/D36)
-        # — non piu' "= thickness" (una stima scalata mai dichiarata,
-        # esattamente quello che D36 vieta per BentProfile). "default"
-        # non conosce nessuna cava -> raggio fisso dichiarato 1mm.
+        # dalla calibration (default = "default", D33). "default" non
+        # conosce nessuna cava -> raggio = spessore (D62).
         flat = Cylinder(diameter=150, height=500, thickness=2, faceted=True).develop()
-        self.assertAlmostEqual(flat.meta["facet_bend_radius"], 1.0)
+        self.assertAlmostEqual(flat.meta["facet_bend_radius"], 2.0)
 
     def test_explicit_facet_bend_radius_still_wins(self):
         flat = Cylinder(
