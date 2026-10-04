@@ -307,12 +307,11 @@ class BentProfile:
         total_length = cum
 
         entities = [{
-            "type": "polyline",
+            "type": "polygon",
             "points": [
                 (0.0, 0.0), (total_length, 0.0),
                 (total_length, self.width), (0.0, self.width),
             ],
-            "closed": True,
             "role": "outer",
         }]
         for pos in bend_positions:

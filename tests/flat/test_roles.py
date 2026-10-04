@@ -35,11 +35,11 @@ class TestConsumerRolesSurviveDetect(unittest.TestCase):
     def _framed_doc(self):
         # cornice grande + due pezzi dentro, tutti geometricamente distinti
         return forge.load_geometry([
-            {"type": "polyline", "closed": True, "role": "frame",
+            {"type": "polygon", "role": "frame",
              "points": [(0, 0), (400, 0), (400, 300), (0, 300)]},
-            {"type": "polyline", "closed": True, "role": "outer",
+            {"type": "polygon", "role": "outer",
              "points": [(20, 20), (120, 20), (120, 120), (20, 120)]},
-            {"type": "polyline", "closed": True, "role": "outer",
+            {"type": "polygon", "role": "outer",
              "points": [(200, 20), (300, 20), (300, 120), (200, 120)]},
         ])
 

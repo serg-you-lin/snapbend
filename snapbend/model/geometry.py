@@ -4,7 +4,7 @@ snapbend/model/geometry.py
 FlatGeometry — il contratto neutro tra il motore matematico di Unfold e
 qualsiasi consumatore a valle. Puri dati Python (dataclass + dict), zero
 import di forge: ogni entità in `.entities` è nello stesso schema accettato
-da `forge.load_geometry()` — {"type": "line"|"arc"|"circle"|"polyline", ...,
+da `forge.load_geometry()` — {"type": "line"|"arc"|"circle"|"polygon", ...,
 "role": ...} — così Unfold non deve conoscere alcun tipo interno di forge, e
 forge non deve conoscere nulla di Unfold.
 
@@ -64,7 +64,7 @@ def swap_xy(entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         if kind == "line":
             e["start"] = (e["start"][1], e["start"][0])
             e["end"] = (e["end"][1], e["end"][0])
-        elif kind == "polyline":
+        elif kind == "polygon":
             e["points"] = [(p[1], p[0]) for p in e["points"]]
         elif kind == "circle":
             e["center"] = (e["center"][1], e["center"][0])

@@ -143,12 +143,11 @@ class Cylinder:
         # Canonico: X = circonferenza/sviluppo sfaccettato (accorciata a
         # destra e sinistra dal margine), Y = lunghezza assiale (invariata).
         entities = [{
-            "type": "polyline",
+            "type": "polygon",
             "points": [
                 (x0, 0.0), (x0 + cut_width, 0.0),
                 (x0 + cut_width, self.height), (x0, self.height),
             ],
-            "closed": True,
             "role": "outer",
         }]
         for pos in bend_lines:
@@ -159,12 +158,11 @@ class Cylinder:
         reference_entities = []
         if self.margin > 0:
             reference_entities = [{
-                "type": "polyline",
+                "type": "polygon",
                 "points": [
                     (0.0, 0.0), (width, 0.0),
                     (width, self.height), (0.0, self.height),
                 ],
-                "closed": True,
             }]
 
         if self.orientation == "horizontal":

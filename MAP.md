@@ -1240,3 +1240,13 @@ the facts off the top level: snapbend imports `concentric_groups`,
 `arcs_around`, `splits_polygon`, `bridged_runs` and the track helpers from
 `forge.core.geometry` (and its submodules). No behaviour change (462 passed).
 Version **0.2.3**; needs forge ≥ 0.10.0.
+
+### D58 — the neutral entities say `polygon`, not `polyline` (4 Oct 2026)
+
+forge D96 renamed the dict-schema entity `polyline` to `polygon` (always
+closed: every use here was), because `polyline` is a DXF word, not a forge one.
+`FlatGeometry.entities` and `reference_entities` from `BentProfile` and
+`Cylinder` now carry `{"type": "polygon", "points": [...]}` with no `closed`
+key; `io/dxf.py` writes it as a closed outline. Arc angles in the schema are
+still degrees (forge TODO). Version **0.3.0** — a consumer reading `.entities`
+sees a different type name; needs forge ≥ 0.11.0.

@@ -366,11 +366,8 @@ def _write_reference_lines(doc_out, reference_entities: List[Dict[str, Any]]) ->
         kind = entity.get("type")
         if kind == "line":
             msp.add_line(entity["start"], entity["end"], dxfattribs=attribs)
-        elif kind == "polyline":
-            msp.add_lwpolyline(
-                entity["points"], close=bool(entity.get("closed", False)),
-                dxfattribs=attribs,
-            )
+        elif kind == "polygon":
+            msp.add_lwpolyline(entity["points"], close=True, dxfattribs=attribs)
         elif kind == "circle":
             msp.add_circle(entity["center"], entity["radius"], dxfattribs=attribs)
         elif kind == "arc":

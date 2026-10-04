@@ -8,7 +8,7 @@ python tests/gen_index.py
 
 What this is: the lookup table of *what already exists* in the package, down to internal helpers. `docs/API.md` documents the public surface (`snapbend.<name>`) with full cards; this file lists every module-level function and class so nothing gets rewritten because it was not found. Signatures and docstring lines come straight from the source, so they cannot drift.
 
-`28` modules · `97` module-level functions · `23` classes · `4590` lines of code.
+`28` modules · `97` module-level functions · `23` classes · `4584` lines of code.
 
 Sections: [Lookup](#lookup) · [Duplicate names](#duplicate-names) · [Dependency rule](#dependency-rule) · [By module](#by-module) · [Internal dependencies](#internal-dependencies)
 
@@ -113,8 +113,8 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_RecoverError` | class | `snapbend/rules/read_section.py:326` |  |
 | `_register_default_styles` | func | `snapbend/flat/roles.py:78` | Registra colore + nome layer di default per i ruoli manifatturieri — |
 | `RenderContour` | class | `snapbend/flat/model/render.py:20` |  |
-| `resolve_calibration` | func | `snapbend/core/bend.py:340` | Nome stringa -> `Calibration` caricata, oggetto già risolto -> se |
-| `resolve_facet_bend` | func | `snapbend/core/bend.py:351` | Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla |
+| `resolve_calibration` | func | `snapbend/core/bend.py:339` | Nome stringa -> `Calibration` caricata, oggetto già risolto -> se |
+| `resolve_facet_bend` | func | `snapbend/core/bend.py:350` | Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla |
 | `_righe_unite` | func | `snapbend/adapters/trubend.py:39` |  |
 | `Section` | class | `snapbend/model/section.py:110` |  |
 | `SectionReading` | class | `snapbend/rules/read_section.py:85` |  |
@@ -200,7 +200,7 @@ _snapbend/core_
 
 No module-level function or class.
 
-#### `snapbend/core/bend.py` — 405 lines
+#### `snapbend/core/bend.py` — 404 lines
 
 _snapbend/core/bend.py_
 
@@ -211,8 +211,8 @@ _snapbend/core/bend.py_
   - methods: `to_dict`
 - **class** `BentProfile` — L200 — Profilo piegato: N flange (quote a MEZZERIA) unite da N-1 pieghe.
   - methods: `_resolve_calibration`, `develop`
-- `resolve_calibration(calibration)` — L340 — Nome stringa -> `Calibration` caricata, oggetto già risolto -> se
-- `resolve_facet_bend(calibration, thickness: float, angle_deg: float, explicit_radius: Optional[float], explicit_k: Optional[float], material: str)` — L351 — Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla
+- `resolve_calibration(calibration)` — L339 — Nome stringa -> `Calibration` caricata, oggetto già risolto -> se
+- `resolve_facet_bend(calibration, thickness: float, angle_deg: float, explicit_radius: Optional[float], explicit_k: Optional[float], material: str)` — L350 — Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla
 
 #### `snapbend/core/cone.py` — 355 lines
 
@@ -223,7 +223,7 @@ _snapbend/core/cone.py_
 - **class** `Cone` — L140
   - methods: `develop`, `_develop_smooth`, `_develop_faceted`
 
-#### `snapbend/core/cylinder.py` — 243 lines
+#### `snapbend/core/cylinder.py` — 241 lines
 
 _snapbend/core/cylinder.py_
 
@@ -350,7 +350,7 @@ _snapbend/io_
 
 No module-level function or class.
 
-#### `snapbend/io/dxf.py` — 384 lines
+#### `snapbend/io/dxf.py` — 381 lines
 
 _snapbend/io/dxf.py_
 

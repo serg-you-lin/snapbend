@@ -16,7 +16,7 @@ from snapbend.flat import detect_flat, LAYER_HOLE, LAYER_COUNTERSINK, LAYER_THRE
 def _plate():
     # piastra 100x50 con due cerchi concentrici e uno singolo
     doc = forge.load_geometry([
-        {"type": "polyline", "closed": True, "points": [(0, 0), (100, 0), (100, 50), (0, 50)]},
+        {"type": "polygon", "points": [(0, 0), (100, 0), (100, 50), (0, 50)]},
         {"type": "circle", "center": (20, 25), "radius": 3},
         {"type": "circle", "center": (20, 25), "radius": 6},
         {"type": "circle", "center": (70, 25), "radius": 4},
@@ -52,7 +52,7 @@ class TestRender(unittest.TestCase):
 
     def test_003_una_piega_e_una_line(self):
         doc = forge.load_geometry([
-            {"type": "polyline", "closed": True, "points": [(0, 0), (100, 0), (100, 50), (0, 50)]},
+            {"type": "polygon", "points": [(0, 0), (100, 0), (100, 50), (0, 50)]},
             {"type": "line", "start": (50, 0), "end": (50, 50)},
         ])
         result = forge.heal(doc)
@@ -64,8 +64,7 @@ class TestRender(unittest.TestCase):
     def test_004_foro_etichettato_da_load_geometry(self):
         # (arrivato da forge tests/unit/adapters/test_geometry_loader.py)
         doc = forge.load_geometry([
-            {"type": "polyline", "points": [(0, 0), (100, 0), (100, 50), (0, 50)],
-             "closed": True, "role": "outer"},
+            {"type": "polygon", "points": [(0, 0), (100, 0), (100, 50), (0, 50)], "role": "outer"},
             {"type": "circle", "center": (20, 25), "radius": 5, "role": "hole"},
         ])
         from snapbend.flat import heal_and_detect
@@ -79,7 +78,7 @@ class TestBendingRule(unittest.TestCase):
     """Una piega attraversa il pezzo (snapbend MAP.md D52)."""
 
     def _bends(self, *lines):
-        entities = [{"type": "polyline", "closed": True,
+        entities = [{"type": "polygon",
                      "points": [(0, 0), (100, 0), (100, 50), (0, 50)]}]
         entities += [{"type": "line", "start": a, "end": b} for a, b in lines]
         result = forge.heal(forge.load_geometry(entities))
@@ -99,12 +98,12 @@ class TestBendingRule(unittest.TestCase):
 
     def _bends_with_window(self, window):
         # pezzo 100x50; due tratti sulla retta y=25, da bordo a x=40 e da x=60 a bordo
-        entities = [{"type": "polyline", "closed": True,
+        entities = [{"type": "polygon",
                      "points": [(0, 0), (100, 0), (100, 50), (0, 50)]},
                     {"type": "line", "start": (0, 25), "end": (40, 25)},
                     {"type": "line", "start": (60, 25), "end": (100, 25)}]
         if window:
-            entities.append({"type": "polyline", "closed": True,
+            entities.append({"type": "polygon",
                              "points": [(40, 10), (60, 10), (60, 40), (40, 40)]})
         result = forge.heal(forge.load_geometry(entities))
         detect_flat(result, "bending")

@@ -11,12 +11,11 @@ class TestCylinderMath(unittest.TestCase):
         expected_width = math.pi * 148.0
         self.assertAlmostEqual(flat.meta["width"], expected_width, places=6)
 
-    def test_entity_is_a_closed_polyline(self):
+    def test_entity_is_a_polygon(self):
         flat = Cylinder(diameter=150, height=3895, thickness=2).develop()
         self.assertEqual(len(flat.entities), 1)
         entity = flat.entities[0]
-        self.assertEqual(entity["type"], "polyline")
-        self.assertTrue(entity["closed"])
+        self.assertEqual(entity["type"], "polygon")
         self.assertEqual(len(entity["points"]), 4)
 
     def test_thickness_too_large_raises(self):
@@ -65,8 +64,7 @@ class TestCylinderMath(unittest.TestCase):
         flat = Cylinder(diameter=150, height=500, thickness=2, margin=2, orientation="vertical").develop()
         self.assertEqual(len(flat.reference_entities), 1)
         ref = flat.reference_entities[0]
-        self.assertEqual(ref["type"], "polyline")
-        self.assertTrue(ref["closed"])
+        self.assertEqual(ref["type"], "polygon")
         ys = [p[1] for p in ref["points"]]
         xs = [p[0] for p in ref["points"]]
         self.assertAlmostEqual(max(ys) - min(ys), 500, places=6)
