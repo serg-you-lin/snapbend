@@ -4,7 +4,6 @@ tests/flat/test_holes.py
 (arrivato da forge tests/unit/test_geometry.py, forge MAP.md D88)
 Test unitari per snapbend.flat.holes:
   - is_threaded_hole      : riconosce fori filettati (cerchio + arco a 270°)
-  - is_countersink_outer  : riconosce il cerchio esterno di un countersink
 """
 
 import math
@@ -12,7 +11,7 @@ import unittest
 
 from forge.core.primitives.segments import ArcSeg
 
-from snapbend.flat.holes import is_threaded_hole, is_countersink_outer
+from snapbend.flat.holes import is_threaded_hole
 
 
 def make_arc(cx, cy, radius, start_angle, end_angle):
@@ -92,42 +91,6 @@ class TestIsThreadedHole(unittest.TestCase):
         arc = make_arc(0, 0, 9, 0, 270)   # ratio 1.8
         self.assertFalse(is_threaded_hole((0, 0), 5, [arc]))
         self.assertTrue(is_threaded_hole((0, 0), 5, [arc], max_radius_ratio=2.0))
-
-
-# ---------------------------------------------------------------------------
-# is_countersink_outer
-# ---------------------------------------------------------------------------
-
-class TestIsCountersinkOuter(unittest.TestCase):
-
-    def test_001_cerchio_grande_con_piccolo_concentrico(self):
-        """Il cerchio esterno ha un cerchio più piccolo concentrico."""
-        self.assertTrue(is_countersink_outer((0, 0), 10, [((0, 0), 5)]))
-
-    def test_002_cerchio_senza_figli(self):
-        self.assertFalse(is_countersink_outer((0, 0), 10, []))
-
-    def test_003_cerchio_con_figlio_non_concentrico(self):
-        self.assertFalse(is_countersink_outer((0, 0), 10, [((50, 50), 5)]))
-
-    def test_004_cerchio_con_figlio_stesso_raggio(self):
-        self.assertFalse(is_countersink_outer((0, 0), 10, [((0, 0), 10)]))
-
-    def test_005_cerchio_con_figlio_piu_grande(self):
-        self.assertFalse(is_countersink_outer((0, 0), 10, [((0, 0), 15)]))
-
-    def test_006_piu_figli_uno_solo_concentrico(self):
-        siblings = [((50, 50), 3), ((0, 0), 4)]
-        self.assertTrue(is_countersink_outer((0, 0), 10, siblings))
-
-    def test_007_tolleranza_centro(self):
-        # Centro leggermente spostato, entro tolleranza
-        self.assertTrue(is_countersink_outer((0, 0), 10, [((0.5, 0.5), 5)], tolerance=1.0))
-
-    def test_008_centro_fuori_tolleranza(self):
-        self.assertFalse(is_countersink_outer((0, 0), 10, [((2.0, 0), 5)], tolerance=1.0))
-
-
 
 
 if __name__ == "__main__":

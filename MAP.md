@@ -1207,3 +1207,14 @@ they had when written (a log is not rewritten). The GitHub repository is
 
 Version **0.1.4 → 0.2.0**: a new name and a new subpackage (`snapbend.flat`,
 D51-D53) — more than a patch; nothing in `snapbend.__all__` changed.
+
+### D55 — hole patterns read on forge's geometric facts (4 Oct 2026)
+
+forge D91 made "concentric circles" and "arcs around a circle" forge facts
+(`forge.concentric_groups`, `forge.arcs_around`), so the same algorithm serves
+snapbend and snapdraw. What stays here is the meaning: the countersink pairing
+in `flat/detect.py` (each circle takes the smallest larger free circle of its
+concentric group as its outer ring, which is swallowed) and the thread test in
+`flat/holes.py` (~270° ± 35°, radius ratio ≤ `THREADED_ARC_MAX_RADIUS_RATIO`,
+center within 1 mm). `is_countersink_outer`, unused since D51, is gone with
+its tests. Goldens unchanged (461 passed).

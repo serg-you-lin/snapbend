@@ -1,16 +1,16 @@
 """
 snapbend/flat/holes.py
 ----------------------
-Rileva fori filettati da primitive geometriche pure (arrivato da forge
-`tools/hole_detector.py`, forge MAP.md D88).
+Foro filettato: il significato che snapbend dà a un arco attorno a un cerchio.
+Il fatto geometrico (arco concentrico, angolo, rapporto dei raggi) è di forge,
+`forge.arcs_around` (forge MAP.md D91); qui restano le soglie.
 
-    is_threaded_hole     — True se il cerchio è un foro filettato
-    is_countersink_outer — True se il cerchio è il cerchio esterno di svasatura
+    is_threaded_hole — True se il cerchio è un foro filettato
 """
 
-import math
 from typing import Tuple
 
+from forge import arcs_around
 from forge.core.primitives.segments import ArcSeg
 from snapbend.flat.thresholds import THREADED_ARC_MAX_RADIUS_RATIO
 
@@ -24,61 +24,10 @@ def is_threaded_hole(
     max_radius_ratio: float = THREADED_ARC_MAX_RADIUS_RATIO,
 ) -> bool:
     """
-    True se esiste un arco a ~270° concentrico al cerchio e con raggio di poco
-    maggiore (anello di cresta della filettatura).
-
-    L'arco deve essere concentrico entro ``tolerance_center``, avere angolo
-    swept ~270° entro ``angle_tolerance`` e raggio compreso tra ``radius`` e
-    ``radius * max_radius_ratio``. Il vincolo sul rapporto dei raggi esclude i
-    falsi positivi in cui un arco molto più grande passa vicino al foro — il
-    bordo esterno di una flangia tonda scantonata, l'estremità raggiata di un
-    profilo: geometrie che circondano il foro ma non sono anelli filettati.
-
-    Args:
-        center:           centro del cerchio (x, y)
-        radius:           raggio del cerchio
-        all_arcs:         tutti gli archi del documento come ArcSeg
-        tolerance_center: distanza massima tra centri (mm)
-        angle_tolerance:  tolleranza sull'angolo swept (gradi)
-        max_radius_ratio: rapporto massimo arc.radius / radius ammesso
+    True se attorno al cerchio c'è un arco a ~270° (entro ``angle_tolerance``
+    gradi) con raggio fino a ``radius * max_radius_ratio``: l'anello di cresta
+    della filettatura. Un arco molto più grande (bordo di una flangia tonda,
+    estremità raggiata di un profilo) gira attorno al foro ma non è un filetto.
     """
-    # Converte tolleranza da gradi a radianti
-    angle_tolerance_rad = math.radians(angle_tolerance)
-    target_swept = math.radians(270)  # 270 gradi in radianti
-    max_arc_radius = radius * max_radius_ratio
-
-    for arc in all_arcs:
-        # Calcola angolo swept in radianti
-        swept = (arc.end_angle - arc.start_angle) % (2 * math.pi)
-
-        # Verifica se è circa 270 gradi
-        if (
-            abs(swept - target_swept) < angle_tolerance_rad
-            and radius < arc.radius <= max_arc_radius
-            and math.hypot(center[0] - arc.center[0], center[1] - arc.center[1]) < tolerance_center
-        ):
-            return True
-    return False
-
-
-def is_countersink_outer(
-    center:    Tuple[float, float],
-    radius:    float,
-    siblings:  list[Tuple[Tuple[float, float], float]],
-    tolerance: float = 1.0,
-) -> bool:
-    """
-    True se esiste un cerchio concentrico con raggio minore (svasatura).
-
-    Args:
-        center:    centro del cerchio da testare (x, y)
-        radius:    raggio del cerchio da testare
-        siblings:  lista di (center, radius) dei cerchi candidati
-        tolerance: distanza massima tra centri (mm)
-    """
-    for other_center, other_radius in siblings:
-        if other_radius >= radius:
-            continue
-        if math.hypot(center[0] - other_center[0], center[1] - other_center[1]) < tolerance:
-            return True
-    return False
+    return any(abs(a.sweep - 270.0) < angle_tolerance and a.radius_ratio <= max_radius_ratio
+               for a in arcs_around(center, radius, all_arcs, tolerance=tolerance_center))

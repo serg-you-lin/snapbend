@@ -19,6 +19,7 @@ from forge.model.feature import OpenFeature
 from forge.model.role import ContourRole, role_str, is_structural_role
 from .roles import HOLE, COUNTERSINK, THREADED_HOLE, BEND, ENGRAVE, MARKING
 from forge.model.detected import DetectedFeatures
+from forge import concentric_groups
 from .model import (
     BendingLine,
     ClassifiedEntity,
@@ -489,23 +490,24 @@ def _promote_geometric_holes(cluster: ForgeCluster, result: ForgeResult,
     swallowed: set = set()      # id(contour) degli anelli esterni di countersink
     promoted:  dict = {}        # id(contour) -> Hole
 
-    # --- countersink: cerchio piccolo concentrico dentro cerchio grande ---
-    for outer_c, outer_d, outer_ctr in circ:
-        for inner_c, inner_d, inner_ctr in circ:
-            if inner_c is outer_c or inner_d >= outer_d:
+    # --- countersink: nel gruppo concentrico (forge D91) ogni cerchio si
+    #     accoppia col più piccolo dei cerchi più grandi ancora liberi ---
+    by_id = {id(c): (c, d, ctr) for c, d, ctr in circ}
+    for group in concentric_groups([c for c, _, _ in circ], tolerance=_CONCENTRIC_TOLERANCE):
+        members = [by_id[id(c)] for c in group.items]
+        for i, (inner_c, inner_d, inner_ctr) in enumerate(members):
+            if id(inner_c) in swallowed:
                 continue
-            if id(inner_c) in promoted or id(outer_c) in swallowed:
+            outer = next((m for m in members[i + 1:]
+                          if m[1] > inner_d and id(m[0]) not in swallowed
+                          and m[0].polygon.contains(inner_c.polygon)), None)
+            if outer is None:
                 continue
-            if not outer_c.polygon.contains(inner_c.polygon):
-                continue
-            if math.hypot(outer_ctr[0] - inner_ctr[0],
-                          outer_ctr[1] - inner_ctr[1]) > _CONCENTRIC_TOLERANCE:
-                continue
-            swallowed.add(id(outer_c))
+            swallowed.add(id(outer[0]))
             promoted[id(inner_c)] = _hole_from_contour(
                 inner_c, inner_d, inner_ctr,
                 hole_type=HOLE_TYPE_COUNTERSINK, confidence=0.85,
-                geometric_hint="countersink", outer_diameter=outer_d,
+                geometric_hint="countersink", outer_diameter=outer[1],
             )
 
     # --- fori piatti / filettati ---
