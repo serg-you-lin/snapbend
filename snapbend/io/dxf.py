@@ -25,8 +25,8 @@ if TYPE_CHECKING:
 def to_forge_result(flat: "FlatGeometry", tolerance: float = 0.05):
     """
     Traduce `flat` in un ForgeResult passando da forge.load_geometry() +
-    forge.heal_and_detect() — stesso contratto di qualsiasi altra sorgente
-    forge (DXF, PDF, ...).
+    snapbend.flat.heal_and_detect() — stesso contratto di qualsiasi altra
+    sorgente forge (DXF, PDF, ...).
     """
     try:
         import forge
@@ -40,7 +40,8 @@ def to_forge_result(flat: "FlatGeometry", tolerance: float = 0.05):
     doc = forge.load_geometry(
         flat.entities, tolerance=tolerance, source_path=flat.label,
     )
-    result = forge.heal_and_detect(doc, label=flat.label)
+    from ..flat import heal_and_detect
+    result = heal_and_detect(doc, label=flat.label)
     if not result.is_valid:
         raise ValueError(
             f"FlatGeometry '{flat.label}' non valido dopo heal(): "
@@ -141,7 +142,7 @@ def write_part_dxf(
       1. taglio          (`flat`, sempre — via forge, come `to_dxf()`)
       2. vista in sezione (se `section_flat` è dato — SOLO riferimento:
                            linee/archi disegnati diretti, non passa da
-                           forge/heal_and_detect, per non farla scambiare
+                           forge/snapbend.flat.heal_and_detect, per non farla scambiare
                            per una seconda parte da tagliare)
       3. header           (se `include_header`: il blocco note di `flat.meta`
                            + `flat.bends` — gli angoli di piega, una riga
@@ -217,7 +218,7 @@ def _entities_bbox(entities: List[Dict[str, Any]]):
 def _write_section_view_entities(doc_out, entities: List[Dict[str, Any]], dx: float, dy: float,
                                  layer: str = "SectionView") -> None:
     """Disegna la vista in sezione come linee/archi diretti, traslati di
-    (dx, dy) — SOLO riferimento, non passa da forge/heal_and_detect: se lo
+    (dx, dy) — SOLO riferimento, non passa da forge/snapbend.flat.heal_and_detect: se lo
     facesse, verrebbe rilevata come una seconda parte da tagliare, che non
     è (stesso principio di `_write_reference_lines`, qui su un layer
     pieno invece che tratteggiato perché non è un fantasma del foglio ma

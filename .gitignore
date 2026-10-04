@@ -63,3 +63,10 @@ Parere_di_DeepSeek.md
 # --- scratch di esplorazione forge, non di bendly (niente bendly importato) ---
 demo_custom_role.py
 demo_custom_role.dxf
+
+# Disegni dei test di snapbend.flat: le stesse copie già in git in forge,
+# anonimizzate (forge MAP.md D79, D90). Pubblicabili perché stanno qui.
+!tests/data/flat/**/*.dxf
+!tests/data/flat/**/*.DXF
+# DXF di prova della detection, da guardare a mano (non vanno in git)
+tests/data/flat/**/detected/

@@ -110,7 +110,7 @@ class FlatGeometry:
     def to_forge_result(self, tolerance: float = 0.05):
         """
         Traduce questo sviluppo in un ForgeResult passando da
-        forge.load_geometry() + forge.heal_and_detect() — stesso contratto
+        forge.load_geometry() + snapbend.flat.heal_and_detect() — stesso contratto
         di qualsiasi altra sorgente forge (DXF, PDF, ...).
         """
         from ..io.dxf import to_forge_result

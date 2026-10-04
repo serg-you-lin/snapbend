@@ -39,14 +39,14 @@ class TestToDxfIntegration(unittest.TestCase):
         result = flat.to_forge_result()
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(result.cluster_count, 1)
-        self.assertEqual(len(result.clusters[0].bending_lines), 1)
+        self.assertEqual(len(result.clusters[0].features("bending_lines")), 1)
 
     def test_faceted_cylinder_detects_seven_bending_lines(self):
         flat = Cylinder(diameter=150, height=500, thickness=2, faceted=True, n_facets=8).develop()
         result = flat.to_forge_result()
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(result.cluster_count, 1)
-        self.assertEqual(len(result.clusters[0].bending_lines), 7)
+        self.assertEqual(len(result.clusters[0].features("bending_lines")), 7)
 
     def test_faceted_cone_detects_seven_bending_lines(self):
         flat = Cone(
@@ -56,7 +56,7 @@ class TestToDxfIntegration(unittest.TestCase):
         result = flat.to_forge_result()
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(result.cluster_count, 1)
-        self.assertEqual(len(result.clusters[0].bending_lines), 7)
+        self.assertEqual(len(result.clusters[0].features("bending_lines")), 7)
 
     def test_cone_to_dxf_writes_file_with_notes(self, tmp_path=None):
         import tempfile

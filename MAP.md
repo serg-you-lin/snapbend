@@ -1133,3 +1133,64 @@ against the renamed import, not just editing text.
   non fa parte nemmeno di questo layer di unfolding, vive di vita propria.
 - **`COME_FUNZIONA.md`** è una bozza scritta da Claude, riallineata a D36
   l'11 set 2026 — poi confluirà in `docs/ARCHITECTURE.md`.
+
+
+### D51 — flat-part detection arrives from forge: `snapbend.flat` (4 Oct 2026)
+forge's `detect_flat()` and its whole process vocabulary (hole, countersink,
+threaded hole, bend, engraving, marking; the 32.1 mm drill threshold) moved
+here — forge MAP.md D88/D90: forge reads structure, the process reading is
+snapbend's. It lives in `snapbend/flat/`, a subpackage that requires forge;
+the rest of snapbend still imports nothing from it (D43 stands). The process
+goldens and their tests came along (`tests/flat/`, `tests/data/flat/`,
+`generate_golden_process.py`); the geometry half of the same goldens stays in
+forge. `to_forge_result()` now calls `snapbend.flat.heal_and_detect`. How a
+snapbend type is drawn by forge is decided here (`flat/model/render.py`): a
+countersink goes on its own layer, a bend is a LINE, an engraving N
+primitives, a hole is a void of the part (`is_void`).
+
+
+### D52 — a bend line crosses the part (4 Oct 2026)
+The geometric bend rule inherited from forge accepted any straight trace whose
+two ends lay less than 1 mm from the outer contour, in any direction, with the
+midpoint inside. A letter stroke running parallel to the edge 1 mm inside it
+(`quattro_sviluppi_un_foglio`, 8.5 mm, on `MARK`) became a bend — and only by
+float noise: its ends were at 0.99999999999995 mm. Federico: a short stroke near
+the outer, parallel or slanted, is never a bend.
+
+The rule now says what a bend is: a straight trace that, extended by 1 mm at
+both ends, splits the part in two (`_cuts_part`), midpoint inside. A stroke
+along an edge touches it at most once and splits nothing. Checked on all 52
+bends the old rule found in the goldens: 51 split the part, the 8.5 mm stroke
+does not — no approved value moves. Two rules tried first and dropped: "each
+end reaches the edge along the line" (real bends in `Linee_piegatura` overshoot
+the contour slightly) and "no end touches another trace" (real bends in
+`linee_di_piegatura_interne` meet each other).
+
+**Open (Federico):** a short stroke laid across a corner still splits off a
+small triangle and passes. Rejecting it takes a minimum — bend length, or width
+of the piece it cuts off — which is a process number, his to choose. Smallest
+pieces cut off by the bends in today's goldens: 0.3 % of the part
+(`due_viste_un_foglio`, 1 mm lines), 0.5–0.8 % (`staffa_scarto_doppia`,
+`piega_cazzuta`).
+
+
+### D53 — a bend interrupted by a void is still one bend (4 Oct 2026)
+`senza_linea_piega`, first part: two bends run across a large window in the
+middle of the part. Each is drawn as two 35.5 mm strokes, edge → window and
+window → edge; neither stroke alone splits the part (D52), so both stayed in
+trash. Federico's diagnosis: the inner interrupts the bend line.
+
+Of his two options — treat inner contours as edges too, or join the collinear
+strokes into a virtual line — the second, with one condition: strokes on the
+same line join only when the whole gap between them lies inside a void of the
+part (an odd-depth inner). The bend axis crosses the part even where a hole has
+removed the material; where there is material and no stroke, nothing is
+invented. The joined line must split the part (D52); the strokes actually drawn
+go on the bend layer, and `describe_features` already counts collinear strokes
+as one bend. The first option was set aside: a stroke from the edge to a hole
+is also what an axis line or any mark reaching a hole looks like.
+
+Result on the goldens: only `senza_linea_piega` changes (four strokes, trash
+empty). Two unit tests (joined across a window: bend; same strokes with
+material between: not). The process goldens of `senza_linea_piega` (single and
+multi) wait for Federico's look at the DXF before being updated.
