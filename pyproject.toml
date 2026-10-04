@@ -34,5 +34,14 @@ dev = ["pytest"]
 where = ["."]
 include = ["snapbend*"]
 
+# Regola di dipendenza controllata da tests/gen_index.py (docs/ARCHITECTURE.md,
+# "Layer di snapbend"): il calcolo non sa che forge esiste. model/ delega a io/
+# dentro i metodi to_dxf()/to_forge_result() — l'unica porta verso forge.
+[tool.gen_index.layers]
+core     = ["forge", "io", "human_layer", "flat"]
+model    = ["forge", "human_layer", "flat"]
+rules    = ["forge", "io", "human_layer", "flat"]
+adapters = ["forge", "io", "human_layer", "flat"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

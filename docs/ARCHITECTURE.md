@@ -130,13 +130,17 @@ rules/       deduction.py + read_section.py — entrambi puri, zero forge
 io/          dxf.py — importa forge, per scrivere
 human_layer  API pubblica di comodo (quote esterne, export a livelli)
 flat/        lettura di processo di un pezzo piano sopra forge (D51):
-             fori, svasature, filettati, pieghe, incisioni — richiede forge,
-             e nessun altro layer la importa
+             fori, svasature, filettati, pieghe, incisioni — richiede forge;
+             la importa solo io/dxf.py, per to_forge_result()
 ```
 
-Ogni layer può dipendere solo da quelli sopra di lui in questa lista,
-mai il contrario. `core/` non sa che forge esiste, punto — qualunque
-codice nuovo che gli farebbe importare forge è nel posto sbagliato.
+`core/`, `model/`, `rules/` non sanno che forge esiste, punto — qualunque
+codice nuovo che gli farebbe importare forge è nel posto sbagliato. Le due
+eccezioni volute sono deleghe dentro un metodo, non import di modulo:
+`FlatGeometry.to_dxf()`/`.to_forge_result()` e `Section.to_dxf()` chiamano
+`io/dxf.py`. `core/` usa `model/` (`FlatGeometry` è quello che ritorna). La
+regola la controlla `tests/gen_index.py --check` (in `tests/test_index.py`),
+configurata in `pyproject.toml`.
 
 ## Cosa espone `snapbend`, per chi ci costruisce sopra
 

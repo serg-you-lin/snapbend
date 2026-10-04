@@ -22,6 +22,19 @@ Unico posto per il lavoro aperto. Le decisioni e il perché stanno in
   (lettura per viste, non ancora fatta), non di `detect_flat`.
 - [ ] `_detect_engrave` resta un segnaposto (inferenza geometrica delle
   incisioni non fatta, era forge D13).
+- [ ] **Lo script di produzione dello split** (ex `scripts/13_…` di forge, ora
+  alla radice di snapbend, **non versionato**: ha un percorso con un codice
+  pezzo; escluso con `.git/info/exclude`). È su API morte e non parte: importa
+  `forge.io.text_utils` (sparito), spacchetta `load_dxf` in `(doc, msp)` (oggi
+  ritorna solo il `ForgeDocument`), chiama `forge.validate_msp` e
+  `forge.detect` (spariti: la detection è `snapbend.flat.detect_flat`),
+  `inject(texts=...)` (oggi `inject(result, data_injector, snap_distance)`,
+  i testi da `result.annotations`), `split(msp, result, output_folder=...)`
+  (oggi `split(result, source_doc, ...)`, e su disco `split_to_files`). Da
+  riscrivere sulla API attuale e collaudare con l'overlay-check in SigmaNest
+  prima di rimetterlo in produzione (Federico, 4 ottobre). Può servire da
+  prototipo per vedere se la pipeline si rompe; lo script vero resta fuori da
+  GitHub, sempre.
 
 ## Fatto stanotte, non ancora in cima al file (MAP.md D45/D46/D47/D49)
 
