@@ -3,6 +3,14 @@
 Unico posto per il lavoro aperto. Le decisioni e il perché stanno in
 `MAP.md`; qui non si ripetono, si rimanda con "vedi `MAP.md` D...".
 
+
+## Da riprendere: la cartella officina (D60) non convince Federico
+
+- [ ] Federico, 4 ottobre, a fine sessione: "non mi piace tanto" — la scelta
+  dell'officina con la variabile `SNAPBEND_OFFICINA` (impostata sul suo utente
+  Windows) e `set_officina()`. Da ridiscutere all'inizio della prossima
+  sessione, prima di costruirci sopra. La variabile si toglie dalle variabili
+  d'ambiente di Windows se non la vuole.
 ## `snapbend.flat` — arrivato da forge (MAP.md D51-D53, 4 ottobre)
 
 - [x] detection di un pezzo piano spostata da forge, con test e golden di
