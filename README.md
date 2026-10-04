@@ -17,7 +17,7 @@ Z, an omega…).
 `.develop()` has **no dependencies**: it does trigonometry and returns a
 `FlatGeometry` — plain Python data (a list of geometric entities in a neutral
 schema + computed values). No DXF, no forge. Only `.to_dxf()` touches
-[dxf-forge](../dxf-forge), and only if you call it.
+[forge](https://github.com/serg-you-lin/forge), and only if you call it.
 
 ```python
 from snapbend import Cone, Cylinder
@@ -35,11 +35,11 @@ flat.to_dxf("cylinder.dxf")
 pip install -e .
 ```
 
-`.develop()` works immediately, with nothing else. For `.to_dxf()` you also need
-[dxf-forge](../dxf-forge) installed alongside (it is not on PyPI):
+`.develop()` works immediately, with nothing else. For `.to_dxf()` and `snapbend.flat` you also need
+[forge](https://github.com/serg-you-lin/forge) installed alongside (it is not on PyPI):
 
 ```
-pip install -e ../dxf-forge
+pip install -e ../forge
 ```
 
 ## The conventions that matter
@@ -179,7 +179,7 @@ through `to_dxf()`, consume `.entities` / `.meta` / `.bends` directly.
 - **`TUTORIAL.md`** — a suggested order for going through the numbered
   exploration scripts to (re)learn the library, one question to answer at each
   stop.
-- **`SCRIPTS.md`** — the index of the numbered scripts (`00_*` … `10_*`): script
+- **`SCRIPTS.md`** — the index of the numbered scripts (`00_*` … `12_*`): script
   → API area → what it shows.
 - **`MAP.md`** — the decision log: what was decided and, above all, why
   (`D1`, `D2`, …), in chronological order.

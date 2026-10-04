@@ -34,7 +34,7 @@ def to_forge_result(flat: "FlatGeometry", tolerance: float = 0.05):
         raise ImportError(
             "FlatGeometry.to_forge_result()/.to_dxf() richiedono il "
             "pacchetto 'forge' installato a fianco "
-            "(pip install -e <percorso a dxf-forge>)."
+            "(pip install -e <percorso a forge>)."
         ) from exc
 
     doc = forge.load_geometry(

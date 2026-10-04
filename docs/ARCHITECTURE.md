@@ -1,7 +1,7 @@
 # ARCHITECTURE — come è fatto `snapbend`, e come si incastra col resto
 
-Questo file spiega il flusso e i confini fra i pezzi (forge, framer,
-snapbend, pippo) — non ripete l'API (quella è `docs/API.md`, da scrivere)
+Questo file spiega il flusso e i confini fra i pezzi (forge, snapdraw,
+snapbend, pippo) — non ripete l'API (quella è `docs/API.md`)
 e non ripete le decisioni (quelle sono `MAP.md`). Se riapri il codice fra
 un mese e non si capisce più niente, il punto di partenza è questo file,
 non il codice.
@@ -10,21 +10,25 @@ non il codice.
 
 ## I quattro pezzi, in una frase ciascuno
 
-- **forge** — motore 2D generico: legge un file CAD (DXF/PDF), lo ripara
+- **forge** — motore 2D generico: legge un file CAD (DXF/DWG), lo ripara
   (`heal`), trova i contorni chiusi e li raggruppa in cluster con
-  gerarchia esterno/interno (`detect`). Non sa cosa sia la lamiera, i
-  fori, le pieghe — vede solo geometria e ruoli generici (`outer`,
-  `inner`, `hole`, ...).
-- **framer** — repo sorella, già in sviluppo. Capisce in un disegno
-  dov'è la cornice e il cartiglio (altrimenti `heal` la vede come un
-  `outer` normale e falsa tutto quello che viene dopo), estrae le
-  informazioni semantiche del cartiglio e le passa a pippo.
-- **snapbend** (questo repo) — sa cosa sia la lamiera piegata. Due lavori:
+  gerarchia esterno/interno. Non sa cosa sia la lamiera, un foro, una
+  piega — vede geometria (`contour_shape`, `concentric_groups`,
+  `arcs_around`: "cerchio", mai "foro") e ruoli (`outer`, `inner`, più
+  quelli che un consumatore registra).
+- **snapdraw** — repo sorella (cartella locale `framer/`, package
+  `snapdraw`). Capisce in un disegno dov'è la cornice e il cartiglio
+  (altrimenti `heal` la vede come un `outer` normale e falsa tutto quello
+  che viene dopo), legge il cartiglio, le viste (con `forge.island()`) e i
+  fori sulle viste come notazione del disegno.
+- **snapbend** (questo repo) — sa cosa sia la lamiera piegata. Tre lavori:
   **calcolare** uno sviluppo da parametri (`Cone`, `Cylinder`,
-  `BentProfile`) e **leggere** un contorno per capire se è lamiera
-  piegata e con che misure (`read_section`).
+  `BentProfile`), **leggere** un contorno per capire se è lamiera
+  piegata e con che misure (`read_section`), e **leggere un file di
+  taglio** sopra `forge.heal()` — fori, svasature, filettati, pieghe,
+  incisioni (`snapbend.flat`).
 - **pippo** — non ancora scritto, vive fuori da questo repo.
-  L'interprete di disegno: prende un file CAD intero, usa framer per
+  L'interprete di disegno: prende un file CAD intero, usa snapdraw per
   togliere la cornice dal conto e forge per trovare i cluster, e per
   ciascuno decide cosa fare — fra cui chiedere a
   `snapbend.read_section()` "in questo cluster c'è lamiera piegata?".
@@ -38,12 +42,12 @@ file CAD (DXF/PDF)
   forge.load_dxf() / load_pdf()
       |
       v
-  framer  -- toglie cornice/cartiglio dal conto, PRIMA di heal --
-      |     (framer legge il disegno grezzo: una cornice ha una firma
+  snapdraw -- toglie cornice/cartiglio dal conto, PRIMA di heal --
+      |     (snapdraw legge il disegno grezzo: una cornice ha una firma
       |     sua — un rettangolo enorme rispetto al resto, spesso su un
       |     layer/blocco a parte — che va riconosciuta prima che heal la
       |     tratti come un outer normale, non dopo su un risultato che
-      |     l'ha già mischiata dentro. Se framer sbagliasse questo
+      |     l'ha già mischiata dentro. Se snapdraw sbagliasse questo
       |     ordine, andrebbe deciso lì, non qui)
       |
       v
@@ -159,11 +163,6 @@ esterno ipotetico:
 - `FlatGeometry` — entities/meta grezzi, per chi vuole la propria
   pipeline forge invece di `to_dxf()`.
 
-Quello che mette in ritardo un "chi ci costruisce sopra" oggi non è
-l'architettura (gli oggetti giusti ci sono già) — è che non c'è ancora
-`docs/API.md`, la scheda per-oggetto (segnatura/prende/ritorna/solleva)
-che fa risparmiare la lettura del sorgente. `MAP.md` D16, ancora aperta.
-
 ---
 
 ## Cosa non è ancora pulito (onesto, non nascosto)
@@ -172,9 +171,10 @@ che fa risparmiare la lettura del sorgente. `MAP.md` D16, ancora aperta.
   forge nativi) — deciso quando pippo esiste, non prima: decidere ora su
   un consumatore immaginario è il modo in cui è nata (e si è ritrattata)
   tutta la parentesi forge di MAP.md D43.
-- Dove framer entra nel flusso rispetto a `heal()` (sopra, nel
-  diagramma) — framer è una repo a sé, non ancora vista da qui: quando
-  esiste per davvero questo file va corretto sui fatti, non tenuto come
-  unica verità.
-- `pippo` è un nome, non un repo — stesso discorso.
-- `docs/API.md` non esiste ancora — `MAP.md` D16.
+- Dove snapdraw entra nel flusso rispetto a `heal()` (sopra, nel
+  diagramma): snapdraw assegna i ruoli di cornice e cartiglio agli edge
+  prima della lettura di forge (`heal` o `island`, scelta del chiamante).
+  Il diagramma lo mette prima di `heal` perché è il caso di snapbend; per
+  le viste snapdraw usa `island`, che snapbend non tocca.
+- `pippo` è un nome, non un repo: il suo posto nel diagramma è
+  un'ipotesi, da correggere sui fatti quando esisterà.

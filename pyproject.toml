@@ -26,7 +26,7 @@ dependencies = []
 dev = ["pytest"]
 # forge NON è qui: è un pacchetto locale, non pubblicato. Per usare
 # FlatGeometry.to_dxf() installalo a parte, es.:
-#   pip install -e ../dxf-forge
+#   pip install -e ../forge
 # (MAP.md D43: un'integrazione più profonda con forge è stata provata e
 # ritrattata l'11 set 2026 — non giustificata finché "pippo" non esiste.)
 

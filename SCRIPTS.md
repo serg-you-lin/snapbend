@@ -6,7 +6,7 @@ dell'API pubblica di `snapbend`. Girano senza argomenti
 Sono la palestra per capire e collaudare l'API, non codice di libreria.
 
 Quelli che generano il DXF richiedono forge installato a fianco
-(`pip install -e ../dxf-forge`); il resto gira liscio.
+(`pip install -e ../forge`); il resto gira liscio.
 
 | script | area API | cosa mostra |
 |---|---|---|

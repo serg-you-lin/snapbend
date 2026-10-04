@@ -12,7 +12,7 @@ forge entra in gioco SOLO in `snapbend/io/dxf.py` (`to_forge_result()`/
 `to_dxf()`), con import lazy: se forge non è installato, `Cone(...).develop()`
 funziona comunque e i dati grezzi restano leggibili/utilizzabili da
 `.entities`/`.meta` — solo il salvataggio DXF richiede forge installato a
-fianco (`pip install -e <percorso a dxf-forge>`). `FlatGeometry.to_dxf()`/
+fianco (`pip install -e <percorso a forge>`). `FlatGeometry.to_dxf()`/
 `.to_forge_result()` restano metodi comodi da chiamare, ma il loro corpo
 vive in `snapbend/io/dxf.py`: questo modulo non importa mai forge, nemmeno
 lazy — lo strato `model` resta pulito, lo strato `io` fa da ponte.

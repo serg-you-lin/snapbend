@@ -393,7 +393,7 @@ Il contratto neutro fra `snapbend` e chiunque a valle — output di ogni
 | `.to_dxf(path, tolerance=0.05, annotate=True, show_margin_reference=False)` | scrive un file DXF (con `annotate=True`, il blocco note include anche `.bends`, MAP.md D47) | forge installato |
 
 **Raises**: `ImportError` da entrambi i metodi se forge non è
-installato (messaggio esplicito, `pip install -e <path a dxf-forge>`).
+installato (messaggio esplicito, `pip install -e <path a forge>`).
 
 ### `polar_point`
 
@@ -560,7 +560,13 @@ snapbend.flat.describe_features(cluster) -> dict
 - **`detect_flat`** — nudo: solo i ruoli assegnati al load (`role_rules` di
   forge). `features` (`"holes"`, `"bending"`, `"engrave"`, `"all"`):
   - fori: contorno interno circolare Ø < `max_drill_diameter` → `Hole`
-    (`plain` / `countersink` / `threaded`); sopra soglia resta contorno;
+    (`plain` / `countersink` / `threaded`); sopra soglia resta contorno.
+    Svasatura: nel gruppo di cerchi concentrici (`forge.concentric_groups`,
+    centri entro 1 mm) ogni cerchio prende come anello esterno il più
+    piccolo dei più grandi ancora liberi; l'anello sparisce da `inners`,
+    il suo Ø va in `outer_diameter`. Filettato: attorno al cerchio un arco
+    (`forge.arcs_around`, centro entro 1 mm) a 270° ± 35° con rapporto dei
+    raggi ≤ 1.6 — `snapbend.flat.holes.is_threaded_hole` (D55);
   - pieghe: una linea dritta che, prolungata di 1 mm, divide il pezzo in due
     (D52); tratti sulla stessa retta separati solo da un vuoto valgono come
     una piega (D53);
