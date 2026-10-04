@@ -1203,7 +1203,7 @@ imports, and now the distribution too — `pyproject.toml` still said
 `snapbend` package and `__version__` read the wrong metadata. Docs, module
 headers, scripts and tests say `snapbend`; the entries above keep the name
 they had when written (a log is not rewritten). The GitHub repository is
-still called `bendly`.
+`serg-you-lin/snapbend` (renamed there; the local remote now points to it).
 
 Version **0.1.4 → 0.2.0**: a new name and a new subpackage (`snapbend.flat`,
 D51-D53) — more than a patch; nothing in `snapbend.__all__` changed.
