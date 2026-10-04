@@ -8,14 +8,18 @@ Unico posto per il lavoro aperto. Le decisioni e il perché stanno in
 - [x] detection di un pezzo piano spostata da forge, con test e golden di
   processo (`tests/flat/`, `tests/data/flat/`).
 - [x] una piega attraversa il pezzo (D52); interrotta da un vuoto resta una (D53).
-- [ ] **Da decidere (Federico):** un righino di traverso in un angolo passa
-  ancora come piega — serve una misura minima (lunghezza della piega o
-  larghezza del pezzo che stacca), D52.
-- [ ] **Da guardare (Federico):** le due pieghe da 30 mm di
-  `staffa_scarto_doppia` (pezzi 2 e 3), mai controllate da un golden: 10
-  golden di `golden_multipli/process/` hanno il summary vuoto (pre-refactor
-  di inject in forge). DXF in `tests/data/flat/golden_multipli/detected/`
-  (script di prova fuori dal repo).
+- [ ] **Misura minima di una piega = regola di processo (Federico, 4
+  ottobre).** Un righino di traverso in un angolo passa ancora come piega
+  (D52). La soglia non è un numero fisso: dipende da spessore e cava — a 0.5
+  mm anche un'aletta 3×3 si piega, a 5 mm no. Va derivata da spessore +
+  calibrazione (che snapbend ha già, `rules/deduction.py`), ma un file di
+  taglio non porta lo spessore: serve deciderne la sorgente (parametro del
+  chiamante, cartiglio letto da snapdraw, ...). Stessa regola per una piega
+  molto vicina al lato.
+- [x] **Le due pieghe da 30 mm di `staffa_scarto_doppia`** (pezzi 2 e 3):
+  confermate da Federico, il risultato atteso è "piega" — i golden ora le
+  contano. Nel disegno sono uno smusso: riconoscerlo come tale è di snapdraw
+  (lettura per viste, non ancora fatta), non di `detect_flat`.
 - [ ] `_detect_engrave` resta un segnaposto (inferenza geometrica delle
   incisioni non fatta, era forge D13).
 
