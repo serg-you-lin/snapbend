@@ -1,0 +1,10 @@
+{
+  "nome": "misurata_esempio",
+  "tipo_cliente": "misurato",
+  "descrizione": "Calibrazione d'esempio per i test del meccanismo 'misurato': valori INVENTATI, non di un'officina. Dove c'e' il misurato si usa quello, dove manca si ripiega su DIN 6935.",
+  "cava_per_spessore": {"1": 8, "3": 16, "7": 40},
+  "misurati": [
+    {"spessore": 1.0, "cava": 8.0, "angolo": 90.0, "accorciamento_esterno": 2.0, "fonte": "esempio inventato"},
+    {"spessore": 3.0, "cava": 16.0, "angolo": 90.0, "accorciamento_esterno": 5.0, "fonte": "esempio inventato"}
+  ]
+}

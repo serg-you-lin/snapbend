@@ -36,12 +36,12 @@ class TestDevelopFromExternalFlanges(unittest.TestCase):
         self.assertAlmostEqual(flat.meta["total_length"], atteso.meta["total_length"], places=9)
 
     def test_uguale_al_giro_manuale_modo_calibrazione(self):
-        # stessa L 100x110s3 degli script 06/07 — calibrazione tipo_misurato
+        # stessa L 100x110s3 degli script 06/07 — calibrazione misurata d'esempio
         external_flanges = [100.0, 110.0]
         bend_angles = [90.0]
         thickness = 3.0
 
-        misurato = Calibration.load("tipo_misurato", folder=Path(__file__).resolve().parent / "data" / "officina")
+        misurato = Calibration.load("misurata_esempio", folder=Path(__file__).resolve().parent / "data")
         atteso = BentProfile(
             flanges=external_flanges_to_centerline(external_flanges, bend_angles, thickness),
             bends=[Bend(angle=a) for a in bend_angles],

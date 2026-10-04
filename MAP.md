@@ -1274,3 +1274,33 @@ thickness and die from the file name only. Suite: 418 passed.
 calibrations on `tests/data/officina/`, `tests/generate_section.py` writes to
 `output/sections/`, and nothing in snapbend reads the folder any more. The real
 shop data moved, untracked, next to the private officina tool that reads it.
+
+### D60 — every shop has its own officina folder; officina 1's data leaves the repo (4 Oct 2026)
+
+Federico: "possiamo fare in modo che uno si fa la sua bella cartella officina
+con i suoi dati e snapbend punta lì?" A calibration with real measured
+deductions, a stock of sheet thicknesses, the DXFs of a shop's test parts are
+that shop's data, not snapbend's.
+
+**The officina folder.** `snapbend/rules/officina.py`: a folder outside the
+repo, chosen with `snapbend.set_officina(path)` in a script (wins, lasts for
+that program) or with the `SNAPBEND_OFFICINA` environment variable.
+`Calibration.load(name)` without `folder` reads
+`<officina>/calibrations/<name>.json`, then the generic examples in the repo's
+`calibrations/` (`default`, `esempio_din_3cave`, `inside_sum`), then the bare
+ones (`din6935`); `SheetThicknessTable.load()` reads
+`<officina>/sheet_thicknesses.json` first. A variable pointing to a missing
+folder raises instead of being ignored; a calibration found nowhere raises
+listing where it looked.
+
+**Officina 1 leaves.** `tests/data/officina/` (20 DXFs and the measured
+calibration, tracked since D59) and `tests/test_golden_officina.py` moved to
+the private officina tool: they check officina 1, not snapbend's mechanism.
+The tests of the "misurato" mechanism use `tests/data/misurata_esempio.json`,
+two invented rows. Script `05` compares calibrations on the officina folder's
+L/U/Z/O parts; it skips the new-schema names (`L12.dxf`), whose thickness and
+die live only in the `.bnc` — it was crashing on them already before today.
+`_pre_reorg_backup_5set/` (old notes, tracked by mistake) is untracked, kept
+on disk. Officina 1's folder on Federico's machine is the private tool's
+`data/`. Suite: 423 passed. The DXFs pushed under D59 stay in history: they
+are the shop's own parts, no client's.

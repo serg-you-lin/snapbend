@@ -8,7 +8,7 @@ import math
 import unittest
 from pathlib import Path
 
-OFFICINA = Path(__file__).resolve().parent / "data" / "officina"
+ESEMPIO = Path(__file__).resolve().parent / "data"
 
 from snapbend.rules.deduction import (
     Calibration,
@@ -125,14 +125,14 @@ class TestCalibrazioni(unittest.TestCase):
             info.value, deduction_din6935(16.0 / 6.0, 3.0, 90.0, "mezzeria"), places=9)
 
     def test_tipo_misurato_usa_il_misurato_dove_c_e(self):
-        p = Calibration.load("tipo_misurato", folder=OFFICINA)
-        # 3 mm / cava 16 / 90 -> misurato 5.222 esterno -> 5.222 - 3 a mezzeria
+        p = Calibration.load("misurata_esempio", folder=ESEMPIO)
+        # 3 mm / cava 16 / 90 -> misurato 5.0 esterno -> 5.0 - 3 a mezzeria
         info = p.deduction_detail(3.0, 90.0, cava=16.0)
         self.assertEqual(info.rule, "misurato")
-        self.assertAlmostEqual(info.value, 5.222 - 3.0, places=6)
+        self.assertAlmostEqual(info.value, 5.0 - 3.0, places=6)
 
     def test_tipo_misurato_ripiega_su_din_dove_manca(self):
-        p = Calibration.load("tipo_misurato", folder=OFFICINA)   # niente k_per_materiale
+        p = Calibration.load("misurata_esempio", folder=ESEMPIO)   # niente k_per_materiale
         d = Calibration.load("din6935")
         # 7 mm non e' fra i misurati -> stessa stima DIN della pura norma
         self.assertAlmostEqual(
@@ -144,7 +144,7 @@ class TestCalibrazioni(unittest.TestCase):
 
     def test_tipo_misurato_niente_interpolazione(self):
         # cava non esatta -> NON deve usare il misurato di una cava vicina
-        p = Calibration.load("tipo_misurato", folder=OFFICINA)
+        p = Calibration.load("misurata_esempio", folder=ESEMPIO)
         d = Calibration.load("din6935")
         self.assertAlmostEqual(
             p.centerline_deduction(3.0, 90.0, cava=20.0),   # cava 20, non 16

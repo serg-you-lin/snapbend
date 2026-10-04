@@ -99,10 +99,19 @@ in mezzo è ambigua come tutto il resto — lì serve la vista in sezione.
 
 ## La calibrazione (il file)
 
-Una **calibrazione** è un file `calibrations/<nome>.json`. Porta le scelte
-di un'officina: la tabella cave, e — se ce l'hai — il K per materiale e gli
+Una **calibrazione** è un file `<nome>.json`. Porta le scelte di
+un'officina: la tabella cave, e — se ce l'hai — il K per materiale e gli
 accorciamenti misurati. Tutti i campi tranne la tabella cave sono
 opzionali.
+
+**Dove sta.** Le calibrazioni della tua officina stanno nella tua **cartella
+officina**, fuori dal repo: la indichi una volta con la variabile d'ambiente
+`SNAPBEND_OFFICINA` (o con `snapbend.set_officina(percorso)` in uno script,
+che vince e vale solo per quel programma), e snapbend cerca `<officina>/calibrations/<nome>.json`
+(e `<officina>/sheet_thicknesses.json` per gli spessori a magazzino). Senza
+cartella officina, o se il nome lì non c'è, usa gli esempi generici in
+`calibrations/` del repo (`default`, `esempio_din_3cave`, `inside_sum`) e le
+calibrazioni nude (`din6935`). MAP D60.
 
 ```json
 {
@@ -236,6 +245,9 @@ La lista `misurati` si ricava dai `.bnc` con lo strumento privato di officina
 
 - `tests/test_deduction.py` → la formula e la stima DIN 6935 danno i numeri
   attesi; la conversione quote esterne↔mezzeria è indipendente dal raggio.
-- `tests/test_golden_officina.py` → con `tipo_misurato`, il tool riproduce
-  ogni DXF di officina (lunghezza + posizione pieghe) entro tolleranza, sulle
-  copie tracciate in `tests/data/officina`.
+- `tests/test_officina.py` → la cartella officina: calibrazioni e spessori si
+  leggono da lì, e vincono sugli esempi del repo.
+- La prova sui pezzi veri di officina 1 (ogni DXF riprodotto entro
+  tolleranza con la calibrazione misurata) sta con i dati di officina 1, fuori
+  dal repo: qui si prova il meccanismo, con una calibrazione d'esempio
+  inventata (`tests/data/misurata_esempio.json`).

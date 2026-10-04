@@ -39,6 +39,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
+from .officina import officina_file
+
 
 # --------------------------------------------------------------------------
 # La formula (metodo della fibra neutra) + la stima DIN 6935 del fattore K
@@ -266,11 +268,23 @@ class Calibration:
 
     @classmethod
     def load(cls, name: str, folder: str | Path | None = None) -> "Calibration":
-        folder = Path(folder) if folder is not None else cls.CALIBRATIONS_FOLDER
-        path = Path(folder) / f"{name}.json"
-        if not path.is_file() and name in BARE_CALIBRATIONS:
+        """
+        La calibrazione `name`: da `folder` se dato; altrimenti dalla cartella
+        officina (`SNAPBEND_OFFICINA`/calibrations), poi dagli esempi del repo,
+        poi dalle calibrazioni nude (`din6935`, ...).
+        """
+        if folder is not None:
+            candidates = [Path(folder) / f"{name}.json"]
+        else:
+            candidates = [p for p in (officina_file("calibrations", f"{name}.json"),
+                                      cls.CALIBRATIONS_FOLDER / f"{name}.json") if p is not None]
+        for path in candidates:
+            if path.is_file():
+                return cls(json.loads(path.read_text(encoding="utf-8")))
+        if name in BARE_CALIBRATIONS:
             return cls(dict(BARE_CALIBRATIONS[name]))
-        return cls(json.loads(path.read_text(encoding="utf-8")))
+        raise FileNotFoundError(f"calibrazione {name!r} non trovata in: "
+                                + ", ".join(str(p) for p in candidates))
 
     # --- lookup ---------------------------------------------------------
 

@@ -229,8 +229,14 @@ Calibration.load(name: str, folder: str | Path | None = None) -> Calibration
 ```
 
 I dati di calcolo di un'officina (tabella cave, K per materiale, righe
-misurate) — un file JSON completo in `calibrations/`, nessuna
-ereditarietà fra calibrazioni. `.load("din6935")`/`.load("inside_sum")`
+misurate) — un file JSON completo, nessuna ereditarietà fra calibrazioni.
+Senza `folder`, `load` cerca nella cartella officina
+(`SNAPBEND_OFFICINA`/calibrations), poi negli esempi di `calibrations/` del
+repo (MAP D60); `SheetThicknessTable.load()` fa lo stesso con
+`sheet_thicknesses.json`. La cartella officina si sceglie con
+`snapbend.set_officina(path)` dentro uno script (vince, vale per quel
+programma; `None` torna alla variabile) o con la variabile d'ambiente
+`SNAPBEND_OFFICINA`. `.load("din6935")`/`.load("inside_sum")`
 funzionano anche senza un file (`BARE_CALIBRATIONS`). **Raises**
 (`.load`): `FileNotFoundError` se il nome non è né un file né una
 calibrazione nuda.

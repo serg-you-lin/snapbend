@@ -48,6 +48,7 @@ import math
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Tuple
+from .officina import officina_file
 
 _TOL = 1e-6
 _SHEET_TABLE = Path(__file__).resolve().parent.parent.parent / "sheet_thicknesses.json"
@@ -66,7 +67,9 @@ class SheetThicknessTable:
 
     @classmethod
     def load(cls, path: str | Path | None = None) -> "SheetThicknessTable":
-        data = json.loads(Path(path or _SHEET_TABLE).read_text(encoding="utf-8"))
+        """Da `path`; altrimenti dalla cartella officina, poi dall'esempio generico del repo."""
+        path = path or officina_file("sheet_thicknesses.json") or _SHEET_TABLE
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
         return cls(
             thicknesses_mm=sorted(float(t) for t in data["thicknesses_mm"]),
             tolerance_mm=float(data.get("tolerance_mm", 0.2)),

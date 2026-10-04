@@ -4,7 +4,7 @@ import unittest
 
 from snapbend import Bend, BentProfile, Calibration, estimate_k_factor, MATERIAL_K_FACTORS
 
-OFFICINA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "officina")
+ESEMPIO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
 
 class TestBendFormulas(unittest.TestCase):
@@ -197,17 +197,17 @@ class TestBendResult(unittest.TestCase):
         self.assertIn("raggio 3 esplicito", b.source)
 
     def test_profilo_reports_misurato_vs_fallback(self):
-        cal = Calibration.load("tipo_misurato", folder=OFFICINA)
+        cal = Calibration.load("misurata_esempio", folder=ESEMPIO)
         flat = BentProfile(
             flanges=[60, 100, 60],
             bends=[Bend(angle=90, cava=16), Bend(angle=90, cava=40)],
             thickness=3, width=50, calibration=cal,
         ).develop()
 
-        got = flat.bends[0]                      # 3 mm / V16 -> misurato (L3.bnc)
+        got = flat.bends[0]                      # 3 mm / V16 -> misurato
         self.assertEqual(got.rule, "misurato")
         self.assertFalse(got.fallback)
-        self.assertIn(".bnc", got.source)
+        self.assertIn("esempio inventato", got.source)
 
         fell_back = flat.bends[1]                # 3 mm / V40 -> nessun misurato per questa combinazione
         self.assertEqual(fell_back.rule, "din6935")

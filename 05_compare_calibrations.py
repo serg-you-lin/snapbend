@@ -1,7 +1,7 @@
 """
 05_compare_calibrations.py
 ---------------------------
-Per ogni pezzo di officina in tests/data/officina/ stampa, fianco a fianco:
+Per ogni pezzo della cartella officina (SNAPBEND_OFFICINA, MAP D60) stampa, fianco a fianco:
   - la lunghezza dello sviluppo REALE (DXF prodotto da TruBend)
   - quella della calibrazione "default"     (DIN 6935 + cava da tabella)
   - quella della calibrazione "tipo_misurato" (valori misurati dai .bnc)
@@ -19,12 +19,14 @@ import ezdxf
 from ezdxf import bbox
 
 from snapbend import Bend, BentProfile, Calibration
+from snapbend.rules.officina import officina_folder
 
 # --- CONFIG ---
-# le copie tracciate dei DXF di officina 1 (MAP D59). Il path è ancorato
-# alla radice del repo, così lo script gira anche da un'altra CWD.
-ROOT = Path(__file__).resolve().parent
-DATA_DIR = ROOT / "tests" / "data" / "officina"
+# i DXF veri dei pezzi di prova, nelle sottocartelle L/U/Z/O della cartella
+# officina; la calibrazione "tipo_misurato" viene da lì anche lei.
+DATA_DIR = officina_folder()
+if DATA_DIR is None:
+    raise SystemExit("imposta SNAPBEND_OFFICINA: la cartella officina con i pezzi L/U/Z/O e calibrations/")
 
 FORME = {
     "L": [114.0, 114.0],
@@ -41,9 +43,14 @@ def golden_len(path: str) -> float:
 
 
 def parse_nome(fname: str):
+    """(forma, spessore, cava) dal nome "parlante"; None se il nome non li dice
+    (schema nuovo `L12.dxf`: spessore e cava stanno nel .bnc, fuori da snapbend)."""
     base = os.path.splitext(os.path.basename(fname))[0]
     forma = base[0]
-    spess = float(re.search(r"s(\d+)-", base).group(1))
+    found = re.search(r"s(\d+)-", base)
+    if found is None:
+        return None
+    spess = float(found.group(1))
     suff = base.split("-")[-1]
     cava = next((v for k, v in CAVA.items() if k == suff), None)
     return forma, spess, cava
@@ -59,13 +66,16 @@ def sviluppo(calibration, forma, spess, cava) -> float:
 
 def main() -> None:
     default = Calibration.load("default")
-    misurato = Calibration.load("tipo_misurato", folder=DATA_DIR)
+    misurato = Calibration.load("tipo_misurato")
 
     print(f"{'file':44} {'sp':>3} {'cava':>4} "
           f"{'REALE':>9} {'default':>9} {'Δ':>7}  {'tipo_misurato':>13} {'Δ':>7}")
     print("-" * 100)
     for path in sorted(glob.glob(str(DATA_DIR / "[LUZO]" / "*.dxf"))):
-        forma, spess, cava = parse_nome(path)
+        parsed = parse_nome(path)
+        if parsed is None:
+            continue
+        forma, spess, cava = parsed
         if forma not in FORME:
             continue
         reale = golden_len(path)
