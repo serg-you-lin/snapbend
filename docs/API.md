@@ -561,11 +561,11 @@ snapbend.flat.describe_features(cluster) -> dict
   forge). `features` (`"holes"`, `"bending"`, `"engrave"`, `"all"`):
   - fori: contorno interno circolare Ø < `max_drill_diameter` → `Hole`
     (`plain` / `countersink` / `threaded`); sopra soglia resta contorno.
-    Svasatura: nel gruppo di cerchi concentrici (`forge.concentric_groups`,
+    Svasatura: nel gruppo di cerchi concentrici (`forge.geometry.concentric_groups`,
     centri entro 1 mm) ogni cerchio prende come anello esterno il più
     piccolo dei più grandi ancora liberi; l'anello sparisce da `inners`,
     il suo Ø va in `outer_diameter`. Filettato: attorno al cerchio un arco
-    (`forge.arcs_around`, centro entro 1 mm) a 270° ± 35° con rapporto dei
+    (`forge.geometry.arcs_around`, centro entro 1 mm) a 270° ± 35° con rapporto dei
     raggi ≤ 1.6 — `snapbend.flat.holes.is_threaded_hole` (D55);
   - pieghe: una linea dritta che, prolungata di 1 mm, divide il pezzo in due
     (D52); tratti sulla stessa retta separati solo da un vuoto valgono come

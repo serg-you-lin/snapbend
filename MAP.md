@@ -1232,3 +1232,11 @@ with `are_collinear` / `point_line_distance` replacing the private copies
 the numbers: `_BEND_REACH` = 1 mm (D52), `_BEND_LINE_OFFSET` = 0.1 mm and
 `_BEND_ANGLE_TOL` = 1e-3 rad (D53), passed as parameters. Goldens unchanged
 (462 passed). Version **0.2.2**; needs forge ≥ 0.9.2.
+
+### D57 — forge's geometry imported from `forge.core.geometry` (4 Oct 2026)
+
+forge D95 moved its geometry into the `forge/core/geometry/` package and took
+the facts off the top level: snapbend imports `concentric_groups`,
+`arcs_around`, `splits_polygon`, `bridged_runs` and the track helpers from
+`forge.core.geometry` (and its submodules). No behaviour change (462 passed).
+Version **0.2.3**; needs forge ≥ 0.10.0.

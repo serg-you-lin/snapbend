@@ -8,7 +8,6 @@ risultato di `forge.heal()`. Arrivato da forge (forge MAP.md D88).
 
 from __future__ import annotations
 
-import math
 from typing import Optional
 
 from shapely.geometry import LineString, Point
@@ -18,7 +17,7 @@ from forge.model.feature import OpenFeature
 from forge.model.role import ContourRole, role_str, is_structural_role
 from .roles import HOLE, COUNTERSINK, THREADED_HOLE, BEND, ENGRAVE, MARKING
 from forge.model.detected import DetectedFeatures
-from forge import concentric_groups
+from forge.core.geometry import concentric_groups
 from .model import (
     BendingLine,
     ClassifiedEntity,
@@ -28,10 +27,10 @@ from .model import (
     HOLE_TYPE_THREADED,
 )
 from .holes import is_threaded_hole
-from forge.core.geometry import (
+from forge.core.geometry.measure import (
     track_points, track_length, track_shape_type, circular_geometry, chord_angle_deg,
 )
-from forge.core.lines import group_collinear_lines, splits_polygon, bridged_runs
+from forge.core.geometry.lines import group_collinear_lines, splits_polygon, bridged_runs
 from .thresholds import HOLE_DIAMETER_THRESHOLD
 
 # Tolleranza per raggruppare le bending line collineari in un'unica piega
@@ -318,7 +317,7 @@ def _bending_line(cluster, start, end, length, source="geometric"):
 
 def _detect_bending(result: ForgeResult, bending_tolerance: float = 1.0) -> None:
     """
-    Una piega attraversa il pezzo (`forge.splits_polygon`, prolungata di
+    Una piega attraversa il pezzo (`forge.geometry.splits_polygon`, prolungata di
     `_BEND_REACH`). Se un vuoto la interrompe,
     i tratti sulla stessa retta separati solo da vuoti valgono come una
     piega: la retta che li unisce deve attraversare il pezzo, e sul layer
