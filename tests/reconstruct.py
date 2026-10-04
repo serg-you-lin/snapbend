@@ -1,7 +1,7 @@
 """
 tests/reconstruct.py
 --------------------
-Strumento INTERNO (non API pubblica, mai in bendly.__all__).
+Strumento INTERNO (non API pubblica, mai in snapbend.__all__).
 
 Da un pezzo reale TruBend — DXF piatto + file .bnc — ricostruisce lo
 sketch primitivo a mezzeria (una Section, stesso formato della Fase 0),

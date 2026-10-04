@@ -1,5 +1,5 @@
 """
-bendly/core/cylinder.py
+snapbend/core/cylinder.py
 ------------------------
 Sviluppo piano del cilindro (rettangolo). Stessa matematica di `cono.py`
 (dxf-forge), riscritta come motore parametrico puro.

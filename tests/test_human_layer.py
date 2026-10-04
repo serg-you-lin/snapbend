@@ -52,7 +52,7 @@ class TestDevelopFromExternalFlanges(unittest.TestCase):
         self.assertAlmostEqual(flat.meta["total_length"], atteso.meta["total_length"], places=9)
         self.assertEqual(flat.bends[0].rule, "misurato")
 
-    def test_e_in_bendly_all(self):
+    def test_e_in_snapbend_all(self):
         import snapbend
         self.assertIn("develop_from_external_flanges", snapbend.__all__)
 

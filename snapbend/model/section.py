@@ -1,5 +1,5 @@
 """
-bendly/model/section.py
+snapbend/model/section.py
 ------------------------
 A "section" is the SECTION drawing of a bent sheet-metal part, built from
 parameters: shape, centerline segments, angles, thickness, radius.
@@ -33,7 +33,7 @@ The "is bent sheet metal" pattern is recognized from three signals:
   - that thickness is a sheet that actually exists (see
     sheet_thicknesses.json).
 
-Conventions (consistent with bendly/core/bend.py and the naming scheme):
+Conventions (consistent with snapbend/core/bend.py and the naming scheme):
   - `segments`: CENTERLINE lengths, from virtual apex to virtual apex —
     the same numbers passed to BentProfile.flanges.
   - `angles`: interior angle as in the naming scheme (flat = 180, a bend

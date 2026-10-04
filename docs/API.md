@@ -1,6 +1,7 @@
-# API — una scheda per ogni nome pubblico di `bendly`
+# API — una scheda per ogni nome pubblico di `snapbend`
 
-Copre ogni nome in `bendly.__all__` (24 nomi). Non ripete il *perché*
+Copre ogni nome in `snapbend.__all__` (24 nomi), più `snapbend.flat` in
+fondo (richiede forge, non è in `__all__`). Non ripete il *perché*
 (quello è `MAP.md`) né il flusso generale (quello è
 `docs/ARCHITECTURE.md`) — qui solo: cosa prende, cosa ritorna, cosa
 solleva, un esempio copiabile.
@@ -12,7 +13,7 @@ dello sviluppo (`model`) → pipeline di comodo (`human_layer`).
 
 ---
 
-## Generatori — `bendly.core`
+## Generatori — `snapbend.core`
 
 ### `Cone`
 
@@ -58,7 +59,7 @@ uguali saldati (`split=2` = due metà). A differenza di `Cylinder`, qui
   `facet_k_factor`/`facet_bend_allowance`/... (sfaccettato).
 
 ```python
-from bendly import Cone
+from snapbend import Cone
 flat = Cone(top_diameter=1600, bottom_diameter=1016, height=1000, thickness=5).develop()
 flat.to_dxf("cone.dxf")   # richiede forge installato a fianco
 ```
@@ -96,7 +97,7 @@ principio di `Cone`.
   campi sfaccettato se `faceted=True`.
 
 ```python
-from bendly import Cylinder
+from snapbend import Cylinder
 flat = Cylinder(diameter=1016, height=3895, thickness=5).develop()
 sella = Cylinder(diameter=603, height=400, thickness=3, sector_angle=60).develop()
 ```
@@ -142,7 +143,7 @@ Tutti e quattro sollevano `TypeError` se chiamati con `radius=None`
 scritto a mano).
 
 ```python
-from bendly import Bend
+from snapbend import Bend
 b = Bend(angle=90, radius=4.0, k_factor=0.42)
 allowance = b.bend_allowance(thickness=3.0, k_factor=0.42)
 
@@ -179,7 +180,7 @@ decide l'accorciamento di ogni piega dalla cava (MAP.md D33) —
   setback mangia più della flangia).
 
 ```python
-from bendly import Bend, BentProfile
+from snapbend import Bend, BentProfile
 flat = BentProfile(
     flanges=[50, 80, 50],
     bends=[Bend(angle=90), Bend(angle=90)],
@@ -203,7 +204,7 @@ allora era la via di default delle pieghe sfaccettate di `Cone`/
 `Cylinder`; ora quelle passano dalla `calibration` dell'officina
 (`k_din6935`, non questa tabella). Resta pubblica e chiamabile a mano
 per chi vuole proprio questa stima per materiale, ma nessun codice di
-`bendly` la chiama più di default. **Raises**: `ValueError` se
+`snapbend` la chiama più di default. **Raises**: `ValueError` se
 `thickness <= 0`.
 
 ### `MATERIAL_K_FACTORS`
@@ -214,11 +215,11 @@ MATERIAL_K_FACTORS: dict[str, float]
 ```
 
 Costante, punto di partenza per `estimate_k_factor` — stessa nota:
-orfana dal percorso di default di `bendly` (D45), resta pubblica.
+orfana dal percorso di default di `snapbend` (D45), resta pubblica.
 
 ---
 
-## Calibrazione e accorciamento — `bendly.rules.deduction`
+## Calibrazione e accorciamento — `snapbend.rules.deduction`
 
 ### `Calibration`
 
@@ -247,7 +248,7 @@ se la calibrazione non ha tabella cave e non è dato né `cava` né
 `radius` per lo spessore richiesto.
 
 ```python
-from bendly import Calibration
+from snapbend import Calibration
 cal = Calibration.load("default")
 info = cal.deduction_detail(thickness=3.0, angle_deg=90.0)
 print(info.rule, info.source, info.value)
@@ -284,14 +285,14 @@ ritorna la lista dei problemi trovati (vuota = coerente, o se
 `tipo_cliente` non è dichiarato: controllo opt-in).
 
 ```python
-from bendly import Calibration, tipo_cliente_coerente
+from snapbend import Calibration, tipo_cliente_coerente
 problemi = tipo_cliente_coerente(Calibration.load("tipo_misurato"))
 assert not problemi, problemi
 ```
 
 ---
 
-## Leggere un disegno — `bendly.rules.read_section`
+## Leggere un disegno — `snapbend.rules.read_section`
 
 ### `read_section`
 
@@ -311,7 +312,7 @@ mai: un contorno non riconosciuto torna con `is_sheet_metal=False` e/o
 `notes` che spiega perché, mai un'eccezione.
 
 ```python
-from bendly import read_section
+from snapbend import read_section
 reading = read_section(my_entities)
 if reading.is_sheet_metal and reading.centerline_segments:
     # profilo a flange dritte -> BentProfile
@@ -325,7 +326,7 @@ elif reading.is_sheet_metal and reading.pure_arc_radius is not None:
 
 ---
 
-## Modello a quote umane — `bendly.model.section`
+## Modello a quote umane — `snapbend.model.section`
 
 ### `Section`
 
@@ -362,7 +363,7 @@ flangia è troppo corta per il raggio/angolo delle pieghe adiacenti
 alla calibrazione).
 
 ```python
-from bendly.model.section import Section
+from snapbend.model.section import Section
 sec = Section.from_external_flanges("L", [100, 110], [90], thickness=3)
 sec.to_dxf("sezione_L.dxf")
 ```
@@ -371,7 +372,7 @@ sec.to_dxf("sezione_L.dxf")
 
 ---
 
-## Dati grezzi dello sviluppo — `bendly.model.geometry`
+## Dati grezzi dello sviluppo — `snapbend.model.geometry`
 
 ### `FlatGeometry`
 
@@ -382,7 +383,7 @@ FlatGeometry(
 )
 ```
 
-Il contratto neutro fra `bendly` e chiunque a valle — output di ogni
+Il contratto neutro fra `snapbend` e chiunque a valle — output di ogni
 `.develop()`/`.section()`. `entities` è nello stesso schema di
 `forge.load_geometry()`, zero import di forge in questo modulo.
 
@@ -406,7 +407,7 @@ eccezione propria.
 
 ---
 
-## Pipeline di comodo — `bendly.human_layer`
+## Pipeline di comodo — `snapbend.human_layer`
 
 ### `develop_from_external_flanges`
 
@@ -427,7 +428,7 @@ chi la chiama non vede mai la mezzeria. Stesse eccezioni di
 `BentProfile.develop()` (la conversione stessa non solleva).
 
 ```python
-from bendly import Bend, develop_from_external_flanges
+from snapbend import Bend, develop_from_external_flanges
 flat = develop_from_external_flanges(
     external_flanges=[100, 110], bends=[Bend(angle=90)],
     thickness=3, width=300,
@@ -454,8 +455,8 @@ installato (via `io.dxf.write_part_dxf`); propaga le eccezioni di
 `section.to_bent_profile(width, calibration).develop()`.
 
 ```python
-from bendly.model.section import Section
-from bendly import export_part
+from snapbend.model.section import Section
+from snapbend import export_part
 sec = Section.from_external_flanges("L", [100, 110], [90], thickness=3)
 export_part(sec, width=300, path="pezzo.dxf", include_section=True, include_header=True)
 ```
@@ -537,11 +538,62 @@ flangia — succede sull'anima di una Z/omega (MAP.md D1), mai su L/U.
 
 ---
 
+## Lettura di un pezzo piano — `snapbend.flat` (richiede forge)
+
+Arrivato da forge (forge MAP.md D88/D90, qui D51). Lavora sopra un
+`forge.ForgeResult` e scrive su `cluster.detected` (l'overlay di forge).
+Presuppone un pezzo piano visto dalla faccia (file di taglio, sviluppo): mai
+sull'output di `forge.island()`.
+
+```python
+snapbend.flat.heal_and_detect(doc, tolerance=None, label="", source_file="",
+                              features="all", max_drill_diameter=32.1,
+                              bending_tolerance=1.0, engrave_tolerance=1.0) -> ForgeResult
+snapbend.flat.detect_flat(result, features=None, *, max_drill_diameter=32.1,
+                          bending_tolerance=1.0, engrave_tolerance=1.0) -> ForgeResult
+snapbend.flat.describe_features(cluster) -> dict
+```
+
+- **`heal_and_detect`** — `forge.heal(doc, is_structural=snapbend.flat.is_structural)`
+  + `detect_flat(features="all")`; salta la detection se heal non produce
+  parti valide.
+- **`detect_flat`** — nudo: solo i ruoli assegnati al load (`role_rules` di
+  forge). `features` (`"holes"`, `"bending"`, `"engrave"`, `"all"`):
+  - fori: contorno interno circolare Ø < `max_drill_diameter` → `Hole`
+    (`plain` / `countersink` / `threaded`); sopra soglia resta contorno;
+  - pieghe: una linea dritta che, prolungata di 1 mm, divide il pezzo in due
+    (D52); tratti sulla stessa retta separati solo da un vuoto valgono come
+    una piega (D53);
+  - incisioni: le tracce con ruolo `engrave` dentro una parte.
+  **Muta** `result` e lo ritorna; scrive `holes` / `bending_lines` /
+  `engrave_lines` su `cluster.detected`.
+- **`describe_features`** — conteggi per tipo: `plain_holes_count`,
+  `countersink_count`, `threaded_holes_count`, `bending_lines` (gruppi
+  collineari), `total_engrave_length`, `total_marking_length`.
+- Ruoli e layer: `HOLE`, `COUNTERSINK`, `THREADED_HOLE`, `BEND`, `ENGRAVE`,
+  `MARKING`, `LAYER_*`, `is_structural(role)`; all'import registra colori e
+  nomi layer in forge (`register_role_style`).
+- Tipi: `Hole` (`is_void = True`: forge lo toglie dall'area), `BendingLine`,
+  `Engraving`, `ClassifiedEntity`; `contours` dice a forge su che layer
+  disegnarli (una svasatura sul suo layer, una piega come LINE).
+
+```python
+import forge
+from snapbend.flat import heal_and_detect, describe_features
+
+result = heal_and_detect(forge.load_dxf("pezzo.dxf", tolerance=0.5))
+if result.is_valid:
+    print(describe_features(result.clusters[0]))
+    forge.to_dxf(result, allow_invalid=False).saveas("pezzo_letto.dxf")
+```
+
+---
+
 ## Il flusso completo, in ordine
 
 ```python
-from bendly import Bend, BentProfile, Calibration, read_section
-from bendly.model.section import Section
+from snapbend import Bend, BentProfile, Calibration, read_section
+from snapbend.model.section import Section
 
 # 1. Generare uno sviluppo da parametri, zero disegno coinvolto
 flat = BentProfile(

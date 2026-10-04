@@ -1,5 +1,5 @@
 """
-bendly/rules/deduction.py
+snapbend/rules/deduction.py
 --------------------------
 Quanto si accorcia una piega ("accorciamento" / bend deduction) e le
 CALIBRAZIONI che portano i dati di un'officina.

@@ -1,8 +1,8 @@
 """
-bendly/io/dxf.py
+snapbend/io/dxf.py
 -----------------
-Export di un FlatGeometry (bendly.model.geometry) su file DXF, via forge.
-Unico modulo di `bendly` che importa forge — e lo fa lazy: se forge non è
+Export di un FlatGeometry (snapbend.model.geometry) su file DXF, via forge.
+Unico modulo di `snapbend` che importa forge — e lo fa lazy: se forge non è
 installato, il resto del pacchetto (calcolo dello sviluppo) funziona
 comunque; solo queste due funzioni sollevano ImportError.
 

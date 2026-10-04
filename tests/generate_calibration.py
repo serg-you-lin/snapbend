@@ -3,7 +3,7 @@ tests/generate_calibration.py
 -------------------------------
 Legge una cartella di file .bnc di TruBend e ne ricava la lista "misurati"
 per una calibrazione a dati misurati (`tipo_cliente: "misurato"`, vedi
-bendly/rules/deduction.py e calibrations/tipo_misurato.json).
+snapbend/rules/deduction.py e calibrations/tipo_misurato.json).
 
 Generazione da zero (stampa su stdout, si redirige a mano):
 
@@ -38,8 +38,8 @@ def misurati_da_bnc(cartella: str) -> list:
     """Righe 'misurati' da tutti i .bnc sotto `cartella`.
 
     Angolo: quello che si confronta con `Bend.angle` nel motore (rotazione
-    da piatta, NON il Sollwinkel/angolo incluso) — vedi `bendly/core/bend.py`
-    e `bendly/rules/deduction.py`. `rotazione = |180 - Sollwinkel|`,
+    da piatta, NON il Sollwinkel/angolo incluso) — vedi `snapbend/core/bend.py`
+    e `snapbend/rules/deduction.py`. `rotazione = |180 - Sollwinkel|`,
     indipendente dal verso (il motore è cieco al verso, MAP.md D23).
 
     Un .bnc con UNA sola piega REGISTRATA: qualunque angolo — ma solo se il

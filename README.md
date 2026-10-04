@@ -1,9 +1,9 @@
-# bendly
+# snapbend
 
 > **Status: alpha.** Phases 1–3 are done (wrapped shapes, press-brake bent
 > profiles, the human layer with external-to-external quotes and the dimensioned
 > section view). Phases 4–5 (boxes / multi-axis bends, bend info inside TruBend
-> DXFs) are parked. The API in `bendly.__all__` is stable; see `docs/API.md`
+> DXFs) are parked. The API in `snapbend.__all__` is stable; see `docs/API.md`
 > and `docs/ARCHITECTURE.md`.
 >
 > **All rights reserved — no license is granted.** This repo is public so it
@@ -20,7 +20,7 @@ schema + computed values). No DXF, no forge. Only `.to_dxf()` touches
 [dxf-forge](../dxf-forge), and only if you call it.
 
 ```python
-from bendly import Cone, Cylinder
+from snapbend import Cone, Cylinder
 
 flat = Cone(top_diameter=1600, bottom_diameter=1016, height=1000, thickness=5).develop()
 flat.to_dxf("cone.dxf")
@@ -76,7 +76,7 @@ DIN 6935 from `r/s` (`MAP.md` D36). `flat.bends[i].source` always says where
 each number came from, never a guess dressed up as real data.
 
 ```python
-from bendly import Bend, BentProfile
+from snapbend import Bend, BentProfile
 
 flat = BentProfile(
     flanges=[50, 80, 50],                       # centerline lengths
@@ -106,7 +106,7 @@ coincidence; otherwise pass `180 − included_angle`.
 ### The human layer — outside-to-outside quotes
 
 ```python
-from bendly import Bend, develop_from_external_flanges
+from snapbend import Bend, develop_from_external_flanges
 
 flat = develop_from_external_flanges(
     external_flanges=[100, 110],                 # read on the outside of the part
@@ -122,7 +122,7 @@ flat = develop_from_external_flanges(
 scheme). It gives you both the flat pattern and the drawing of the *bent* part.
 
 ```python
-from bendly import Section
+from snapbend import Section
 
 sec = Section.from_external_flanges(
     shape="Z", external_flanges=[80, 40, 80], angles=[90, 270], thickness=3,
@@ -138,7 +138,7 @@ flat = sec.to_bent_profile(width=300, calibration="din6935").develop()
 ### The layered export — one DXF, stacked vertically
 
 ```python
-from bendly import Section, export_part
+from snapbend import Section, export_part
 
 sec = Section.from_external_flanges(
     shape="L", external_flanges=[100, 110], angles=[90], thickness=3,
@@ -158,7 +158,7 @@ setup choice against these four cases (`MAP.md` D36/D39) — a calibration
 self-declares which one it is via `tipo_cliente`, checked against its actual
 content by `tipo_cliente_coerente()`:
 
-| `tipo_cliente` | You are... | You give `bendly`... | Calibration |
+| `tipo_cliente` | You are... | You give `snapbend`... | Calibration |
 |---|---|---|---|
 | `zero_config` | a stranger who just downloaded this, no reading | nothing | `default` (or omit it) — fixed 1mm radius, DIN-estimated `K` |
 | `cava_propria` | a shop with your own dies but no CAM | only a thickness→die table (5 minutes, never a measurement) | copy `calibrations/esempio_din_3cave.json`, fill in your real dies |
@@ -168,8 +168,10 @@ content by `tipo_cliente_coerente()`:
 ## The neutral contract with forge
 
 `FlatGeometry.entities` is in the same schema `forge.load_geometry()` accepts —
-it is the neutral contract between the two projects. `bendly` never imports forge
-for the calculation; forge is only needed by `to_dxf()`. If you do not want to go
+it is the neutral contract between the two projects. `snapbend` never imports forge
+for the calculation; forge is only needed by `to_dxf()` and by `snapbend.flat`,
+the reading of a flat cutting file on top of `forge.heal()` (holes, countersinks,
+threaded holes, bend lines, engraving). If you do not want to go
 through `to_dxf()`, consume `.entities` / `.meta` / `.bends` directly.
 
 ## Documentation

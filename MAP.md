@@ -1,4 +1,4 @@
-# MAP — decision log di `bendly`
+# MAP — decision log di `snapbend` (ex `bendly`, D54)
 
 La **memoria delle decisioni**: cosa è stato deciso e soprattutto *perché*.
 Non è documentazione (quella andrà in `docs/`), non è un log di sessione
@@ -1194,3 +1194,16 @@ Result on the goldens: only `senza_linea_piega` changes (four strokes, trash
 empty). Two unit tests (joined across a window: bend; same strokes with
 material between: not). The process goldens of `senza_linea_piega` (single and
 multi) wait for Federico's look at the DXF before being updated.
+
+
+### D54 — package renamed `bendly` → `snapbend`; version 0.2.0 (4 Oct 2026)
+The rename that sat on disk uncommitted is in (`720fa8b`): package folder,
+imports, and now the distribution too — `pyproject.toml` still said
+`name = "bendly"` / `include = ["bendly*"]`, so an install shipped no
+`snapbend` package and `__version__` read the wrong metadata. Docs, module
+headers, scripts and tests say `snapbend`; the entries above keep the name
+they had when written (a log is not rewritten). The GitHub repository is
+still called `bendly`.
+
+Version **0.1.4 → 0.2.0**: a new name and a new subpackage (`snapbend.flat`,
+D51-D53) — more than a patch; nothing in `snapbend.__all__` changed.

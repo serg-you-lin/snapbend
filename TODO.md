@@ -3,6 +3,22 @@
 Unico posto per il lavoro aperto. Le decisioni e il perché stanno in
 `MAP.md`; qui non si ripetono, si rimanda con "vedi `MAP.md` D...".
 
+## `snapbend.flat` — arrivato da forge (MAP.md D51-D53, 4 ottobre)
+
+- [x] detection di un pezzo piano spostata da forge, con test e golden di
+  processo (`tests/flat/`, `tests/data/flat/`).
+- [x] una piega attraversa il pezzo (D52); interrotta da un vuoto resta una (D53).
+- [ ] **Da decidere (Federico):** un righino di traverso in un angolo passa
+  ancora come piega — serve una misura minima (lunghezza della piega o
+  larghezza del pezzo che stacca), D52.
+- [ ] **Da guardare (Federico):** le due pieghe da 30 mm di
+  `staffa_scarto_doppia` (pezzi 2 e 3), mai controllate da un golden: 10
+  golden di `golden_multipli/process/` hanno il summary vuoto (pre-refactor
+  di inject in forge). DXF in `tests/data/flat/golden_multipli/detected/`
+  (script di prova fuori dal repo).
+- [ ] `_detect_engrave` resta un segnaposto (inferenza geometrica delle
+  incisioni non fatta, era forge D13).
+
 ## Fatto stanotte, non ancora in cima al file (MAP.md D45/D46/D47/D49)
 
 - [x] **`Bend.from_included()`** (MAP.md D49) — costruisce un `Bend`
@@ -78,10 +94,10 @@ limite e si va avanti (vedi MAP.md D36).
   riallineati a D36 (raggio fisso dichiarato per il caso A, tabella dei
   4 casi A/B/C/D).
 - [x] `docs/ARCHITECTURE.md` — scritto (11 set 2026): il flusso
-  forge→pippo→bendly, cosa riceve/manda pippo da/a `read_section()`,
+  forge→pippo→snapbend, cosa riceve/manda pippo da/a `read_section()`,
   i layer e la regola di dipendenza, cosa non è ancora pulito.
 - [x] `docs/API.md` — scritto (11 set 2026), D16 chiusa: una scheda per
-  ognuno dei 24 nomi di `bendly.__all__`, ogni esempio verificato
+  ognuno dei 24 nomi di `snapbend.__all__`, ogni esempio verificato
   girando davvero (non solo letto dal sorgente).
 
 ## Dati che arrivano quando arrivano — mai un blocco
@@ -169,10 +185,10 @@ ogni pezzo piccolo e verificabile da solo:
 
 `rules/read_section.py` ha importato forge per una notte (prima gli interni
 `forge.core.topology.*`, poi la superficie pubblica
-`load_geometry`+`heal_and_detect`, entrambe verificate funzionanti) ed è
+`load_geometry`+`heal_and_detect`, allora di forge, entrambe verificate funzionanti) ed è
 tornato al loop-walker fatto a mano — non perché rotto, ma perché non
 c'è ancora un consumatore vero (`pippo`) per cui decidere quel
-contratto. `bendly` oggi importa forge SOLO in `io/dxf.py`, come sempre.
+contratto. `snapbend` oggi importa forge SOLO in `io/dxf.py` e in `flat/` (D51).
 Restano dal giro di stanotte: il rilevamento delle coppie di cerchi e
 l'instradamento dell'arco puro (sella) verso `Cylinder`/`Cone`, portati
 sul loop-walker originale — 167/167 verdi. Storico delle fasi valutate:
@@ -186,7 +202,7 @@ sul loop-walker originale — 167/167 verdi. Storico delle fasi valutate:
   Fatto: `forge.load_geometry()` costruisce il `ForgeDocument`,
   `build_node_graph()`+`LoopFinder()` camminano il loop chiuso già
   ordinato. **Ritrattato lo stesso giorno** (vedi sotto): tornato al
-  loop-walker fatto a mano, `bendly` non importa più forge da
+  loop-walker fatto a mano, `snapbend` non importa più forge da
   `rules/read_section.py`. Sopravvive il risultato buono: caso arco puro
   (sella, cap→arco→cap, zero flange) riconosciuto, `centerline_segments`/
   `angles` vuoti per quel caso, campi `pure_arc_radius`/
@@ -200,7 +216,7 @@ sul loop-walker originale — 167/167 verdi. Storico delle fasi valutate:
   costruire `Edge` a mano rifarebbe peggio quello che fa già lui.
   `FlatGeometry` non è ridondante con `ForgeDocument`: porta `meta`
   (i numeri leggibili da un piegatore) e `reference_entities` (il
-  margine tratteggiato), roba di dominio `bendly` che `ForgeDocument`
+  margine tratteggiato), roba di dominio `snapbend` che `ForgeDocument`
   non ha. D43 resta chiusa alla fase 0-1 sopra.
 
 ## `BentProfile` da un disegno letto — resta da fare, indipendente da D43
@@ -221,19 +237,19 @@ ingresso `read_section()`'s `centerline_segments`/`angles`/
 - [ ] Info di piega (angolo ≠ 90°) nei DXF TruBend — dove sta quando si
   reimporta.
 
-## Futuribili — qui dentro bendly, non un altro progetto (11 set 2026)
+## Futuribili — qui dentro snapbend, non un altro progetto (11 set 2026)
 
-Deciso da Federico: senza un pippo anche rudimentale, `bendly` come
+Deciso da Federico: senza un pippo anche rudimentale, `snapbend` come
 generatore+lettore è già in uno stato completo per quello che è (173
 test verdi, calibrazione unificata D45, `docs/API.md`/`ARCHITECTURE.md`
 scritti) — non è bloccato in attesa di pippo, pippo è un consumatore a
-parte. Questi tre restano lavoro VERO di `bendly`, non rimandati a un
-altro repo, perché modificano/estendono la geometria che `bendly` stesso
+parte. Questi tre restano lavoro VERO di `snapbend`, non rimandati a un
+altro repo, perché modificano/estendono la geometria che `snapbend` stesso
 genera — diverso dal caso "foro nella posizione che dice il cliente"
 (quello sì resta di forge/pippo a valle, vedi sotto):
 
 - [ ] **Smussi/raggi ai 4 angoli dello sviluppo** — già prassi
-  d'officina, `bendly` oggi genera sempre spigoli vivi. Sostituisce il
+  d'officina, `snapbend` oggi genera sempre spigoli vivi. Sostituisce il
   vecchio bullet "raggio sugli spigoli del contorno esterno" (era
   segnato "non deciso" — ora deciso: qui). Conseguenza diretta: la
   **larghezza netta** della flangia vista dall'alto (quella che si
@@ -242,7 +258,7 @@ genera — diverso dal caso "foro nella posizione che dice il cliente"
 - [ ] **Convertitore da profilo strutturale standard (angolare/U) a
   `Section`** — quando un angolare o un U a catalogo nella misura giusta
   non si trova/non si compra, l'officina lo piega da lamiera invece —
-  stessa forma (L/U) che `bendly` già sa sviluppare. Serve una tabella
+  stessa forma (L/U) che `snapbend` già sa sviluppare. Serve una tabella
   dati VERA (dimensioni standard angolari/profilati UNI/EN) prima di
   scrivere il convertitore — non va inventata a memoria (stesso principio
   di "verificare prima di asserire" già in altre note). Nome di lavoro:
@@ -253,7 +269,7 @@ genera — diverso dal caso "foro nella posizione che dice il cliente"
   le posizioni delle linee di piega ma non le espone in `meta` come
   range per-flangia. Senza quello, pippo (o chiunque) non sa DOVE su un
   cut file piazzare una feature con `forge.inject()` — questo è il pezzo
-  che manca perché `bendly` continui a dire "le coordinate", non "la
+  che manca perché `snapbend` continui a dire "le coordinate", non "la
   feature" (vedi sotto).
 
 ## Fuori scope (di un altro layer, non "non deciso")
@@ -261,9 +277,9 @@ genera — diverso dal caso "foro nella posizione che dice il cliente"
 - [ ] Fori/altre feature sul pezzo, in posizione decisa dal disegno
   cliente — resta compito di `forge`/pippo a valle
   (`forge.inject()` esiste già per questo). Principio che li separa dai
-  tre sopra: uno smusso d'angolo è `bendly` che completa la SUA propria
+  tre sopra: uno smusso d'angolo è `snapbend` che completa la SUA propria
   geometria generata; un foro a una coordinata del cliente è pippo che
-  aggiunge qualcosa che `bendly` non ha motivo di conoscere.
+  aggiunge qualcosa che `snapbend` non ha motivo di conoscere.
 - [ ] Traduttore quote INTERNE ↔ mezzeria — proposto e ritirato da
   Federico stesso, resta qui solo perché banale da aggiungere se serve.
 - [x] ~~Reverse engineering pieghe da un DXF cliente senza `.bnc`~~ —

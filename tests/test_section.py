@@ -102,7 +102,7 @@ class TestFlangeQuotes(unittest.TestCase):
         self.assertIsNone(quotes[1].face)
         self.assertAlmostEqual(quotes[1].display_length, 60.0, places=9)
 
-    def test_e_in_bendly_all(self):
+    def test_e_in_snapbend_all(self):
         import snapbend
         self.assertIn("FlangeFace", snapbend.__all__)
         self.assertIn("FlangeQuote", snapbend.__all__)

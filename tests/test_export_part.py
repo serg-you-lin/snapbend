@@ -25,7 +25,7 @@ class TestExportPart(unittest.TestCase):
     def _section(self) -> Section:
         return Section.default("L", [50.0, 60.0], [90.0], thickness=2.0)
 
-    def test_e_in_bendly_all(self):
+    def test_e_in_snapbend_all(self):
         import snapbend
         self.assertIn("export_part", snapbend.__all__)
 
