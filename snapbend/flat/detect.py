@@ -12,7 +12,6 @@ import math
 from typing import Optional
 
 from shapely.geometry import LineString, Point
-from shapely.ops import split
 
 from forge.model import ForgeResult, ForgeCluster
 from forge.model.feature import OpenFeature
@@ -30,9 +29,9 @@ from .model import (
 )
 from .holes import is_threaded_hole
 from forge.core.geometry import (
-    track_points, track_length, track_shape_type, circular_geometry,
-    group_collinear_lines, chord_angle_deg,
+    track_points, track_length, track_shape_type, circular_geometry, chord_angle_deg,
 )
+from forge.core.lines import group_collinear_lines, splits_polygon, bridged_runs
 from .thresholds import HOLE_DIAMETER_THRESHOLD
 
 # Tolleranza per raggruppare le bending line collineari in un'unica piega
@@ -299,23 +298,6 @@ def _detect_labeled(result: ForgeResult) -> None:
 # taglia il pezzo (snapbend MAP.md D52).
 _BEND_REACH = 1.0
 
-
-def _cuts_part(outer, start, end) -> bool:
-    """
-    La linea `start`-`end`, prolungata di `_BEND_REACH` ai due capi, divide il
-    pezzo in due. Una piega attraversa il pezzo da bordo a bordo; un tratto
-    vicino al bordo — parallelo o storto, di una scritta o un refuso — non
-    taglia niente.
-    """
-    dx, dy = end[0] - start[0], end[1] - start[1]
-    norm = math.hypot(dx, dy)
-    if norm == 0:
-        return False
-    ux, uy = dx / norm * _BEND_REACH, dy / norm * _BEND_REACH
-    cutter = LineString([(start[0] - ux, start[1] - uy), (end[0] + ux, end[1] + uy)])
-    return len(split(outer, cutter).geoms) >= 2
-
-
 # Due tratti stanno sulla stessa retta se la direzione differisce meno di
 # questo (radianti) e la distanza fra le rette meno di _BEND_LINE_OFFSET (mm).
 _BEND_ANGLE_TOL = 1e-3
@@ -334,65 +316,10 @@ def _bending_line(cluster, start, end, length, source="geometric"):
     )
 
 
-def _same_line(a, b) -> bool:
-    """I tratti `a`, `b` ((start, end)) stanno sulla stessa retta."""
-    (a0, a1), (b0, b1) = a, b
-    ang_a = math.atan2(a1[1] - a0[1], a1[0] - a0[0]) % math.pi
-    ang_b = math.atan2(b1[1] - b0[1], b1[0] - b0[0]) % math.pi
-    diff = abs(ang_a - ang_b)
-    if min(diff, math.pi - diff) > _BEND_ANGLE_TOL:
-        return False
-    return all(_point_line_distance(q, a0, a1) < _BEND_LINE_OFFSET for q in (b0, b1))
-
-
-def _point_line_distance(q, a, b) -> float:
-    """Distanza di `q` dalla retta (infinita) per `a`, `b`."""
-    dx, dy = b[0] - a[0], b[1] - a[1]
-    return abs(dy * (q[0] - a[0]) - dx * (q[1] - a[1])) / math.hypot(dx, dy)
-
-
-def _bridged_runs(pieces, voids) -> list:
-    """
-    Tratti sulla stessa retta, in fila: si uniscono quando lo spazio fra uno e
-    il successivo sta tutto dentro un vuoto del pezzo (un contorno interno).
-    Ritorna le file di 2+ tratti: [(start, end, [proxy, ...]), ...].
-    """
-    runs = []
-    used = set()
-    for i, (p0, p1, _) in enumerate(pieces):
-        if i in used:
-            continue
-        group = [j for j in range(len(pieces))
-                 if j not in used and _same_line((p0, p1), pieces[j][:2])]
-        used.update(group)
-        if len(group) < 2:
-            continue
-        ux, uy = p1[0] - p0[0], p1[1] - p0[1]
-        norm = math.hypot(ux, uy); ux, uy = ux / norm, uy / norm
-        along = lambda q: (q[0] - p0[0]) * ux + (q[1] - p0[1]) * uy
-        spans = []
-        for j in group:
-            s0, s1, proxy = pieces[j]
-            lo, hi = sorted((s0, s1), key=along)
-            spans.append((along(lo), along(hi), lo, hi, j, proxy))
-        spans.sort(key=lambda t: t[0])
-        chain = [spans[0]]
-        for span in spans[1:]:
-            gap = LineString([chain[-1][3], span[2]])
-            if gap.length > 0 and any(v.buffer(1e-6).covers(gap) for v in voids):
-                chain.append(span)
-                continue
-            if len(chain) >= 2:
-                runs.append(chain)
-            chain = [span]
-        if len(chain) >= 2:
-            runs.append(chain)
-    return [(chain[0][2], chain[-1][3], [t[5] for t in chain]) for chain in runs]
-
-
 def _detect_bending(result: ForgeResult, bending_tolerance: float = 1.0) -> None:
     """
-    Una piega attraversa il pezzo (`_cuts_part`). Se un vuoto la interrompe,
+    Una piega attraversa il pezzo (`forge.splits_polygon`, prolungata di
+    `_BEND_REACH`). Se un vuoto la interrompe,
     i tratti sulla stessa retta separati solo da vuoti valgono come una
     piega: la retta che li unisce deve attraversare il pezzo, e sul layer
     vanno i tratti disegnati (snapbend MAP.md D53).
@@ -416,7 +343,7 @@ def _detect_bending(result: ForgeResult, bending_tolerance: float = 1.0) -> None
             outer = cluster.outer.polygon
             if not outer.contains(midpoint):
                 continue
-            if _cuts_part(outer, pts[0], pts[-1]):
+            if splits_polygon(outer, pts[0], pts[-1], reach=_BEND_REACH):
                 _ensure_detected(cluster).add("bending_lines",
                                               _bending_line(cluster, pts[0], pts[-1], length))
                 promoted_ids.add(id(proxy))
@@ -429,10 +356,12 @@ def _detect_bending(result: ForgeResult, bending_tolerance: float = 1.0) -> None
         if not pieces or not cluster.inners:
             continue
         voids = [i.polygon for i in cluster.inners if i.depth % 2]
-        for start, end, proxies in _bridged_runs(pieces, voids):
-            if not _cuts_part(cluster.outer.polygon, start, end):
+        runs = bridged_runs([p[:2] for p in pieces], voids,
+                            tolerance=_BEND_LINE_OFFSET, angle_tolerance=_BEND_ANGLE_TOL)
+        for run in runs:
+            if not splits_polygon(cluster.outer.polygon, run.start, run.end, reach=_BEND_REACH):
                 continue
-            for proxy in proxies:
+            for proxy in (pieces[j][2] for j in run.members):
                 pts = _proxy_pts(proxy)
                 _ensure_detected(cluster).add("bending_lines", _bending_line(
                     cluster, pts[0], pts[-1], track_length(pts)))

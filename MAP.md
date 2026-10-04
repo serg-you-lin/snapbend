@@ -1222,3 +1222,13 @@ its tests. Goldens unchanged (461 passed).
 Version **0.2.0 → 0.2.1**: a patch — `is_countersink_outer` was never in
 `snapbend.__all__`, the rest is the same reading on shared code. Needs forge
 ≥ 0.9.1 (`concentric_groups`, `arcs_around`).
+
+### D56 — bend geometry on forge's line facts (4 Oct 2026)
+
+forge D93 moved the geometry of the bend reading to `forge.core.lines`:
+`splits_polygon` (was `_cuts_part`) and `bridged_runs` (was `_bridged_runs`),
+with `are_collinear` / `point_line_distance` replacing the private copies
+`_same_line` / `_point_line_distance`. `flat/detect.py` keeps the meaning and
+the numbers: `_BEND_REACH` = 1 mm (D52), `_BEND_LINE_OFFSET` = 0.1 mm and
+`_BEND_ANGLE_TOL` = 1e-3 rad (D53), passed as parameters. Goldens unchanged
+(462 passed). Version **0.2.2**; needs forge ≥ 0.9.2.

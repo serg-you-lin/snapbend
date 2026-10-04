@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "snapbend"
-version = "0.2.1"
+version = "0.2.2"
 description = "Motore matematico puro per sviluppi piani di forme sviluppabili (cono, cilindro, profili piegati, ...). Zero dipendenze per il calcolo e per la lettura di un disegno; l'export DXF passa da forge (opzionale, installato a parte) — vedi MAP.md D43."
 readme = "README.md"
 requires-python = ">=3.10"
