@@ -4,13 +4,6 @@ Unico posto per il lavoro aperto. Le decisioni e il perché stanno in
 `MAP.md`; qui non si ripetono, si rimanda con "vedi `MAP.md` D...".
 
 
-## Da riprendere: la cartella officina (D60) non convince Federico
-
-- [ ] Federico, 4 ottobre, a fine sessione: "non mi piace tanto" — la scelta
-  dell'officina con la variabile `SNAPBEND_OFFICINA` (impostata sul suo utente
-  Windows) e `set_officina()`. Da ridiscutere all'inizio della prossima
-  sessione, prima di costruirci sopra. La variabile si toglie dalle variabili
-  d'ambiente di Windows se non la vuole.
 ## `snapbend.flat` — arrivato da forge (MAP.md D51-D53, 4 ottobre)
 
 - [x] detection di un pezzo piano spostata da forge, con test e golden di
@@ -93,7 +86,7 @@ controlla contro questi quattro casi, sempre gli stessi — nome standard
 |---|---|---|
 | `zero_config` | sconosciuto, scarica e basta, non legge nulla | niente — zero config, `calibration="default"` |
 | `cava_propria` | carpenteria vicina, mi contatta, niente CAM | solo la tabella spessore→cava (5 minuti, mai una misura) |
-| `somma_interna` | vuole solo somma quote interne, zero K-factor | niente — `calibrations/inside_sum.json` |
+| `somma_interna` | vuole solo somma quote interne, zero K-factor | niente — `calibration="inside_sum"` |
 | `misurato` | ha il CAM, vuole avvicinarsi per preventivare | cava + tutti i dati misurati che il CAM tira fuori, **quando li ha** — mai un prerequisito per gli altri tre |
 
 Una scelta che serve bene `misurato` ma appesantisce o blocca gli altri

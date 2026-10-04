@@ -161,16 +161,19 @@ D36/D39) — una calibrazione dichiara da sé quale dei quattro è col campo
 | `tipo_cliente` | Sei... | Dai a `snapbend`... | Calibrazione |
 |---|---|---|---|
 | `zero_config` | uno sconosciuto che l'ha appena scaricato, non legge nulla | niente | `default` (o omessa) — raggio fisso 1 mm, `K` stimato DIN |
-| `cava_propria` | un'officina con le tue cave ma senza CAM | solo la tabella spessore→cava (5 minuti, mai una misura) | copia `calibrations/esempio_din_3cave.json`, ci metti le tue cave vere |
-| `somma_interna` | un'officina che vuole solo la somma delle quote interne, niente K-factor | niente, solo questa preferenza | `calibrations/inside_sum.json` |
+| `cava_propria` | un'officina con le tue cave ma senza CAM | solo la tabella spessore→cava (5 minuti, mai una misura) | copia `snapbend/data/calibrations/esempio_din_3cave.json`, ci metti le tue cave vere |
+| `somma_interna` | un'officina che vuole solo la somma delle quote interne, niente K-factor | niente, solo questa preferenza | `inside_sum` |
 | `misurato` | un'officina con CAM, che vuole avvicinarsi il più possibile per preventivare | cave + accorciamenti misurati (ore di lavoro vere, non gratis) | la tua `tipo_misurato.json` nella tua cartella officina — misurato dove c'è, stimato altrove |
 
-Le tue calibrazioni (e gli spessori che hai a magazzino) stanno nella **tua
-cartella officina**, fuori dal repo: indichi la cartella una volta con la
-variabile d'ambiente `SNAPBEND_OFFICINA` (oppure `snapbend.set_officina(percorso)`
-in uno script), e snapbend legge
-`<officina>/calibrations/<nome>.json` e `<officina>/sheet_thicknesses.json`
-prima degli esempi generici di `calibrations/` (MAP D60).
+`pip install snapbend` e basta: le calibrazioni generiche e la tabella degli
+spessori viaggiano dentro il pacchetto, nessuna cartella, nessuna variabile
+d'ambiente, nessuna configurazione (MAP D61).
+
+*Avanzato, facoltativo.* Un'officina con i suoi dati misurati può tenerli in
+una sua **cartella officina**, fuori dal pacchetto: `snapbend.set_officina(percorso)`
+in uno script (o, per chi la vuole, la variabile d'ambiente `SNAPBEND_OFFICINA`),
+e snapbend legge `<officina>/calibrations/<nome>.json` e
+`<officina>/sheet_thicknesses.json` prima di quelli inclusi (MAP D60).
 
 ## Il contratto neutro con forge
 

@@ -34,6 +34,11 @@ dev = ["pytest"]
 where = ["."]
 include = ["snapbend*"]
 
+# Le calibrazioni generiche e la tabella spessori viaggiano DENTRO il pacchetto:
+# `pip install snapbend` deve funzionare senza nessuna configurazione (MAP D61).
+[tool.setuptools.package-data]
+snapbend = ["data/*.json", "data/calibrations/*.json"]
+
 # Regola di dipendenza controllata da tests/gen_index.py (docs/ARCHITECTURE.md,
 # "Layer di snapbend"): il calcolo non sa che forge esiste. model/ delega a io/
 # dentro i metodi to_dxf()/to_forge_result() — l'unica porta verso forge.

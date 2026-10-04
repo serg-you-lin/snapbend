@@ -104,14 +104,15 @@ un'officina: la tabella cave, e — se ce l'hai — il K per materiale e gli
 accorciamenti misurati. Tutti i campi tranne la tabella cave sono
 opzionali.
 
-**Dove sta.** Le calibrazioni della tua officina stanno nella tua **cartella
-officina**, fuori dal repo: la indichi una volta con la variabile d'ambiente
-`SNAPBEND_OFFICINA` (o con `snapbend.set_officina(percorso)` in uno script,
-che vince e vale solo per quel programma), e snapbend cerca `<officina>/calibrations/<nome>.json`
-(e `<officina>/sheet_thicknesses.json` per gli spessori a magazzino). Senza
-cartella officina, o se il nome lì non c'è, usa gli esempi generici in
-`calibrations/` del repo (`default`, `esempio_din_3cave`, `inside_sum`) e le
-calibrazioni nude (`din6935`). MAP D60.
+**Dove sta.** Le calibrazioni generiche (`default`, `esempio_din_3cave`,
+`inside_sum`) e la tabella spessori sono dentro il pacchetto
+(`snapbend/data/`): chi installa snapbend non configura niente (MAP D61).
+*Avanzato, facoltativo:* un'officina con i suoi dati li tiene in una sua
+**cartella officina** — `snapbend.set_officina(percorso)` in uno script (vince,
+vale per quel programma) o la variabile d'ambiente `SNAPBEND_OFFICINA` — e
+snapbend cerca prima `<officina>/calibrations/<nome>.json` (e
+`<officina>/sheet_thicknesses.json`), poi quelle incluse, poi le calibrazioni
+nude (`din6935`). MAP D60.
 
 ```json
 {
@@ -130,7 +131,7 @@ Ogni calibrazione è un file **completo**, senza ereditarietà da un'altra
 
 ## Cosa c'è di default, e i quattro casi (`MAP.md` D36)
 
-**Il default è `calibrations/default.json`.** Se in `BentProfile` non
+**Il default è `default.json` (in `snapbend/data/calibrations/`).** Se in `BentProfile` non
 passi `calibration`, usa quello. Non indovina **nessuna** cava: la tabella
 `cava_per_spessore` elenca gli spessori comuni tutti a `null` — un elenco
 di taglie da riempire, non un valore inventato spacciato per vero.
@@ -159,7 +160,7 @@ un bonus, mai un requisito.
 **Il `tipo_cliente` non è un'etichetta decorativa**: `tipo_cliente_coerente(calibration)`
 controlla che il contenuto del file mantenga la promessa (es. `zero_config`
 non può avere cave vere, `misurato` non può avere `misurati` vuoto) e un
-test gira su ogni file in `calibrations/` a ogni `pytest`. Nasce da un bug
+test gira su ogni calibrazione inclusa a ogni `pytest`. Nasce da un bug
 vero: `default.json` (`zero_config`) copiava in silenzio le cave reali
 della calibrazione a dati misurati (`misurato`) — il controllo prende
 esattamente quella classe di errore.

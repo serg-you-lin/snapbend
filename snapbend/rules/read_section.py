@@ -51,7 +51,7 @@ from typing import List, Optional, Tuple
 from .officina import officina_file
 
 _TOL = 1e-6
-_SHEET_TABLE = Path(__file__).resolve().parent.parent.parent / "sheet_thicknesses.json"
+_SHEET_TABLE = Path(__file__).resolve().parent.parent / "data" / "sheet_thicknesses.json"
 
 Point = Tuple[float, float]
 

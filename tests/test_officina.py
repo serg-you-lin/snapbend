@@ -78,3 +78,24 @@ class TestCartellaOfficina(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestZeroConfig(unittest.TestCase):
+    """Chi installa snapbend non configura niente (MAP.md D61): i dati inclusi
+    stanno dentro il pacchetto, così `pip install` li porta con sé."""
+
+    def test_dati_inclusi_dentro_il_pacchetto(self):
+        import snapbend
+        from snapbend.rules.read_section import _SHEET_TABLE
+        package = Path(snapbend.__file__).resolve().parent
+        for path in (Calibration.CALIBRATIONS_FOLDER / "default.json", _SHEET_TABLE):
+            self.assertTrue(path.is_file(), path)
+            self.assertTrue(path.resolve().is_relative_to(package), path)
+
+    def test_piega_senza_officina(self):
+        from snapbend import Bend, BentProfile
+        with mock.patch.dict(os.environ, {OFFICINA_ENV: ""}):
+            flat = BentProfile(flanges=[50, 80, 50], bends=[Bend(angle=90), Bend(angle=90)],
+                               thickness=2, width=300).develop()
+            self.assertTrue(flat.entities)
+            self.assertTrue(SheetThicknessTable.load().thicknesses_mm)

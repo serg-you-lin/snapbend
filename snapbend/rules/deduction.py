@@ -264,7 +264,7 @@ class Calibration:
 
     # --- caricamento --------------------------------------------------------
 
-    CALIBRATIONS_FOLDER = Path(__file__).resolve().parent.parent.parent / "calibrations"
+    CALIBRATIONS_FOLDER = Path(__file__).resolve().parent.parent / "data" / "calibrations"
 
     @classmethod
     def load(cls, name: str, folder: str | Path | None = None) -> "Calibration":

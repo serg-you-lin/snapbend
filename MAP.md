@@ -1304,3 +1304,28 @@ die live only in the `.bnc` — it was crashing on them already before today.
 on disk. Officina 1's folder on Federico's machine is the private tool's
 `data/`. Suite: 423 passed. The DXFs pushed under D59 stay in history: they
 are the shop's own parts, no client's.
+
+### D61 — snapbend works with zero setup; the officina folder is advanced and optional (4 Oct 2026)
+
+Federico, non-negotiable: "se uno vuole solo provare SnapBend, deve poter
+piegare la sua lamierina, vedere che funziona e pensare 'ok, interessante'.
+Non passare mezz'ora a configurare Windows." `import snapbend` and a
+`BentProfile(...).develop()` must work right after `pip install`: no folder,
+no environment variable, no `set_officina`. The officina folder (D60) stays as
+an advanced, optional path for whoever wants it — never an entry fee.
+
+It was broken, and not since D60: the generic calibrations (`default`,
+`esempio_din_3cave`, `inside_sum`) and `sheet_thicknesses.json` sat at the
+repo root, outside the package, so a regular (non-editable) install shipped
+none of them and even `BentProfile(...)` with no arguments raised "calibrazione
+'default' non trovata". Proven in a clean venv. They now live in
+`snapbend/data/` and ship as package-data; `tests/test_officina.py`
+(`TestZeroConfig`) checks they sit inside the package and that a bend develops
+with no officina.
+
+Not built further, on purpose: no more officina machinery. Federico does not
+want to build something he himself does not understand. If one day a shop asks
+to install its own deduction values, that is discussed then — and it belongs to
+the full product, *pippo* (drawing → flat pattern, `docs/ARCHITECTURE.md`),
+not to snapbend's entry path.
+

@@ -230,9 +230,9 @@ Calibration.load(name: str, folder: str | Path | None = None) -> Calibration
 
 I dati di calcolo di un'officina (tabella cave, K per materiale, righe
 misurate) — un file JSON completo, nessuna ereditarietà fra calibrazioni.
-Senza `folder`, `load` cerca nella cartella officina
-(`SNAPBEND_OFFICINA`/calibrations), poi negli esempi di `calibrations/` del
-repo (MAP D60); `SheetThicknessTable.load()` fa lo stesso con
+Senza `folder`, `load` cerca nella cartella officina se ce n'è una
+(facoltativa, MAP D60), poi nelle calibrazioni incluse nel pacchetto
+(`snapbend/data/calibrations/`, MAP D61); `SheetThicknessTable.load()` fa lo stesso con
 `sheet_thicknesses.json`. La cartella officina si sceglie con
 `snapbend.set_officina(path)` dentro uno script (vince, vale per quel
 programma; `None` torna alla variabile) o con la variabile d'ambiente

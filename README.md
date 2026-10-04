@@ -161,15 +161,19 @@ content by `tipo_cliente_coerente()`:
 | `tipo_cliente` | You are... | You give `snapbend`... | Calibration |
 |---|---|---|---|
 | `zero_config` | a stranger who just downloaded this, no reading | nothing | `default` (or omit it) — fixed 1mm radius, DIN-estimated `K` |
-| `cava_propria` | a shop with your own dies but no CAM | only a thickness→die table (5 minutes, never a measurement) | copy `calibrations/esempio_din_3cave.json`, fill in your real dies |
-| `somma_interna` | a shop that only wants raw interior-quote sums, no K-factor talk | nothing, just that preference | `calibrations/inside_sum.json` |
+| `cava_propria` | a shop with your own dies but no CAM | only a thickness→die table (5 minutes, never a measurement) | copy `snapbend/data/calibrations/esempio_din_3cave.json`, fill in your real dies |
+| `somma_interna` | a shop that only wants raw interior-quote sums, no K-factor talk | nothing, just that preference | `inside_sum` |
 | `misurato` | a shop with CAM, quoting as close to real as possible | dies + measured deductions (real hours of work, not free) | your own `tipo_misurato.json` in your officina folder — measured where you have it, estimated elsewhere |
 
-Your own calibrations (and your stock of sheet thicknesses) live in **your
-officina folder**, outside the repo: point the `SNAPBEND_OFFICINA` environment
-variable at it once (or call `snapbend.set_officina(path)` in a script), and snapbend reads `<officina>/calibrations/<name>.json`
-and `<officina>/sheet_thicknesses.json` before the generic examples in
-`calibrations/` (MAP D60).
+`pip install snapbend` and nothing else: the generic calibrations and the
+table of sheet thicknesses ship inside the package, no folder, no environment
+variable, no setup (MAP D61).
+
+*Advanced, optional.* A shop with its own measured data can keep it in an
+**officina folder** of its own, outside the package: `snapbend.set_officina(path)`
+in a script (or, for whoever wants it, the `SNAPBEND_OFFICINA` environment
+variable), and snapbend reads `<officina>/calibrations/<name>.json` and
+`<officina>/sheet_thicknesses.json` before the built-in ones (MAP D60).
 
 ## The neutral contract with forge
 

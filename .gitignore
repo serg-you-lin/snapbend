@@ -32,11 +32,11 @@ output/
 
 # --- dati di officina / cliente: NON vanno su GitHub ---
 # le calibrazioni misurate e i file CAM reali sono roba del singolo cliente.
-# Sul repo resta solo calibrations/default.json (la norma).
+# Sul repo resta solo snapbend/data/calibrations/default.json (la norma).
 data_4_cloude/
-calibrations/officina_*.json
-calibrations/cliente_*.json
-calibrations/tipo_misurato.json
+snapbend/data/calibrations/officina_*.json
+snapbend/data/calibrations/cliente_*.json
+snapbend/data/calibrations/tipo_misurato.json
 # ^ rinominato da officina_1.json (MAP.md D40) - stessi dati misurati
 # reali, il pattern *_officina/*_cliente sopra non lo becca più col
 # nuovo nome. Solo default.json / esempio_din_3cave.json / inside_sum.json
