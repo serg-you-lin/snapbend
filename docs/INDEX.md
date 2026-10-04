@@ -8,7 +8,7 @@ python tests/gen_index.py
 
 What this is: the lookup table of *what already exists* in the package, down to internal helpers. `docs/API.md` documents the public surface (`snapbend.<name>`) with full cards; this file lists every module-level function and class so nothing gets rewritten because it was not found. Signatures and docstring lines come straight from the source, so they cannot drift.
 
-`28` modules · `97` module-level functions · `23` classes · `4584` lines of code.
+`26` modules · `88` module-level functions · `20` classes · `4353` lines of code.
 
 Sections: [Lookup](#lookup) · [Duplicate names](#duplicate-names) · [Dependency rule](#dependency-rule) · [By module](#by-module) · [Internal dependencies](#internal-dependencies)
 
@@ -20,7 +20,6 @@ Every module-level name in the package, alphabetically. **Search here before wri
 
 | name | kind | location | what |
 |---|---|---|---|
-| `_apertura_da_nome` | func | `snapbend/adapters/trubend.py:157` |  |
 | `_arc_point` | func | `snapbend/rules/read_section.py:110` |  |
 | `_assign_to_part` | func | `snapbend/flat/detect.py:645` |  |
 | `_belongs_to_cluster` | func | `snapbend/flat/detect.py:630` | Un'entità aperta (marking/bending) appartiene al cluster se la sua |
@@ -40,7 +39,6 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_chain_vertex` | func | `snapbend/rules/read_section.py:471` |  |
 | `_check_orientation` | func | `snapbend/model/geometry.py:40` |  |
 | `_circular_inners` | func | `snapbend/flat/detect.py:400` | (contour, diameter, center) per ogni inner geometricamente circolare. |
-| `_classifica_utensile` | func | `snapbend/adapters/trubend.py:148` |  |
 | `ClassifiedEntity` | class | `snapbend/flat/model/classified.py:13` | Risultato della classificazione di una entità da detect_flat(). |
 | `Cone` | class | `snapbend/core/cone.py:140` |  |
 | `Cylinder` | class | `snapbend/core/cylinder.py:79` |  |
@@ -86,22 +84,16 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `heal_and_detect` | func | `snapbend/flat/pipeline.py:19` | heal() + detect_flat(). `detect_flat()` viene saltato se heal() non produce |
 | `Hole` | class | `snapbend/flat/model/hole.py:31` |  |
 | `_hole_from_contour` | func | `snapbend/flat/detect.py:471` |  |
-| `_int` | func | `snapbend/adapters/trubend.py:223` |  |
 | `is_structural` | func | `snapbend/flat/roles.py:68` | Predicato strutturale COMPLETO: outer/inner (motore) + hole/countersink/ |
 | `is_threaded_hole` | func | `snapbend/flat/holes.py:18` | True se attorno al cerchio c'è un arco a ~270° (entro ``angle_tolerance`` |
 | `k_din6935` | func | `snapbend/rules/deduction.py:63` | Stima DIN 6935 del fattore K (in [0, 0.5]), dal SOLO rapporto |
 | `_labeled_hole_from_contour` | func | `snapbend/flat/detect.py:489` | `ForgeContour` con ruolo foro da role_rules → `Hole(source="labeled")`. |
-| `leggi_blocchi` | func | `snapbend/adapters/trubend.py:69` | Ritorna {NOME_BLOCCO: [ {nome_colonna: valore, ...}, ... ]}. |
-| `leggi_bnc` | func | `snapbend/adapters/trubend.py:164` |  |
-| `LetturaBnc` | class | `snapbend/adapters/trubend.py:124` |  |
 | `_meta_lines` | func | `snapbend/io/dxf.py:289` |  |
 | `_mid` | func | `snapbend/rules/read_section.py:106` |  |
 | `_mode` | func | `snapbend/rules/read_section.py:314` |  |
 | `_normalize_features` | func | `snapbend/flat/detect.py:70` | Normalizza l'argomento `features` di detect_flat() in un set di stringhe. |
-| `_num` | func | `snapbend/adapters/trubend.py:214` |  |
 | `_order_chain` | func | `snapbend/rules/read_section.py:449` |  |
 | `_perp_distance` | func | `snapbend/rules/read_section.py:294` |  |
-| `PiegaBnc` | class | `snapbend/adapters/trubend.py:117` |  |
 | `polar_point` | func | `snapbend/model/geometry.py:30` | Punto a coordinate polari (angolo in gradi). |
 | `_probe_point` | func | `snapbend/flat/detect.py:687` |  |
 | `_projection_overlap` | func | `snapbend/rules/read_section.py:274` |  |
@@ -115,12 +107,10 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `RenderContour` | class | `snapbend/flat/model/render.py:20` |  |
 | `resolve_calibration` | func | `snapbend/core/bend.py:339` | Nome stringa -> `Calibration` caricata, oggetto già risolto -> se |
 | `resolve_facet_bend` | func | `snapbend/core/bend.py:350` | Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla |
-| `_righe_unite` | func | `snapbend/adapters/trubend.py:39` |  |
 | `Section` | class | `snapbend/model/section.py:110` |  |
 | `SectionReading` | class | `snapbend/rules/read_section.py:85` |  |
 | `_sector_entities` | func | `snapbend/core/cone.py:77` | Settore anulare simmetrico rispetto a X, ampiezza angolare `angle` (gradi). |
 | `SheetThicknessTable` | class | `snapbend/rules/read_section.py:63` |  |
-| `_spezza_campi` | func | `snapbend/adapters/trubend.py:49` | Spezza una riga DA,... rispettando gli apici singoli. |
 | `_split_into_sides` | func | `snapbend/rules/read_section.py:409` |  |
 | `swap_xy` | func | `snapbend/model/geometry.py:47` | Riflette la geometria lungo la diagonale y=x (scambia gli assi X/Y) — il |
 | `_sweep_deg` | func | `snapbend/rules/read_section.py:115` | Signed sweep from a0 to a1 in (-360, 360), positive when ccw. |
@@ -130,8 +120,6 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `to_forge_result` | func | `snapbend/io/dxf.py:25` | Traduce `flat` in un ForgeResult passando da forge.load_geometry() + |
 | `_turn_deg` | func | `snapbend/model/section.py:67` | Signed rotation relative to going straight (>0 = to the left). |
 | `_unit` | func | `snapbend/model/section.py:72` |  |
-| `Utensile` | class | `snapbend/adapters/trubend.py:108` |  |
-| `_valore` | func | `snapbend/adapters/trubend.py:62` |  |
 | `_write_custom` | func | `snapbend/flat/detect.py:666` |  |
 | `_write_flange_quotes` | func | `snapbend/io/dxf.py:252` |  |
 | `_write_meta_block` | func | `snapbend/io/dxf.py:338` |  |
@@ -150,7 +138,6 @@ No module-level name is defined in more than one module.
 - `core` never imports `forge`, `io`, `human_layer`, `flat`
 - `model` never imports `forge`, `human_layer`, `flat`
 - `rules` never imports `forge`, `io`, `human_layer`, `flat`
-- `adapters` never imports `forge`, `io`, `human_layer`, `flat`
 
 `TYPE_CHECKING`-only imports count as violations here and must be verified by hand.
 
@@ -165,32 +152,6 @@ No module-level name is defined in more than one module.
 _snapbend_
 
 No module-level function or class.
-
-### `snapbend/adapters/`
-
-#### `snapbend/adapters/__init__.py` — 6 lines
-
-_snapbend/adapters_
-
-No module-level function or class.
-
-#### `snapbend/adapters/trubend.py` — 225 lines
-
-_snapbend/adapters/trubend.py_
-
-- `_righe_unite(testo: str) -> List[str]` — L39
-- `_spezza_campi(riga: str) -> List[str]` — L49 — Spezza una riga DA,... rispettando gli apici singoli.
-- `_valore(x: str)` — L62
-- `leggi_blocchi(percorso: str \| Path) -> Dict[str, List[dict]]` — L69 — Ritorna {NOME_BLOCCO: [ {nome_colonna: valore, ...}, ... ]}.
-- **class** `Utensile` — L108
-- **class** `PiegaBnc` — L117
-- **class** `LetturaBnc` — L124
-  - methods: `matrice`, `sviluppo`
-- `_classifica_utensile(nome: str) -> str` — L148
-- `_apertura_da_nome(nome: str) -> Optional[float]` — L157
-- `leggi_bnc(percorso: str \| Path) -> LetturaBnc` — L164
-- `_num(x) -> Optional[float]` — L214
-- `_int(x) -> Optional[int]` — L223
 
 ### `snapbend/core/`
 

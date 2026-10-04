@@ -4,6 +4,8 @@ import unittest
 
 from snapbend import Bend, BentProfile, Calibration, estimate_k_factor, MATERIAL_K_FACTORS
 
+OFFICINA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "officina")
+
 
 class TestBendFormulas(unittest.TestCase):
 
@@ -194,12 +196,8 @@ class TestBendResult(unittest.TestCase):
         self.assertEqual(b.rule, "din6935")
         self.assertIn("raggio 3 esplicito", b.source)
 
-    @unittest.skipUnless(
-        os.path.isfile(os.path.join("calibrations", "tipo_misurato.json")),
-        "calibrazione tipo_misurato non presente",
-    )
     def test_profilo_reports_misurato_vs_fallback(self):
-        cal = Calibration.load("tipo_misurato")
+        cal = Calibration.load("tipo_misurato", folder=OFFICINA)
         flat = BentProfile(
             flanges=[60, 100, 60],
             bends=[Bend(angle=90, cava=16), Bend(angle=90, cava=40)],

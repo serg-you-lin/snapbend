@@ -70,3 +70,7 @@ demo_custom_role.dxf
 !tests/data/flat/**/*.DXF
 # DXF di prova della detection, da guardare a mano (non vanno in git)
 tests/data/flat/**/detected/
+
+# Copie di officina per i test (tests/data/officina): i DXF sì, i .bnc mai
+# (D59) — i dati veri restano in data_4_cloude/, locali.
+!tests/data/officina/**/*.dxf

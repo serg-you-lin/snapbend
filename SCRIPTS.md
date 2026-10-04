@@ -33,5 +33,6 @@ esplorano l'API — spostati lì dal vecchio `scripts/` nel refactor a strati
 | script | cosa produce |
 |---|---|
 | `tests/generate_section.py` | le 12 sezioni golden (L/U/Z/O × sp 1/3/10) in `data_4_cloude/sections/`, `.dxf` + `.json` |
-| `tests/generate_calibration.py` | la lista "misurati" per una calibrazione a dati misurati, letta da una cartella di `.bnc`: `python tests/generate_calibration.py data_4_cloude "tipo_misurato" > calibrations/tipo_misurato.json` |
-| `tests/reconstruct.py` | strumento interno Fase 1: da DXF piatto + `.bnc` ricostruisce la Section a mezzeria del pezzo reale (`section_from_part`). `python tests/reconstruct.py` stampa la ricostruzione di tutti i provini di `data_4_cloude/`. La verifica a giro chiuso è in `tests/test_reconstruct_officina.py`. |
+
+La calibrazione misurata e la ricostruzione da `.bnc` + DXF stanno fuori dal
+repo, in uno strumento privato di officina: i `.bnc` sono dati del CAM (MAP D59).

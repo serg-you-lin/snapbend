@@ -1250,3 +1250,22 @@ closed: every use here was), because `polyline` is a DXF word, not a forge one.
 key; `io/dxf.py` writes it as a closed outline. Arc angles in the schema are
 still degrees (forge TODO). Version **0.3.0** — a consumer reading `.entities`
 sees a different type name; needs forge ≥ 0.11.0.
+
+### D59 — `.bnc` files and their reader leave snapbend (4 Oct 2026)
+
+Federico: "i files bnc e il parser bnc sono roba che deve stare fuori dalla
+repo". A `.bnc` is a TruBend program from officina 1's CAM — it carries the
+CAM's network path and the shop's machine data — and the reader exists only to
+read that format. Both leave: `snapbend/adapters/trubend.py` (the whole
+`adapters/` layer), `tests/reconstruct.py`, `tests/generate_calibration.py`,
+`tests/test_trubend.py`, `tests/test_reconstruct_officina.py` now live in a
+private officina tool outside this repo, which depends on snapbend; snapbend
+does not know it exists. Nothing in snapbend imported them.
+
+Tests no longer point at local data either. `tests/data/officina/` holds the
+20 officina DXFs whose name states thickness and die (`La114ab90b114s3-EV5`,
+...) and a copy of the measured calibration (`tipo_misurato.json`); the
+golden, `test_bend`, `test_deduction` and `test_human_layer` load from there
+instead of `data_4_cloude/` and `calibrations/`, so a clean clone runs them
+all (before: 4 failures and 5 skips without the local files). The golden reads
+thickness and die from the file name only. Suite: 418 passed.

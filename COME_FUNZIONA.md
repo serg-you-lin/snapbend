@@ -174,8 +174,9 @@ Il `−5.222` viene dal database materiale di TruBend (che include il K del
 materiale), non dal file. Per un CAM diverso: ogni CAM esporta un DXF
 piatto, e la lunghezza sviluppo è il rettangolo che lo contiene — quello si
 legge sempre uguale. Il lettore del formato nativo (`.bnc`…) serve solo ad
-avere l'accorciamento spezzato piega per piega.
-`snapbend/adapters/trubend.py` è il lettore per TruBend.
+avere l'accorciamento spezzato piega per piega. Il lettore dei `.bnc` di
+TruBend non sta in snapbend: è uno strumento privato di officina, fuori dal
+repo, perché i `.bnc` sono dati del CAM (MAP D59).
 
 ## Quanto ci si può fidare (onesto)
 
@@ -227,11 +228,8 @@ solo per una piega fatta con una cava fuori standard.
 
 ## Generare una calibrazione dai file .bnc
 
-```
-python tests/generate_calibration.py data_4_cloude "tipo_misurato" > calibrations/tipo_misurato.json
-```
-
-Riempie `cava_per_spessore` e `misurati` da una cartella di `.bnc`. Il
+La lista `misurati` si ricava dai `.bnc` con lo strumento privato di officina
+(fuori dal repo, MAP D59): riempie `cava_per_spessore` e `misurati`. Il
 `k_per_materiale` lo aggiungi a mano (dal database materiale della pressa).
 
 ## I test
@@ -239,6 +237,5 @@ Riempie `cava_per_spessore` e `misurati` da una cartella di `.bnc`. Il
 - `tests/test_deduction.py` → la formula e la stima DIN 6935 danno i numeri
   attesi; la conversione quote esterne↔mezzeria è indipendente dal raggio.
 - `tests/test_golden_officina.py` → con `tipo_misurato`, il tool riproduce
-  ogni DXF reale (lunghezza + posizione pieghe) entro tolleranza. Gira solo
-  se i dati del cliente sono presenti.
-- `tests/test_trubend.py` → il lettore `.bnc` legge i campi giusti.
+  ogni DXF di officina (lunghezza + posizione pieghe) entro tolleranza, sulle
+  copie tracciate in `tests/data/officina`.

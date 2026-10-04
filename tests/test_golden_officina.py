@@ -6,8 +6,8 @@ messi noi nel profilo, dai .bnc): prova che la CATENA GEOMETRICA sia
 giusta — somma dei segmenti, posizione delle linee di piega, versi
 alternati di Z/omega — dato l'accorciamento corretto.
 
-Gira solo se ci sono i dati reali di officina 1 (cartella data_4_cloude/,
-non su GitHub). Senza, si salta.
+Gira sulle copie in tests/data/officina: i DXF col nome che dice spessore e
+matrice, tracciati — niente dati locali, niente .bnc (snapbend MAP D59).
 """
 
 import glob
@@ -17,8 +17,7 @@ import unittest
 
 TOLLERANZA_MM = 0.1
 
-DATI = "data_4_cloude"
-CALIBRAZIONE = os.path.join("calibrations", "tipo_misurato.json")
+DATI = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "officina")
 
 FORME = {
     "L": [114.0, 114.0],
@@ -28,35 +27,19 @@ FORME = {
 }
 CAVA = {"EV1": 6, "EV2": 8, "EV5": 16, "EW50": 50, "EW60": 60, "EV60": 60}
 
-_ha_dati = os.path.isdir(DATI) and os.path.isfile(CALIBRAZIONE)
-
-
-@unittest.skipUnless(_ha_dati, "dati reali di officina 1 non presenti (ok su CI)")
 class TestGoldenOfficina1(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         import ezdxf  # noqa
-        from reconstruct import is_ninety_degree_name
         from snapbend import Calibration
-        cls.calibration = Calibration.load("tipo_misurato")
-        cls.files = [
-            f for f in sorted(glob.glob(f"{DATI}/[LUZO]/*.dxf"))
-            if is_ninety_degree_name(os.path.splitext(os.path.basename(f))[0])
-        ]
+        cls.calibration = Calibration.load("tipo_misurato", folder=DATI)
+        cls.files = sorted(glob.glob(f"{DATI}/[LUZO]/*.dxf"))
         assert cls.files, "nessun DXF di test trovato"
 
     def _caso(self, path):
         base = os.path.splitext(os.path.basename(path))[0]
         forma = base[0]
-        # se c'è il .bnc con lo stesso nome (schema nuovo: L12, O2, ...),
-        # spessore e apertura V si prendono da lì, sono autorevoli.
-        twin = os.path.join(os.path.dirname(path), base + ".bnc")
-        if os.path.isfile(twin):
-            from snapbend.adapters.trubend import leggi_bnc
-            b = leggi_bnc(twin)
-            cava = b.matrice.apertura_v if b.matrice else None
-            return forma, float(b.spessore), cava
         # schema verboso storico: ...s<spessore>-<matrice>
         spess = float(re.search(r"s(\d+)-", base).group(1))
         cava = CAVA.get(base.split("-")[-1])

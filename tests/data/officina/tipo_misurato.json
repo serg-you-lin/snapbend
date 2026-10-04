@@ -1,0 +1,228 @@
+{
+  "nome": "tipo_misurato",
+  "tipo_cliente": "misurato",
+  "descrizione": "Calibrazione con accorciamenti di piega MISURATI da file .bnc TruBend reali (campo 'misurati'): per quelle combinazioni il numero e' esatto. Dove manca, si usa la formula col K stimato DIN 6935 (raggio dalla cava qui sotto) -- e' gia' la scelta migliore che abbiamo: verificato che batte le tabelle generiche di settore sui dati veri (MAP.md D35), e i placeholder 'k_per_materiale' inox/alluminio tolti l'11 set 2026 (MAP.md D37) erano sotto QUALSIASI intervallo pubblicato per quei materiali (0.2/0.15 contro un range reale di 0.3-0.5), quindi peggio di niente. k_per_materiale torna quando arrivano i dati veri della pressa (.fx, MAP.md D34). Dati reali di una pressa TruBend (MAP.md D34); la cava qui sotto copre anche gli spessori/angoli senza misurato, cosi' il fallback e' un raggio vero, non quello fisso di zero_config (MAP.md D40).",
+  "cava_per_spessore": {
+    "0.5": 6,
+    "0.8": 6,
+    "1": 8,
+    "1.2": 8,
+    "1.5": 12,
+    "2": 12,
+    "2.5": 16,
+    "3": 16,
+    "4": 32,
+    "5": 40,
+    "6": 50,
+    "8": 63,
+    "10": 60,
+    "12": 80,
+    "15": 100,
+    "20": 120
+  },
+  "misurati": [
+    {
+      "spessore": 0.5,
+      "cava": 4.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 1.123,
+      "fonte": "data_4_cloude/L/L0,5.bnc"
+    },
+    {
+      "spessore": 1.0,
+      "cava": 6.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 1.881,
+      "fonte": "data_4_cloude/L/L1.bnc"
+    },
+    {
+      "spessore": 1.0,
+      "cava": 8.0,
+      "angolo": 30.0,
+      "accorciamento_esterno": 0.353,
+      "fonte": "data_4_cloude/L/La114ab150b114s1.bnc"
+    },
+    {
+      "spessore": 1.0,
+      "cava": 8.0,
+      "angolo": 60.0,
+      "accorciamento_esterno": 0.937,
+      "fonte": "data_4_cloude/L/La114ab120b114s1.bnc"
+    },
+    {
+      "spessore": 1.0,
+      "cava": 8.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 1.995,
+      "fonte": "data_4_cloude/L/L1-EV2.bnc"
+    },
+    {
+      "spessore": 1.0,
+      "cava": 8.0,
+      "angolo": 110.0,
+      "accorciamento_esterno": 1.15,
+      "fonte": "data_4_cloude/L/La114ab70b114s1.bnc"
+    },
+    {
+      "spessore": 1.0,
+      "cava": 8.0,
+      "angolo": 130.0,
+      "accorciamento_esterno": 0.588,
+      "fonte": "data_4_cloude/L/La114ab50b114s1.bnc"
+    },
+    {
+      "spessore": 1.2,
+      "cava": 10.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 2.374,
+      "fonte": "data_4_cloude/L/L1,2.bnc"
+    },
+    {
+      "spessore": 1.5,
+      "cava": 10.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 2.788,
+      "fonte": "data_4_cloude/L/L1,5.bnc"
+    },
+    {
+      "spessore": 2.0,
+      "cava": 12.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 3.59,
+      "fonte": "data_4_cloude/L/L2.bnc"
+    },
+    {
+      "spessore": 2.5,
+      "cava": 12.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 4.282,
+      "fonte": "data_4_cloude/L/L2,5.bnc"
+    },
+    {
+      "spessore": 3.0,
+      "cava": 16.0,
+      "angolo": 30.0,
+      "accorciamento_esterno": 1.009,
+      "fonte": "data_4_cloude/L/La114ab150b114s3.bnc"
+    },
+    {
+      "spessore": 3.0,
+      "cava": 16.0,
+      "angolo": 60.0,
+      "accorciamento_esterno": 2.599,
+      "fonte": "data_4_cloude/L/La114ab120b114s3.bnc"
+    },
+    {
+      "spessore": 3.0,
+      "cava": 16.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 5.222,
+      "fonte": "data_4_cloude/L/L3.bnc"
+    },
+    {
+      "spessore": 3.0,
+      "cava": 16.0,
+      "angolo": 110.0,
+      "accorciamento_esterno": 3.407,
+      "fonte": "data_4_cloude/L/La114ab70b114s3.bnc"
+    },
+    {
+      "spessore": 3.0,
+      "cava": 16.0,
+      "angolo": 130.0,
+      "accorciamento_esterno": 2.339,
+      "fonte": "data_4_cloude/L/La114ab50b114s3.bnc"
+    },
+    {
+      "spessore": 4.0,
+      "cava": 20.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 6.869,
+      "fonte": "data_4_cloude/O/O4.bnc"
+    },
+    {
+      "spessore": 4.0,
+      "cava": 24.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 7.132,
+      "fonte": "data_4_cloude/L/L4.bnc"
+    },
+    {
+      "spessore": 5.0,
+      "cava": 30.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 8.847,
+      "fonte": "data_4_cloude/L/L5.bnc"
+    },
+    {
+      "spessore": 6.0,
+      "cava": 30.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 10.259,
+      "fonte": "data_4_cloude/L/L6.bnc"
+    },
+    {
+      "spessore": 8.0,
+      "cava": 40.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 14.043,
+      "fonte": "data_4_cloude/O/O8.bnc"
+    },
+    {
+      "spessore": 8.0,
+      "cava": 60.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 15.043,
+      "fonte": "data_4_cloude/L/L8.bnc"
+    },
+    {
+      "spessore": 10.0,
+      "cava": 50.0,
+      "angolo": 30.0,
+      "accorciamento_esterno": 4.979,
+      "fonte": "data_4_cloude/L/La114ab150b114s10.bnc"
+    },
+    {
+      "spessore": 10.0,
+      "cava": 50.0,
+      "angolo": 60.0,
+      "accorciamento_esterno": 10.869,
+      "fonte": "data_4_cloude/L/La114ab120b114s10.bnc"
+    },
+    {
+      "spessore": 10.0,
+      "cava": 50.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 19.251,
+      "fonte": "data_4_cloude/L/L10-EW50.bnc"
+    },
+    {
+      "spessore": 10.0,
+      "cava": 60.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 19.251,
+      "fonte": "data_4_cloude/L/L10.bnc"
+    },
+    {
+      "spessore": 12.0,
+      "cava": 70.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 23.389,
+      "fonte": "data_4_cloude/L/L12.bnc"
+    },
+    {
+      "spessore": 15.0,
+      "cava": 90.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 29.699,
+      "fonte": "data_4_cloude/L/L15.bnc"
+    },
+    {
+      "spessore": 20.0,
+      "cava": 90.0,
+      "angolo": 90.0,
+      "accorciamento_esterno": 40.437,
+      "fonte": "data_4_cloude/L/L20.bnc"
+    }
+  ]
+}

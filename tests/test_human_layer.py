@@ -8,7 +8,9 @@ un involucro comodo, non un calcolo nuovo.
 
 import unittest
 
-from snapbend import Bend, BentProfile, develop_from_external_flanges
+from pathlib import Path
+
+from snapbend import Bend, BentProfile, Calibration, develop_from_external_flanges
 from snapbend.rules.deduction import external_flanges_to_centerline
 
 
@@ -39,15 +41,16 @@ class TestDevelopFromExternalFlanges(unittest.TestCase):
         bend_angles = [90.0]
         thickness = 3.0
 
+        misurato = Calibration.load("tipo_misurato", folder=Path(__file__).resolve().parent / "data" / "officina")
         atteso = BentProfile(
             flanges=external_flanges_to_centerline(external_flanges, bend_angles, thickness),
             bends=[Bend(angle=a) for a in bend_angles],
-            thickness=thickness, width=50, calibration="tipo_misurato",
+            thickness=thickness, width=50, calibration=misurato,
         ).develop()
 
         flat = develop_from_external_flanges(
             external_flanges, [Bend(angle=a) for a in bend_angles],
-            thickness=thickness, width=50, calibration="tipo_misurato",
+            thickness=thickness, width=50, calibration=misurato,
         )
         self.assertAlmostEqual(flat.meta["total_length"], atteso.meta["total_length"], places=9)
         self.assertEqual(flat.bends[0].rule, "misurato")

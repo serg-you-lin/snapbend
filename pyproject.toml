@@ -41,7 +41,6 @@ include = ["snapbend*"]
 core     = ["forge", "io", "human_layer", "flat"]
 model    = ["forge", "human_layer", "flat"]
 rules    = ["forge", "io", "human_layer", "flat"]
-adapters = ["forge", "io", "human_layer", "flat"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
