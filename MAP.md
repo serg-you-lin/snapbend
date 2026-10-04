@@ -1218,3 +1218,7 @@ concentric group as its outer ring, which is swallowed) and the thread test in
 `flat/holes.py` (~270° ± 35°, radius ratio ≤ `THREADED_ARC_MAX_RADIUS_RATIO`,
 center within 1 mm). `is_countersink_outer`, unused since D51, is gone with
 its tests. Goldens unchanged (461 passed).
+
+Version **0.2.0 → 0.2.1**: a patch — `is_countersink_outer` was never in
+`snapbend.__all__`, the rest is the same reading on shared code. Needs forge
+≥ 0.9.1 (`concentric_groups`, `arcs_around`).
