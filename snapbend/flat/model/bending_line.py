@@ -12,14 +12,14 @@ from typing import Any, Optional
 from shapely.geometry import LineString
 
 from forge.core.primitives import LineSeg
-from forge.model.feature import OpenFeature
+from forge.model.curve import OpenCurve
 from forge.model.role import ContourRole
 from snapbend.flat.roles import BEND
 from .render import RenderContour
 
 
 @dataclass
-class BendingLine(OpenFeature):
+class BendingLine(OpenCurve):
     geometry:   LineString    = field(default=None)
     length:     float         = 0.0
     angle_deg:  float         = 0.0

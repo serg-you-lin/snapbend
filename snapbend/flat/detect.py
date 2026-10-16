@@ -13,7 +13,7 @@ from typing import Optional
 from shapely.geometry import LineString, Point
 
 from forge.model import ForgeResult, ForgeCluster
-from forge.model.feature import OpenFeature
+from forge.model.curve import OpenCurve
 from forge.model.role import ContourRole, role_str, is_structural_role
 from .roles import HOLE, COUNTERSINK, THREADED_HOLE, BEND, ENGRAVE, MARKING
 from forge.model.detected import DetectedFeatures
@@ -85,7 +85,7 @@ def _normalize_features(features) -> frozenset:
 
 
 def _proxy_pts(proxy) -> list:
-    """Vertici di un proxy aperto (OpenFeature), derivati dai suoi segmenti nativi."""
+    """Vertici di un proxy aperto (OpenCurve), derivati dai suoi segmenti nativi."""
     return track_points(getattr(proxy, "segments", []) or [])
 
 _ROLE_TO_HOLE_TYPE = {
@@ -564,7 +564,7 @@ def _engraving_from_closed(polygon, segments, cluster_label: str = "",
     )
 
 
-def _handle_engrave_open(proxy: OpenFeature, result: ForgeResult) -> bool:
+def _handle_engrave_open(proxy: OpenCurve, result: ForgeResult) -> bool:
     """
     Smista una traccia engrave aperta per contenimento.
 
@@ -692,7 +692,7 @@ def _probe_point(ce: ClassifiedEntity) -> Optional[Point]:
     return None
 
 
-def _extract_data(proxy: OpenFeature, work_type: str) -> dict:
+def _extract_data(proxy: OpenCurve, work_type: str) -> dict:
     work_type = work_type.lower()
     pts = _proxy_pts(proxy)
     length = track_length(pts)

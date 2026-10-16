@@ -9,7 +9,7 @@ from typing import Optional, Tuple, Any, List
 from shapely.geometry import Polygon
 
 from forge.core.primitives import LineSeg, ArcSeg, CircleSeg, SplineSeg
-from forge.model.feature import ClosedFeature
+from forge.model.curve import ClosedCurve
 from forge.model.role import ContourRole
 from snapbend.flat.roles import HOLE, COUNTERSINK, THREADED_HOLE
 from .render import RenderContour
@@ -28,7 +28,7 @@ VALID_HOLE_TYPES = {
 
 
 @dataclass
-class Hole(ClosedFeature):
+class Hole(ClosedCurve):
     diameter:       float                     = 0.0
     center:         Tuple[float, float]       = field(default_factory=lambda: (0.0, 0.0))
     hole_type:      str                       = HOLE_TYPE_UNKNOWN

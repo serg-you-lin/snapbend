@@ -22,14 +22,14 @@ from typing import List, Optional, Tuple
 
 from shapely.geometry import LineString, Polygon
 
-from forge.model.feature import OpenFeature
+from forge.model.curve import OpenCurve
 from forge.model.role import ContourRole
 from snapbend.flat.roles import ENGRAVE
 from .render import RenderContour
 
 
 @dataclass
-class Engraving(OpenFeature):
+class Engraving(OpenCurve):
     length:     float                    = 0.0
     cluster_label: str                      = ""
     pts:        List[Tuple[float, float]] = field(default_factory=list)

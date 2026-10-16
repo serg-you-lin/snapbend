@@ -101,7 +101,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_probe_point` | func | `snapbend/flat/detect.py:687` |  |
 | `_projection_overlap` | func | `snapbend/rules/read_section.py:277` |  |
 | `_promote_geometric_holes` | func | `snapbend/flat/detect.py:412` |  |
-| `_proxy_pts` | func | `snapbend/flat/detect.py:87` | Vertici di un proxy aperto (OpenFeature), derivati dai suoi segmenti nativi. |
+| `_proxy_pts` | func | `snapbend/flat/detect.py:87` | Vertici di un proxy aperto (OpenCurve), derivati dai suoi segmenti nativi. |
 | `radius_from_v_opening` | func | `snapbend/rules/deduction.py:96` | Stima del raggio interno di piega in aria da una cava a V. |
 | `read_section` | func | `snapbend/rules/read_section.py:172` |  |
 | `_recover_centerline` | func | `snapbend/rules/read_section.py:333` | Returns (segments, angles, pure_arc_radius, pure_arc_angle_deg) - the |
@@ -209,7 +209,7 @@ _snapbend/flat/detect.py_
 
 - `_ensure_detected(cluster: ForgeCluster) -> DetectedFeatures` — L43 — `cluster.detected`, creandolo alla prima scrittura.
 - `_normalize_features(features) -> frozenset` — L70 — Normalizza l'argomento `features` di detect_flat() in un set di stringhe.
-- `_proxy_pts(proxy) -> list` — L87 — Vertici di un proxy aperto (OpenFeature), derivati dai suoi segmenti nativi.
+- `_proxy_pts(proxy) -> list` — L87 — Vertici di un proxy aperto (OpenCurve), derivati dai suoi segmenti nativi.
 - `detect_flat(result: ForgeResult, features=None, *, max_drill_diameter: float=HOLE_DIAMETER_THRESHOLD, bending_tolerance: float=1.0, engrave_tolerance: float=1.0) -> ForgeResult` — L101 — Classifica le feature dentro le parti già trovate da heal().
 - `describe_features(cluster: ForgeCluster) -> dict` — L140 — Conteggio ricco per i tipi **noti di forge** — fori per tipo, pieghe
 - `_detect_labeled(result: ForgeResult) -> None` — L189
@@ -223,14 +223,14 @@ _snapbend/flat/detect.py_
 - `_detect_engrave(result: ForgeResult, engrave_tolerance: float=1.0) -> None` — L512 — Inferenza geometrica delle incisioni — NON ANCORA IMPLEMENTATA.
 - `_engraving_from_open(proxy, cluster_label: str='', source: str='labeled', confidence: float=1.0) -> Engraving` — L535
 - `_engraving_from_closed(polygon, segments, cluster_label: str='', source: str='labeled', confidence: float=1.0, styles=None) -> Engraving` — L551
-- `_handle_engrave_open(proxy: OpenFeature, result: ForgeResult) -> bool` — L567 — Smista una traccia engrave aperta per contenimento.
+- `_handle_engrave_open(proxy: OpenCurve, result: ForgeResult) -> bool` — L567 — Smista una traccia engrave aperta per contenimento.
 - `_handle_engrave_closed_trash(proxy, result: ForgeResult) -> bool` — L595 — Come _handle_engrave_open ma per una traccia engrave già chiusa
 - `_handle_engrave_closed(inner, cluster: ForgeCluster) -> None` — L614
 - `_belongs_to_cluster(ce: ClassifiedEntity, cluster: ForgeCluster) -> bool` — L630 — Un'entità aperta (marking/bending) appartiene al cluster se la sua
 - `_assign_to_part(ce: ClassifiedEntity, result: ForgeResult) -> None` — L645
 - `_write_custom(ce: ClassifiedEntity, cluster: ForgeCluster) -> None` — L666
 - `_probe_point(ce: ClassifiedEntity) -> Optional[Point]` — L687
-- `_extract_data(proxy: OpenFeature, work_type: str) -> dict` — L695
+- `_extract_data(proxy: OpenCurve, work_type: str) -> dict` — L695
 - `_extract_data_from_source(work_type: str, polygon=None) -> dict` — L728
 - `_bending_line_from_data(data: dict, cluster_label: str) -> BendingLine` — L746
 
@@ -250,7 +250,7 @@ No module-level function or class.
 
 _snapbend/flat/model/bending_line.py_
 
-- **class** `BendingLine(OpenFeature)` — L22
+- **class** `BendingLine(OpenCurve)` — L22
   - methods: `contours`, `to_dict`
 
 #### `snapbend/flat/model/classified.py` — 31 lines
@@ -263,14 +263,14 @@ _snapbend/flat/model/classified.py_
 
 _snapbend/flat/model/engraving.py_
 
-- **class** `Engraving(OpenFeature)` — L32
+- **class** `Engraving(OpenCurve)` — L32
   - methods: `closed`, `contours`, `to_dict`
 
 #### `snapbend/flat/model/hole.py` — 71 lines
 
 _snapbend/flat/model/hole.py_
 
-- **class** `Hole(ClosedFeature)` — L31
+- **class** `Hole(ClosedCurve)` — L31
   - methods: `is_void`, `contours`, `to_dict`
 
 #### `snapbend/flat/model/render.py` — 24 lines
