@@ -1,11 +1,11 @@
 # snapbend — working agreement
 
-Sheet-metal engine on top of forge. Three jobs: **compute** a flat pattern from
+Sheet-metal engine on top of topo. Three jobs: **compute** a flat pattern from
 parameters (`Cone`, `Cylinder`, `BentProfile`, pure math, zero dependencies),
 **read** a contour to tell whether it is a bent sheet and with what measures
-(`read_section`), and **read a flat cutting file** on top of `forge.heal()` —
+(`read_section`), and **read a flat cutting file** on top of `topo.heal()` —
 holes, countersinks, threaded holes, bends, engraving (`snapbend.flat`, needs
-forge). snapbend is where process meaning lives: forge says "circle", snapbend
+topo). snapbend is where process meaning lives: topo says "circle", snapbend
 says "hole to drill".
 
 Python 3.11 · version in `pyproject.toml` · `import snapbend`.
@@ -17,7 +17,7 @@ docstrings/comments (Italian).
 | situation | read |
 |---|---|
 | calling the library, need a signature | `docs/API.md` — one card per public name, `snapbend.flat` included |
-| **about to add a function, helper or class** | `docs/INDEX.md` — every module-level name with `file:line`. Check the name *and* the job exist nowhere before writing — and check forge's `docs/INDEX.md` too: a geometric fact belongs there |
+| **about to add a function, helper or class** | `docs/INDEX.md` — every module-level name with `file:line`. Check the name *and* the job exist nowhere before writing — and check topo's `docs/INDEX.md` too: a geometric fact belongs there |
 | why is it built this way, which layer may import what | `docs/ARCHITECTURE.md` |
 | why was X decided | `MAP.md` — decision log `D1…Dn`. **A closed decision is not re-decided**; to reopen it, say "reopening D##" out loud |
 | what's missing | `TODO.md` |
@@ -33,21 +33,21 @@ python tests/gen_index.py --check    # exit 1 if stale or the dependency rule is
 
 `tests/test_index.py` runs the check in the suite. The rule is in
 `pyproject.toml` (`[tool.gen_index.layers]`); `tests/gen_index.py` is the same
-file as forge's `scripts/gen_index.py` — change it in one, copy to the other.
+file as topo's `scripts/gen_index.py` — change it in one, copy to the other.
 
 ## Non-negotiables
 
-1. **The calculation does not know forge exists.** `core/`, `model/`, `rules/`
-   never import forge (checked by `tests/test_index.py`). forge enters only in
+1. **The calculation does not know topo exists.** `core/`, `model/`, `rules/`
+   never import topo (checked by `tests/test_index.py`). topo enters only in
    `io/dxf.py` and `flat/`.
-2. **Geometry is forge's, meaning is snapbend's.** "Concentric circles", "an
-   arc around a circle", a contour's shape come from forge
+2. **Geometry is topo's, meaning is snapbend's.** "Concentric circles", "an
+   arc around a circle", a contour's shape come from topo
    (`concentric_groups`, `arcs_around`, `contour_shape`). If a geometric fact
-   is missing, add it to forge — never a private copy here (forge MAP.md D91).
+   is missing, add it to topo — never a private copy here (topo MAP.md D91).
    Thresholds that carry process meaning stay here (`flat/thresholds.py`).
 3. **`detect_flat()` assumes a flat part seen from its face** (cutting file,
-   development). Never run it on `forge.island()` output.
-4. **Build fixtures through forge's API or snapbend's generators**, never with
+   development). Never run it on `topo.island()` output.
+4. **Build fixtures through topo's API or snapbend's generators**, never with
    `ezdxf` directly.
 5. **Never regenerate a golden to make a test pass** without first proving the
    code is right.

@@ -20,7 +20,7 @@ Genera 4 file per il cilindro (orizzontale/verticale x con/senza margine) e
 2 per il cono (con/senza margine, verticale), così puoi aprirli e
 confrontarli in AutoCAD.
 
-Richiede forge installato a fianco: pip install -e ../dxf-forge
+Richiede topo installato a fianco: pip install -e ../dxf-forge
 """
 
 from pathlib import Path

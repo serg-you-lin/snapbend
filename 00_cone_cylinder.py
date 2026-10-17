@@ -5,7 +5,7 @@ Equivalente di dxf-forge/cono.py con la nuova API: modifica i valori qui
 sotto ed esegui. Sostituisce due file DXF separati (cono + cilindro) invece
 di un unico disegno combinato — un file per parte, come nell'uso reale.
 
-Richiede forge installato a fianco: pip install -e ../dxf-forge
+Richiede topo installato a fianco: pip install -e ../dxf-forge
 """
 
 from pathlib import Path

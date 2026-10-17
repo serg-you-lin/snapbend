@@ -225,7 +225,7 @@ class BentProfile:
                   "vertical" (su Y)
 
     develop() ritorna un rettangolo (outer) più una linea per ogni piega,
-    role="bending" — stesso schema che forge riconosce già per le linee di
+    role="bending" — stesso schema che topo riconosce già per le linee di
     piega su un disegno letto da DXF.
     """
     flanges: List[float]

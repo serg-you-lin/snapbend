@@ -5,15 +5,15 @@ Motore matematico puro per sviluppi piani di forme sviluppabili: forme
 avvolte (cono, cilindro) e profili piegati a pressopiega (BentProfile).
 Zero dipendenze per il calcolo — la lettura di un disegno
 (`read_section`) compresa: MAP.md D43 ha provato e ritrattato
-un'integrazione nativa con forge, non ancora giustificata finché "pippo"
+un'integrazione nativa con topo, non ancora giustificata finché "pippo"
 (il futuro interprete di disegno, `docs/ARCHITECTURE.md`) non esiste
 davvero. `.develop()` ritorna sempre un FlatGeometry — dati puri, nessun
-import di forge.
+import di topo.
 
     from snapbend import Cone, Cylinder, Bend, BentProfile
 
     flat = Cone(top_diameter=1600, bottom_diameter=1016, height=1000, thickness=5).develop()
-    flat.to_dxf("cone.dxf")   # richiede forge installato a fianco
+    flat.to_dxf("cone.dxf")   # richiede topo installato a fianco
 
     flat = Cylinder(diameter=1016, height=3895, thickness=5).develop()
     flat.to_dxf("cylinder.dxf")
@@ -27,7 +27,7 @@ import di forge.
     flat.to_dxf("bent_profile.dxf")   # rettangolo + linee di piega (role="bending")
 
 `FlatGeometry.entities` è nello stesso schema accettato da
-`forge.load_geometry()` — è il contratto neutro fra i due progetti.
+`topo.load_geometry()` — è il contratto neutro fra i due progetti.
 """
 
 from importlib.metadata import version, PackageNotFoundError

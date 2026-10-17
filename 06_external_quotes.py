@@ -10,7 +10,7 @@ Genera una squadra a L 100x110 (quote esterne) a spessore 3mm, calibrazione
 "default" (DIN 6935): niente raggio da dare a mano, lo decide la
 calibrazione dalla cava, esattamente come nell'uso normale di BentProfile.
 
-Richiede forge installato a fianco: pip install -e ../dxf-forge
+Richiede topo installato a fianco: pip install -e ../dxf-forge
 """
 
 from pathlib import Path

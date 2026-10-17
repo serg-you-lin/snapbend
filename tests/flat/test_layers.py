@@ -2,7 +2,7 @@
 """
 test_layers.py
 --------------
-Verifica che dopo write() ogni layer forge abbia il colore canonico
+Verifica che dopo write() ogni layer topo abbia il colore canonico
 nella tabella layer del documento, e che ogni entità abbia color=256 (BYLAYER).
 
 File di test: tests/data/Multifeature.dxf
@@ -19,12 +19,12 @@ import ezdxf
 project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-import forge
+import topo
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
-from forge.adapters.dxf.layers import ALL_FORGE_LAYERS, TRASH_LAYER
-from forge.adapters.dxf.layers import LAYER_OUTER, ROLE_TO_LAYER
+from topo.adapters.dxf.layers import ALL_LAYERS, TRASH_LAYER
+from topo.adapters.dxf.layers import LAYER_OUTER, ROLE_TO_LAYER
 from snapbend.flat.roles import LAYER_BENDING
-from forge.model.role import ContourRole
+from topo.model.role import ContourRole
 from snapbend.flat.roles import HOLE, THREADED_HOLE, COUNTERSINK
 
 EXAMPLES_DIR = project_root / "tests" / "data" / "flat"
@@ -42,13 +42,13 @@ def _run_pipeline(dxf_path: Path) -> tuple:
     """Esegue heal → detect → to_dxf e restituisce (source_doc, doc_out, result).
 
     `doc_out` è il documento materializzato da to_dxf(): è lì che vivono i
-    layer forge e le entità routate. `source_doc` serve solo a split().
+    layer topo e le entità routate. `source_doc` serve solo a split().
     """
     from snapbend.flat.roles import is_structural
-    source_doc = forge.load_dxf(
-        dxf_path, explode_inserts=True, role_rules=forge.name_rules(SPECIAL_LAYERS),
+    source_doc = topo.load_dxf(
+        dxf_path, explode_inserts=True, role_rules=topo.name_rules(SPECIAL_LAYERS),
     )
-    result = forge.heal(
+    result = topo.heal(
         source_doc,
         tolerance=1,
         label=dxf_path.stem,
@@ -56,7 +56,7 @@ def _run_pipeline(dxf_path: Path) -> tuple:
         is_structural=is_structural,
     )
     detect_flat(result, features="all", bending_tolerance=0.2)
-    doc_out = forge.to_dxf(result, source_doc)
+    doc_out = topo.to_dxf(result, source_doc)
 
     return source_doc, doc_out, result
 
@@ -71,9 +71,9 @@ class TestLayerTable(unittest.TestCase):
         cls.src_doc, cls.doc, cls.result = _run_pipeline(MULTIFEATURE)
         cls.msp = cls.doc.modelspace()
 
-    def test_tutti_i_layer_forge_presenti(self):
-        """Ogni layer forge deve esistere nella tabella layer del doc."""
-        for name in ALL_FORGE_LAYERS:
+    def test_tutti_i_layer_topo_presenti(self):
+        """Ogni layer topo deve esistere nella tabella layer del doc."""
+        for name in ALL_LAYERS:
             with self.subTest(layer=name):
                 self.assertIn(
                     name,
@@ -82,11 +82,11 @@ class TestLayerTable(unittest.TestCase):
                 )
 
     def test_colori_canonici_nella_tabella(self):
-        """Il colore di ogni layer forge nella tabella deve corrispondere ad ALL_FORGE_LAYERS."""
-        for name, expected_color in ALL_FORGE_LAYERS.items():
+        """Il colore di ogni layer topo nella tabella deve corrispondere ad ALL_LAYERS."""
+        for name, expected_color in ALL_LAYERS.items():
             with self.subTest(layer=name):
                 if name not in self.doc.layers:
-                    self.skipTest(f"Layer '{name}' assente — coperto da test_tutti_i_layer_forge_presenti")
+                    self.skipTest(f"Layer '{name}' assente — coperto da test_tutti_i_layer_topo_presenti")
                 
                 actual_color = self.doc.layers.get(name).color
                 self.assertEqual(
@@ -97,7 +97,7 @@ class TestLayerTable(unittest.TestCase):
 
 
 class TestEntitaBylayer(unittest.TestCase):
-    """Ogni entità forge deve avere color=256 (BYLAYER)."""
+    """Ogni entità topo deve avere color=256 (BYLAYER)."""
 
     @classmethod
     def setUpClass(cls):
@@ -105,11 +105,11 @@ class TestEntitaBylayer(unittest.TestCase):
             raise unittest.SkipTest(f"File non trovato: {MULTIFEATURE}")
         cls.src_doc, cls.doc, cls.result = _run_pipeline(MULTIFEATURE)
         cls.msp = cls.doc.modelspace()
-        cls.forge_layer_names = {name.upper() for name in ALL_FORGE_LAYERS}
+        cls.topo_layer_names = {name.upper() for name in ALL_LAYERS}
 
-    def test_entita_su_layer_forge_hanno_bylayer(self):
+    def test_entita_su_layer_topo_hanno_bylayer(self):
         """
-        Tutte le entità posizionate su un layer forge devono avere color=256.
+        Tutte le entità posizionate su un layer topo devono avere color=256.
         Le entità su layer non-forge (layer originali del file) vengono ignorate.
         """
         violazioni = []
@@ -117,7 +117,7 @@ class TestEntitaBylayer(unittest.TestCase):
             if not entity.dxf.hasattr("layer"):
                 continue
             
-            if entity.dxf.layer.upper() not in self.forge_layer_names:
+            if entity.dxf.layer.upper() not in self.topo_layer_names:
                 continue
             
             color = entity.dxf.color if entity.dxf.hasattr("color") else 256
@@ -164,7 +164,7 @@ class TestLayerSplit(unittest.TestCase):
         cls.src_doc, cls.doc, cls.result = _run_pipeline(MULTIFEATURE)
         cls.msp = cls.doc.modelspace()
         cls.output_dir = tempfile.mkdtemp()
-        drawings = forge.split(cls.result, cls.src_doc)
+        drawings = topo.split(cls.result, cls.src_doc)
         cls.generated = []
         for i, drawing in enumerate(drawings):
             path = str(Path(cls.output_dir) / f"child_{i:03d}.dxf")
@@ -174,11 +174,11 @@ class TestLayerSplit(unittest.TestCase):
     def test_file_figli_generati(self):
         self.assertGreater(len(self.generated), 0, "split() non ha generato file")
 
-    def test_layer_forge_nei_figli(self):
-        """Ogni file figlio deve avere i layer forge con i colori canonici."""
+    def test_layer_topo_nei_figli(self):
+        """Ogni file figlio deve avere i layer topo con i colori canonici."""
         for path in self.generated:
             doc_out = ezdxf.readfile(path)
-            for name, expected_color in ALL_FORGE_LAYERS.items():
+            for name, expected_color in ALL_LAYERS.items():
                 # Un figlio potrebbe non avere tutti i layer se quella feature non c'è
                 if name not in doc_out.layers:
                     continue
@@ -192,8 +192,8 @@ class TestLayerSplit(unittest.TestCase):
                     )
 
     def test_entita_bylayer_nei_figli(self):
-        """Nei file figli le entità forge devono avere color=256."""
-        forge_layer_names = {name.upper() for name in ALL_FORGE_LAYERS}
+        """Nei file figli le entità topo devono avere color=256."""
+        topo_layer_names = {name.upper() for name in ALL_LAYERS}
         for path in self.generated:
             msp_out = ezdxf.readfile(path).modelspace()
             violazioni = []
@@ -201,7 +201,7 @@ class TestLayerSplit(unittest.TestCase):
             for entity in msp_out:
                 if not entity.dxf.hasattr("layer"):
                     continue
-                if entity.dxf.layer.upper() not in forge_layer_names:
+                if entity.dxf.layer.upper() not in topo_layer_names:
                     continue
                 
                 color = entity.dxf.color if entity.dxf.hasattr("color") else 256
@@ -229,15 +229,15 @@ class TestLineetteSpurie(unittest.TestCase):
         if not cls.dxf_path.exists():
             raise unittest.SkipTest(f"File non trovato: {cls.dxf_path}")
 
-        src_doc = forge.load_dxf(cls.dxf_path, explode_inserts=True)
-        cls.result = forge.heal(
+        src_doc = topo.load_dxf(cls.dxf_path, explode_inserts=True)
+        cls.result = topo.heal(
             src_doc,
             tolerance=1,
             label=cls.dxf_path.stem,
             source_file=cls.dxf_path.name,
         )
         detect_flat(cls.result, features="all")
-        cls.msp = forge.to_dxf(cls.result, src_doc).modelspace()
+        cls.msp = topo.to_dxf(cls.result, src_doc).modelspace()
 
     def test_un_solo_part(self):
         self.assertEqual(self.result.cluster_count, 1, "Atteso 1 cluster")
@@ -302,9 +302,9 @@ class TestGambaTavoloSplit(unittest.TestCase):
         if not cls.dxf_path.exists():
             raise unittest.SkipTest(f"File non trovato: {cls.dxf_path}")
         
-        src_doc = forge.load_dxf(cls.dxf_path, explode_inserts=True)
+        src_doc = topo.load_dxf(cls.dxf_path, explode_inserts=True)
         cls.output_dir = tempfile.mkdtemp()
-        cls.result = forge.split_to_files(
+        cls.result = topo.split_to_files(
             src_doc,
             output_folder=cls.output_dir,
             label=cls.dxf_path.stem,
@@ -333,14 +333,14 @@ class TestGambaTavoloSplit(unittest.TestCase):
 
     def test_nessun_outer_su_layer_originale(self):
         """Nessun figlio deve avere LWPOLYLINE su layer non-forge come contorno esterno."""
-        forge_layer_names = {name.upper() for name in ALL_FORGE_LAYERS}
+        topo_layer_names = {name.upper() for name in ALL_LAYERS}
         for path in self.generated:
             msp_out = ezdxf.readfile(path).modelspace()
             spuri = [
                 e for e in msp_out
                 if e.dxftype() == "LWPOLYLINE"
                 and e.dxf.hasattr("layer")
-                and e.dxf.layer.upper() not in forge_layer_names
+                and e.dxf.layer.upper() not in topo_layer_names
             ]
             with self.subTest(file=Path(path).name):
                 self.assertEqual(

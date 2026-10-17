@@ -25,9 +25,9 @@ import ezdxf
 project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
-import forge
+import topo
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
-from forge.adapters.dxf.layers import TRASH_LAYER
+from topo.adapters.dxf.layers import TRASH_LAYER
 from snapbend.flat.roles import LAYER_ENGRAVE
 from snapbend.flat.detect import describe_features
 
@@ -42,9 +42,9 @@ def _run_pipeline(
     tolerance=0.05,
     inject=False,
 ):
-    doc = forge.document_from_msp(msp, role_rules=forge.name_rules(special_layers))
+    doc = topo.document_from_msp(msp, role_rules=topo.name_rules(special_layers))
 
-    result = forge.heal(
+    result = topo.heal(
         doc,
         tolerance=tolerance,
     )
@@ -53,10 +53,10 @@ def _run_pipeline(
         result, features="all",
     )
 
-    doc_out = forge.to_dxf(result, doc)
+    doc_out = topo.to_dxf(result, doc)
 
     if inject:
-        forge.inject(result)
+        topo.inject(result)
 
     return result, doc_out
 

@@ -31,8 +31,8 @@ empty and the radius/angle come back instead in `pure_arc_radius`/
 `BentProfile` (which requires real straight flanges on both sides of
 every bend).
 
-MAP.md D43 (retracted, 11 Sep 2026): this module briefly imported forge
-(`forge.load_geometry` + its topology engine) to walk the outline instead
+MAP.md D43 (retracted, 11 Sep 2026): this module briefly imported topo
+(`topo.load_geometry` + its topology engine) to walk the outline instead
 of the hand-rolled walker below. Reverted before `pippo` (the future
 drawing interpreter this feeds, see `docs/ARCHITECTURE.md`) exists for
 real: deciding the forge-native shape of this contract now, for an

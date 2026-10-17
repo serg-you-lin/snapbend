@@ -10,9 +10,9 @@ impossible combinations (a segment shorter than its neighbouring radii)
 are skipped and reported.
 
 Each section is written in two formats:
-  - .dxf  : via forge (to look at it / feed the drawing interpreter)
+  - .dxf  : via topo (to look at it / feed the drawing interpreter)
   - .json : neutral entities + parameters (for tests, via
-            forge.load_geometry, without going through a DXF file)
+            topo.load_geometry, without going through a DXF file)
 
 Usage:
     python tests/generate_section.py
@@ -69,7 +69,7 @@ def main() -> None:
             )
             try:
                 flat.to_dxf(str(OUT / f"{s.name()}.dxf"), annotate=False)
-            except Exception as exc:  # forge missing, or heal failed
+            except Exception as exc:  # topo missing, or heal failed
                 print(f"  {s.name()}: JSON ok, DXF no ({exc})")
 
             print(f"  {s.name()}  (inner radius {s.inner_radius:g})")

@@ -1,9 +1,9 @@
 """
 tests/flat/test_cluster_summary.py
 ----------------------------------
-(arrivato da forge tests/unit/test_cluster_summary.py, forge MAP.md D88)
+(arrivato da topo tests/unit/test_cluster_summary.py, topo MAP.md D88)
 `describe_features()` (MAP.md D8, D44): i conteggi feature che prima
-produceva `inject()` scrivendo in `cluster.custom`, poi `ForgeCluster.summary`
+produceva `inject()` scrivendo in `cluster.custom`, poi `Cluster.summary`
 per intero (D8), ora sono il livello "ricco" separato dal modello — vive in
 `tools.detect` perché serve le costanti `HOLE_TYPE_*` (branch
 refactor/detect-overlay).
@@ -13,27 +13,27 @@ import unittest
 
 from shapely.geometry import Polygon, LineString
 
-from forge.model.cluster import ForgeCluster
-from forge.model.contour import ForgeContour
-from forge.model.role import ContourRole
+from topo.model.cluster import Cluster
+from topo.model.contour import Contour
+from topo.model.role import ContourRole
 from snapbend.flat.roles import HOLE, BEND, ENGRAVE
 from snapbend.flat.detect import describe_features
 from snapbend.flat.model import (
     Hole, HOLE_TYPE_PLAIN, HOLE_TYPE_COUNTERSINK, HOLE_TYPE_THREADED, BendingLine, Engraving,
 )
-from forge.model import DetectedFeatures
+from topo.model import DetectedFeatures
 
 
 def _part(**detected_kw):
     """
-    ForgeCluster con `detected` popolato dai kwargs (`holes=[...]`,
+    Cluster con `detected` popolato dai kwargs (`holes=[...]`,
     `bending_lines=[...]`, `engrave_lines=[...]`) — stessa comodità di prima
     del refactor, ma passando per `DetectedFeatures.attach()` invece di
     campi fissi sul cluster.
     """
-    outer = ForgeContour(polygon=Polygon([(0, 0), (100, 0), (100, 100), (0, 100)]),
+    outer = Contour(polygon=Polygon([(0, 0), (100, 0), (100, 100), (0, 100)]),
                          role=ContourRole.OUTER)
-    cluster = ForgeCluster(outer=outer)
+    cluster = Cluster(outer=outer)
     if detected_kw:
         cluster.detected = DetectedFeatures()
         for name, items in detected_kw.items():
@@ -115,7 +115,7 @@ class TestSummaryMatchesGoldenFixtures(unittest.TestCase):
     def test_golden_summary_matches_pipeline(self):
         import json
         from pathlib import Path
-        import forge
+        import topo
         from snapbend.flat import heal_and_detect
 
         ex = Path(__file__).resolve().parents[1] / "data" / "flat"
@@ -136,8 +136,8 @@ class TestSummaryMatchesGoldenFixtures(unittest.TestCase):
             lm = {**GLOBAL_NAME_ROLES, **cfg.get("name_roles", {})}
             try:
                 result = heal_and_detect(
-                    forge.load_dxf(str(dxf), explode_inserts=True,
-                                   flatten_z_flag=True, role_rules=forge.name_rules(lm)),
+                    topo.load_dxf(str(dxf), explode_inserts=True,
+                                   flatten_z_flag=True, role_rules=topo.name_rules(lm)),
                     tolerance=tol,
                 )
             except Exception:

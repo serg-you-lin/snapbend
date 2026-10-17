@@ -2,11 +2,11 @@
 snapbend/flat/__init__.py
 -------------------------
 Lettura di processo di un pezzo piano (file di taglio / sviluppo) sopra
-forge: fori, svasature, filettati, pieghe, incisioni; il tratteggio delle pieghe. Richiede forge
-installato (il resto di snapbend no). Arrivato da forge, forge MAP.md D88.
+topo: fori, svasature, filettati, pieghe, incisioni; il tratteggio delle pieghe. Richiede topo
+installato (il resto di snapbend no). Arrivato da topo, topo MAP.md D88.
 
     from snapbend.flat import heal_and_detect
-    result = heal_and_detect(forge.load_dxf("pezzo.dxf"))
+    result = heal_and_detect(topo.load_dxf("pezzo.dxf"))
 """
 
 from .roles import (

@@ -1,8 +1,8 @@
 """
 tests/flat/test_role_style.py
 -----------------------------
-(arrivato da forge tests/integration/test_role_style.py, forge MAP.md D88)
-RoleStyle di forge sui ruoli registrati da snapbend: il magenta di "hole" è
+(arrivato da topo tests/integration/test_role_style.py, topo MAP.md D88)
+RoleStyle di topo sui ruoli registrati da snapbend: il magenta di "hole" è
 registrato da snapbend.flat.roles con `register_role_style`.
 """
 
@@ -10,16 +10,16 @@ import unittest
 
 import ezdxf
 
-import forge
-from forge import RoleStyle
+import topo
+from topo import RoleStyle
 from snapbend.flat import detect_flat, LAYER_HOLE
 
 
 def _rect_with_hole_and_frame():
     """
-    Rettangolo 100x50 con un foro (per il ruolo 'hole', noto a forge) + una
+    Rettangolo 100x50 con un foro (per il ruolo 'hole', noto a topo) + una
     LINE su layer FRAME fuori dal rettangolo (diventa trash col ruolo
-    consumatore 'frame', mai visto da forge prima d'ora — D31).
+    consumatore 'frame', mai visto da topo prima d'ora — D31).
     """
     doc = ezdxf.new('R2010')
     msp = doc.modelspace()
@@ -32,8 +32,8 @@ def _rect_with_hole_and_frame():
 
     msp.add_line((200, 200), (220, 200), dxfattribs={'layer': 'FRAME'})
 
-    doc_in = forge.document_from_msp(msp, role_rules=forge.name_rules({'FRAME': 'frame'}))
-    result = forge.heal(doc_in, tolerance=0.05)
+    doc_in = topo.document_from_msp(msp, role_rules=topo.name_rules({'FRAME': 'frame'}))
+    result = topo.heal(doc_in, tolerance=0.05)
     detect_flat(result, features="all")
     return result, doc_in
 
@@ -52,7 +52,7 @@ class TestRoleStyleDefaultUnchanged(unittest.TestCase):
 
     def setUp(self):
         self.result, self.doc_in = _rect_with_hole_and_frame()
-        self.doc_out = forge.to_dxf(self.result, self.doc_in)
+        self.doc_out = topo.to_dxf(self.result, self.doc_in)
 
     def test_001_hole_layer_has_registered_true_color(self):
         layer = self.doc_out.layers.get(LAYER_HOLE)
@@ -68,11 +68,11 @@ class TestRoleStyleDefaultUnchanged(unittest.TestCase):
 
 
 class TestRoleStyleColorOverride(unittest.TestCase):
-    """role_styles fa override del colore di un ruolo noto a forge."""
+    """role_styles fa override del colore di un ruolo noto a topo."""
 
     def setUp(self):
         self.result, self.doc_in = _rect_with_hole_and_frame()
-        self.doc_out = forge.to_dxf(
+        self.doc_out = topo.to_dxf(
             self.result, self.doc_in,
             role_styles={"hole": RoleStyle(color=(0, 0, 0))},
         )
@@ -87,11 +87,11 @@ class TestRoleStyleColorOverride(unittest.TestCase):
 
 
 class TestRoleStyleColorOverride(unittest.TestCase):
-    """role_styles fa override del colore di un ruolo noto a forge."""
+    """role_styles fa override del colore di un ruolo noto a topo."""
 
     def setUp(self):
         self.result, self.doc_in = _rect_with_hole_and_frame()
-        self.doc_out = forge.to_dxf(
+        self.doc_out = topo.to_dxf(
             self.result, self.doc_in,
             role_styles={"hole": RoleStyle(color=(0, 0, 0))},
         )

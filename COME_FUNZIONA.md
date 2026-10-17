@@ -229,7 +229,7 @@ flat = BentProfile(
 flat.meta["total_length"]                     # la lunghezza sviluppo
 for b in flat.bends:                          # una riga per piega
     print(b.deduction, b.source)              # quanto, e da dove viene
-flat.to_dxf("pezzo.dxf")                      # richiede forge installato a fianco
+flat.to_dxf("pezzo.dxf")                      # richiede topo installato a fianco
 ```
 
 La cava viene dalla tabella della calibrazione; la passi (`Bend(cava=20)`)

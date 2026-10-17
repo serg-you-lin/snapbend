@@ -1,49 +1,49 @@
 """
 test_to_dxf_integration.py
 ----------------------------
-Verifica l'integrazione con forge — FlatGeometry.to_dxf() end-to-end. Salta
-automaticamente se forge non è installato a fianco (vedi README).
+Verifica l'integrazione con topo — FlatGeometry.to_dxf() end-to-end. Salta
+automaticamente se topo non è installato a fianco (vedi README).
 """
 
 import unittest
 
 try:
-    import forge  # noqa: F401
-    FORGE_AVAILABLE = True
+    import topo  # noqa: F401
+    TOPO_AVAILABLE = True
 except ImportError:
-    FORGE_AVAILABLE = False
+    TOPO_AVAILABLE = False
 
 from snapbend import Bend, BentProfile, Cone, Cylinder
 
 
-@unittest.skipUnless(FORGE_AVAILABLE, "forge non installato — pip install -e ../dxf-forge")
+@unittest.skipUnless(TOPO_AVAILABLE, "topo non installato — pip install -e ../dxf-forge")
 class TestToDxfIntegration(unittest.TestCase):
 
-    def test_cone_to_forge_result(self):
+    def test_cone_to_topo_result(self):
         flat = Cone(top_diameter=200, bottom_diameter=150, height=100, thickness=2).develop()
-        result = flat.to_forge_result()
+        result = flat.to_topo_result()
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(result.cluster_count, 1)
 
-    def test_cylinder_to_forge_result(self):
+    def test_cylinder_to_topo_result(self):
         flat = Cylinder(diameter=150, height=500, thickness=2).develop()
-        result = flat.to_forge_result()
+        result = flat.to_topo_result()
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(result.cluster_count, 1)
 
-    def test_bent_profile_to_forge_result_detects_bending_line(self):
+    def test_bent_profile_to_topo_result_detects_bending_line(self):
         flat = BentProfile(
             flanges=[50, 80], bends=[Bend(angle=90, radius=3)],
             thickness=2, width=200,
         ).develop()
-        result = flat.to_forge_result()
+        result = flat.to_topo_result()
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(result.cluster_count, 1)
         self.assertEqual(len(result.clusters[0].features("bending_lines")), 1)
 
     def test_faceted_cylinder_detects_seven_bending_lines(self):
         flat = Cylinder(diameter=150, height=500, thickness=2, faceted=True, n_facets=8).develop()
-        result = flat.to_forge_result()
+        result = flat.to_topo_result()
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(result.cluster_count, 1)
         self.assertEqual(len(result.clusters[0].features("bending_lines")), 7)
@@ -53,7 +53,7 @@ class TestToDxfIntegration(unittest.TestCase):
             top_diameter=200, bottom_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8,
         ).develop()
-        result = flat.to_forge_result()
+        result = flat.to_topo_result()
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(result.cluster_count, 1)
         self.assertEqual(len(result.clusters[0].features("bending_lines")), 7)

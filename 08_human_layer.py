@@ -7,7 +7,7 @@ Fase 3.2 (MAP.md D30) — l'API pubblica del layer umano:
 si vede la conversione a mezzeria: si danno le quote esterne e i `Bend`,
 esce direttamente il `FlatGeometry`.
 
-Richiede forge installato a fianco per il DXF: pip install -e ../dxf-forge
+Richiede topo installato a fianco per il DXF: pip install -e ../dxf-forge
 """
 
 from pathlib import Path

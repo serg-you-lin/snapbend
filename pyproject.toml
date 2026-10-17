@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "snapbend"
-version = "0.3.1"
-description = "Motore matematico puro per sviluppi piani di forme sviluppabili (cono, cilindro, profili piegati, ...). Zero dipendenze per il calcolo e per la lettura di un disegno; l'export DXF passa da forge (opzionale, installato a parte) — vedi MAP.md D43."
+version = "0.4.0"
+description = "Motore matematico puro per sviluppi piani di forme sviluppabili (cono, cilindro, profili piegati, ...). Zero dipendenze per il calcolo e per la lettura di un disegno; l'export DXF passa da topo (opzionale, installato a parte) — vedi MAP.md D43."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "All rights reserved — source-available, no license granted (see LICENSE)" }
@@ -24,10 +24,10 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest"]
-# forge NON è qui: è un pacchetto locale, non pubblicato. Per usare
+# topo NON è qui: è un pacchetto locale, non pubblicato. Per usare
 # FlatGeometry.to_dxf() installalo a parte, es.:
-#   pip install -e ../forge
-# (MAP.md D43: un'integrazione più profonda con forge è stata provata e
+#   pip install -e ../topo
+# (MAP.md D43: un'integrazione più profonda con topo è stata provata e
 # ritrattata l'11 set 2026 — non giustificata finché "pippo" non esiste.)
 
 [tool.setuptools.packages.find]
@@ -40,12 +40,12 @@ include = ["snapbend*"]
 snapbend = ["data/*.json", "data/calibrations/*.json"]
 
 # Regola di dipendenza controllata da tests/gen_index.py (docs/ARCHITECTURE.md,
-# "Layer di snapbend"): il calcolo non sa che forge esiste. model/ delega a io/
-# dentro i metodi to_dxf()/to_forge_result() — l'unica porta verso forge.
+# "Layer di snapbend"): il calcolo non sa che topo esiste. model/ delega a io/
+# dentro i metodi to_dxf()/to_topo_result() — l'unica porta verso topo.
 [tool.gen_index.layers]
-core     = ["forge", "io", "human_layer", "flat"]
-model    = ["forge", "human_layer", "flat"]
-rules    = ["forge", "io", "human_layer", "flat"]
+core     = ["topo", "io", "human_layer", "flat"]
+model    = ["topo", "human_layer", "flat"]
+rules    = ["topo", "io", "human_layer", "flat"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

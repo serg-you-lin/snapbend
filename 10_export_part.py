@@ -9,7 +9,7 @@ Stessa L 100x110s3 di 06/07/08/09, calibrazione tipo_misurato. Due file:
 solo il taglio, e il combo completo (taglio + sezione + header) da aprire
 e guardare per vedere lo stacking.
 
-Richiede forge installato a fianco: pip install -e ../dxf-forge
+Richiede topo installato a fianco: pip install -e ../dxf-forge
 """
 
 from pathlib import Path

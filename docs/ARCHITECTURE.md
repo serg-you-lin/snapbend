@@ -1,6 +1,6 @@
 # ARCHITECTURE — come è fatto `snapbend`, e come si incastra col resto
 
-Questo file spiega il flusso e i confini fra i pezzi (forge, snapdraw,
+Questo file spiega il flusso e i confini fra i pezzi (topo, snapdraw,
 snapbend, pippo) — non ripete l'API (quella è `docs/API.md`)
 e non ripete le decisioni (quelle sono `MAP.md`). Se riapri il codice fra
 un mese e non si capisce più niente, il punto di partenza è questo file,
@@ -10,7 +10,7 @@ non il codice.
 
 ## I quattro pezzi, in una frase ciascuno
 
-- **forge** — motore 2D generico: legge un file CAD (DXF/DWG), lo ripara
+- **topo** — motore 2D generico: legge un file CAD (DXF/DWG), lo ripara
   (`heal`), trova i contorni chiusi e li raggruppa in cluster con
   gerarchia esterno/interno. Non sa cosa sia la lamiera, un foro, una
   piega — vede geometria (`contour_shape`, `concentric_groups`,
@@ -19,17 +19,17 @@ non il codice.
 - **snapdraw** — repo sorella (cartella locale `framer/`, package
   `snapdraw`). Capisce in un disegno dov'è la cornice e il cartiglio
   (altrimenti `heal` la vede come un `outer` normale e falsa tutto quello
-  che viene dopo), legge il cartiglio, le viste (con `forge.island()`) e i
+  che viene dopo), legge il cartiglio, le viste (con `topo.island()`) e i
   fori sulle viste come notazione del disegno.
 - **snapbend** (questo repo) — sa cosa sia la lamiera piegata. Tre lavori:
   **calcolare** uno sviluppo da parametri (`Cone`, `Cylinder`,
   `BentProfile`), **leggere** un contorno per capire se è lamiera
   piegata e con che misure (`read_section`), e **leggere un file di
-  taglio** sopra `forge.heal()` — fori, svasature, filettati, pieghe,
+  taglio** sopra `topo.heal()` — fori, svasature, filettati, pieghe,
   incisioni (`snapbend.flat`).
 - **pippo** — non ancora scritto, vive fuori da questo repo.
   L'interprete di disegno: prende un file CAD intero, usa snapdraw per
-  togliere la cornice dal conto e forge per trovare i cluster, e per
+  togliere la cornice dal conto e topo per trovare i cluster, e per
   ciascuno decide cosa fare — fra cui chiedere a
   `snapbend.read_section()` "in questo cluster c'è lamiera piegata?".
   Il nome è deciso l'11 set 2026 (prima non ne avevamo uno, e infatti
@@ -39,7 +39,7 @@ non il codice.
 file CAD (DXF/PDF)
       |
       v
-  forge.load_dxf() / load_pdf()
+  topo.load_dxf() / load_pdf()
       |
       v
   snapdraw -- toglie cornice/cartiglio dal conto, PRIMA di heal --
@@ -51,8 +51,8 @@ file CAD (DXF/PDF)
       |     ordine, andrebbe deciso lì, non qui)
       |
       v
-  forge.heal()  ->  ForgeResult { clusters: [...] }   (+ snapbend.flat per fori/pieghe)
-      |                             ognuno con .outer (ForgeContour,
+  topo.heal()  ->  Result { clusters: [...] }   (+ snapbend.flat per fori/pieghe)
+      |                             ognuno con .outer (Contour,
       |                             .segments ordinati) e .inners
       v
    PIPPO   -- per ogni cluster che sembra una vista di lamiera --
@@ -69,7 +69,7 @@ file CAD (DXF/PDF)
 ```
 
 **Pippo è una pipeline o un oggetto?** Una pipeline, per come è disegnato
-sopra — un flusso file→forge→pippo→snapbend, non uno stato che vive a
+sopra — un flusso file→topo→pippo→snapbend, non uno stato che vive a
 lungo. Ma "pipeline" non vuol dire "funzione unica": dentro, cammina i
 cluster e per ciascuno costruisce un piccolo referto (candidato lamiera,
 scartato, non capito) — quello sì può essere un oggetto per cluster,
@@ -104,15 +104,15 @@ arco puro (secondo gruppo), o nessuno dei due (`notes` dice perché).
 `read_section(entities: List[dict], ...)` prende in ingresso una
 lista di dict grezzi (`{"type": "line", ...}`) — lo stesso schema che
 `Cone`/`Cylinder`/`BentProfile` producono generando, e che
-`forge.load_geometry()` accetta come "geometria da un generatore"
-(MAP.md D43). `snapbend` non importa forge da nessuna parte tranne
+`topo.load_geometry()` accetta come "geometria da un generatore"
+(MAP.md D43). `snapbend` non importa topo da nessuna parte tranne
 `io/dxf.py` e `flat/` (la lettura di un pezzo piano, D51), lettura di una
 sezione compresa — provato il contrario per una notte
 intera (D43), tornato indietro: non perché non funzionasse (167/167
 verdi anche lì), ma perché decidere QUEL contratto oggi vorrebbe dire
 indovinare cosa vorrà pippo, che non esiste ancora. Se pippo arriverà con
-già in mano `cluster.outer.segments` di forge (probabile, se usa
-`forge.heal()` per i cluster) e fargli ricostruire dict grezzi da
+già in mano `cluster.outer.segments` di topo (probabile, se usa
+`topo.heal()` per i cluster) e fargli ricostruire dict grezzi da
 lì sarà uno spreco visibile, si riapre la domanda allora — con pippo
 vero davanti, non immaginato.
 
@@ -122,22 +122,22 @@ vero davanti, non immaginato.
 
 ```
 core/        matematica di piega pura (Bend, K-factor, DIN 6935)
-             ZERO dipendenze — non importa forge, non importa niente
+             ZERO dipendenze — non importa topo, non importa niente
              sopra di lui
 model/       Section, FlatGeometry — struttura dati di dominio,
-             ancora senza forge
-rules/       deduction.py + read_section.py — entrambi puri, zero forge
-io/          dxf.py — importa forge, per scrivere
+             ancora senza topo
+rules/       deduction.py + read_section.py — entrambi puri, zero topo
+io/          dxf.py — importa topo, per scrivere
 human_layer  API pubblica di comodo (quote esterne, export a livelli)
-flat/        lettura di processo di un pezzo piano sopra forge (D51):
-             fori, svasature, filettati, pieghe, incisioni — richiede forge;
-             la importa solo io/dxf.py, per to_forge_result()
+flat/        lettura di processo di un pezzo piano sopra topo (D51):
+             fori, svasature, filettati, pieghe, incisioni — richiede topo;
+             la importa solo io/dxf.py, per to_topo_result()
 ```
 
-`core/`, `model/`, `rules/` non sanno che forge esiste, punto — qualunque
-codice nuovo che gli farebbe importare forge è nel posto sbagliato. Le due
+`core/`, `model/`, `rules/` non sanno che topo esiste, punto — qualunque
+codice nuovo che gli farebbe importare topo è nel posto sbagliato. Le due
 eccezioni volute sono deleghe dentro un metodo, non import di modulo:
-`FlatGeometry.to_dxf()`/`.to_forge_result()` e `Section.to_dxf()` chiamano
+`FlatGeometry.to_dxf()`/`.to_topo_result()` e `Section.to_dxf()` chiamano
 `io/dxf.py`. `core/` usa `model/` (`FlatGeometry` è quello che ritorna). La
 regola la controlla `tests/gen_index.py --check` (in `tests/test_index.py`),
 configurata in `pyproject.toml`.
@@ -161,24 +161,24 @@ esterno ipotetico:
   costruire nessuna forma.
 - `snapbend.flat` — `heal_and_detect()`, `detect_flat()`,
   `describe_features()`, i ruoli e i tipi (`Hole`, `BendingLine`,
-  `Engraving`): la lettura di un file di taglio sopra `forge.heal()`.
+  `Engraving`): la lettura di un file di taglio sopra `topo.heal()`.
   `trim_bending_lines()` tratteggia le pieghe (D63).
   Una piega è una linea che attraversa il pezzo (D52), anche se un vuoto la
-  interrompe (D53). Non entra in `snapbend.__all__`: richiede forge.
+  interrompe (D53). Non entra in `snapbend.__all__`: richiede topo.
 - `FlatGeometry` — entities/meta grezzi, per chi vuole la propria
-  pipeline forge invece di `to_dxf()`.
+  pipeline topo invece di `to_dxf()`.
 
 ---
 
 ## Cosa non è ancora pulito (onesto, non nascosto)
 
 - Il contratto di ingresso di `read_section()` (dict vs segmenti
-  forge nativi) — deciso quando pippo esiste, non prima: decidere ora su
+  topo nativi) — deciso quando pippo esiste, non prima: decidere ora su
   un consumatore immaginario è il modo in cui è nata (e si è ritrattata)
-  tutta la parentesi forge di MAP.md D43.
+  tutta la parentesi topo di MAP.md D43.
 - Dove snapdraw entra nel flusso rispetto a `heal()` (sopra, nel
   diagramma): snapdraw assegna i ruoli di cornice e cartiglio agli edge
-  prima della lettura di forge (`heal` o `island`, scelta del chiamante).
+  prima della lettura di topo (`heal` o `island`, scelta del chiamante).
   Il diagramma lo mette prima di `heal` perché è il caso di snapbend; per
   le viste snapdraw usa `island`, che snapbend non tocca.
 - `pippo` è un nome, non un repo: il suo posto nel diagramma è

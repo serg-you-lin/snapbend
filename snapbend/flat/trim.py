@@ -3,7 +3,7 @@ snapbend/flat/trim.py
 ---------------------
 Tratteggio delle linee di piega: la piega si disegna a tratti invece che
 intera — un tratto attaccato a ogni capo, tratti centrali, vuoti uguali. La
-geometria del tratteggio è di forge (`forge.geometry.dash_line`, forge MAP.md
+geometria del tratteggio è di topo (`topo.geometry.dash_line`, topo MAP.md
 D115); qui c'è il significato: quali linee, con che misure (MAP.md D63).
 """
 
@@ -12,8 +12,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Optional, Union
 
-from forge.core.geometry import dash_line
-from forge.model import ForgeResult
+from topo.core.geometry import dash_line
+from topo.model import Result
 
 from .model import BendingLine
 
@@ -32,8 +32,8 @@ class DashPattern:
 DashRule = Callable[[BendingLine], Optional[DashPattern]]
 
 
-def trim_bending_lines(result: ForgeResult,
-                       pattern: Union[DashPattern, DashRule]) -> ForgeResult:
+def trim_bending_lines(result: Result,
+                       pattern: Union[DashPattern, DashRule]) -> Result:
     """
     Tratteggia ogni `BendingLine` di `result` con `pattern`: le stesse misure
     per tutte, o una regola che le sceglie piega per piega (per esempio dalla

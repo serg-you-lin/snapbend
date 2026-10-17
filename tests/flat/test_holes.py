@@ -1,7 +1,7 @@
 """
 tests/flat/test_holes.py
 ------------------------
-(arrivato da forge tests/unit/test_geometry.py, forge MAP.md D88)
+(arrivato da topo tests/unit/test_geometry.py, topo MAP.md D88)
 Test unitari per snapbend.flat.holes:
   - is_threaded_hole      : riconosce fori filettati (cerchio + arco a 270°)
 """
@@ -9,7 +9,7 @@ Test unitari per snapbend.flat.holes:
 import math
 import unittest
 
-from forge.core.primitives.segments import ArcSeg
+from topo.core.primitives.segments import ArcSeg
 
 from snapbend.flat.holes import is_threaded_hole
 

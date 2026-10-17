@@ -2,21 +2,21 @@
 tests/flat/test_trim.py
 
 Tratteggio delle linee di piega (MAP.md D63): la piega resta una, con l'asse
-intero in `geometry`; i tratti stanno in `dashes` e sono quello che forge
+intero in `geometry`; i tratti stanno in `dashes` e sono quello che topo
 disegna. Le misure sono uguali per tutte o scelte da una regola del chiamante.
 """
 import math
 import unittest
 
-import forge
-from forge.core.primitives import LineSeg
+import topo
+from topo.core.primitives import LineSeg
 from snapbend.flat import LAYER_BENDING, DashPattern, describe_features, detect_flat, trim_bending_lines
 
 
 def _read(outline, bends):
-    segments = forge.geometry.polygon(outline)
+    segments = topo.geometry.polygon(outline)
     segments += [LineSeg(start=a, end=b) for a, b in bends]
-    return detect_flat(forge.heal(forge.load_segments(segments)), "bending")
+    return detect_flat(topo.heal(topo.load_segments(segments)), "bending")
 
 
 def _plate():
@@ -46,7 +46,7 @@ class TestTrimBendingLines(unittest.TestCase):
         self.assertAlmostEqual(long_.length, 300)
         self.assertEqual(describe_features(result.clusters[0])["bending_lines"], before)
 
-    def test_dashes_are_what_forge_draws(self):
+    def test_dashes_are_what_topo_draws(self):
         result = trim_bending_lines(_plate(), DashPattern(head=10, tail=10, middle=10, n_middle=3))
         for bl in _by_length(result):
             self.assertEqual(len(bl.contours), 5)
@@ -74,7 +74,7 @@ class TestTrimBendingLines(unittest.TestCase):
 
     def test_dxf_has_one_line_per_dash(self):
         result = trim_bending_lines(_plate(), DashPattern(head=20, tail=20, middle=20, n_middle=1))
-        lines = [e for e in forge.to_dxf(result).modelspace().query("LINE")
+        lines = [e for e in topo.to_dxf(result).modelspace().query("LINE")
                  if e.dxf.layer == LAYER_BENDING]
         self.assertEqual(len(lines), 6)
 

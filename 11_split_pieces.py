@@ -28,7 +28,7 @@ Il liscio (calandra) non ha un equivalente "vista in sezione": è una
 curva continua, non una catena di flange dritte — quel concetto si
 applica solo allo sfaccettato.
 
-Richiede forge installato a fianco: pip install -e ../dxf-forge
+Richiede topo installato a fianco: pip install -e ../dxf-forge
 """
 
 from pathlib import Path

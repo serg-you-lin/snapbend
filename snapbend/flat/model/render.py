@@ -1,10 +1,10 @@
 """
 snapbend/flat/model/render.py
 -----------------------------
-Come un elemento di processo si fa disegnare dai renderer di forge.
+Come un elemento di processo si fa disegnare dai renderer di topo.
 
-forge disegna un elemento di `cluster.detected` dal suo `role` e dalla sua
-geometria (forge D90): se ha `contours`, ognuno con `role`, `segments`,
+topo disegna un elemento di `cluster.detected` dal suo `role` e dalla sua
+geometria (topo D90): se ha `contours`, ognuno con `role`, `segments`,
 `styles`, `polygon`. `polygon` presente → contorno chiuso; assente → una
 entità per primitiva. È qui che snapbend decide, per esempio, che una
 svasatura va sul layer della svasatura e non su quello del foro.

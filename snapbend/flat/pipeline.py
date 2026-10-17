@@ -1,31 +1,31 @@
 """
 snapbend/flat/pipeline.py
 -------------------------
-`heal_and_detect()`: `forge.heal()` + `detect_flat()` in un colpo solo, con il
+`heal_and_detect()`: `topo.heal()` + `detect_flat()` in un colpo solo, con il
 predicato strutturale di processo (un foro è un contorno di pezzo). Arrivato
-da forge `recipes.py` (forge MAP.md D88).
+da topo `recipes.py` (topo MAP.md D88).
 """
 
 from __future__ import annotations
 
-import forge
-from forge.model import ForgeDocument, ForgeResult
+import topo
+from topo.model import Document, Result
 
 from .detect import detect_flat
 from .roles import is_structural
 from .thresholds import HOLE_DIAMETER_THRESHOLD
 
 
-def heal_and_detect(doc: ForgeDocument, tolerance=None, label="", source_file="",
+def heal_and_detect(doc: Document, tolerance=None, label="", source_file="",
                     features="all",
                     max_drill_diameter: float = HOLE_DIAMETER_THRESHOLD,
                     bending_tolerance: float = 1.0,
-                    engrave_tolerance: float = 1.0) -> ForgeResult:
+                    engrave_tolerance: float = 1.0) -> Result:
     """
     heal() + detect_flat(). `detect_flat()` viene saltato se heal() non produce
     cluster validi (il result torna comunque, con `is_valid=False`).
     """
-    result = forge.heal(doc, tolerance=tolerance, label=label, source_file=source_file,
+    result = topo.heal(doc, tolerance=tolerance, label=label, source_file=source_file,
                         is_structural=is_structural)
     if result.is_valid and result.clusters:
         detect_flat(result,

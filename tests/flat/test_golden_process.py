@@ -1,7 +1,7 @@
 """
 tests/flat/test_golden_process.py
 ---------------------------------
-(arrivato da forge tests/real/test_golden_process.py, forge MAP.md D88)
+(arrivato da topo tests/real/test_golden_process.py, topo MAP.md D88)
 La metà di processo dei golden: fori, pieghe, incisioni e summary letti da
 detect_flat(). La geometria (outer, perimetri) è in test_golden.py. Questo
 file e i suoi JSON passano a snapbend insieme a detect_flat (MAP.md D88).
@@ -22,9 +22,9 @@ from shapely import wkt as shapely_wkt
 project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-import forge
+import topo
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
-from forge.adapters.dxf.layers import role_to_dxf_layer
+from topo.adapters.dxf.layers import role_to_dxf_layer
 from snapbend.flat.detect import describe_features
 
 
@@ -103,14 +103,14 @@ def _make_test(path):
         }
 
         from snapbend.flat.roles import is_structural
-        result = forge.heal(
-            forge.load_dxf(
+        result = topo.heal(
+            topo.load_dxf(
                 str(dxf_path),
                 upgrade=True,
                 explode_inserts=True,
                 flatten_z_flag=True,
                 tolerance=config.get("tolerance", DEFAULT_TOLERANCE),
-                role_rules=forge.name_rules(name_roles),
+                role_rules=topo.name_rules(name_roles),
             ),
             tolerance=config.get("tolerance", DEFAULT_TOLERANCE),
             is_structural=is_structural,
@@ -366,7 +366,7 @@ MULTIPLI_PROC_DIR = MULTIPLI_DIR / "process"
 
 @lru_cache(maxsize=None)
 def _multipli_clusters(parent_path: Path, tolerance: float):
-    result = forge.heal(forge.load_dxf(parent_path, explode_inserts=True, tolerance=tolerance),
+    result = topo.heal(topo.load_dxf(parent_path, explode_inserts=True, tolerance=tolerance),
                         tolerance=tolerance)
     if result.is_valid and result.clusters:
         detect_flat(result, features="all")

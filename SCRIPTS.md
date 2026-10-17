@@ -9,8 +9,8 @@ Gli script che usano la calibrazione `tipo_misurato` (04, 05, 07, 08, 10)
 la leggono dalla cartella officina scelta con `set_officina` (MAP D60, D62);
 `05` la prende come argomento.
 
-Quelli che generano il DXF richiedono forge installato a fianco
-(`pip install -e ../forge`); il resto gira liscio.
+Quelli che generano il DXF richiedono topo installato a fianco
+(`pip install -e ../topo`); il resto gira liscio.
 
 | script | area API | cosa mostra |
 |---|---|---|

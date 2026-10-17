@@ -3,21 +3,21 @@ tests/flat/test_bend_at_corner.py
 
 Una piega senza layer che parte da uno spigolo dell'outer, collineare col
 lato che arriva lì, è ancora una piega: il pezzo resta uno, l'outer è il
-contorno intero, la piega va nella lane geometrica (forge MAP.md D110).
-Prima la fusione collineare di forge univa piega e lato in una riga sola e
+contorno intero, la piega va nella lane geometrica (topo MAP.md D110).
+Prima la fusione collineare di topo univa piega e lato in una riga sola e
 il pezzo diventava due rettangoli sovrapposti.
 """
 import unittest
 
-import forge
-from forge.core.primitives import LineSeg
+import topo
+from topo.core.primitives import LineSeg
 from snapbend.flat import detect_flat
 
 
 def _read(outline, bends, extra=()):
-    segments = forge.geometry.polygon(outline) + list(extra)
+    segments = topo.geometry.polygon(outline) + list(extra)
     segments += [LineSeg(start=a, end=b) for a, b in bends]
-    return detect_flat(forge.heal(forge.load_segments(segments)), "bending")
+    return detect_flat(topo.heal(topo.load_segments(segments)), "bending")
 
 
 class TestBendAtCorner(unittest.TestCase):
@@ -45,7 +45,7 @@ class TestBendAtCorner(unittest.TestCase):
 
     def test_ala_stretta_con_foro(self):
         outline = [(0, 0), (400, 0), (400, 80), (325, 80), (325, 140), (75, 140), (75, 80), (0, 80)]
-        result = _read(outline, [((75, 80), (325, 80))], forge.geometry.circle(8, center=(200, 40)))
+        result = _read(outline, [((75, 80), (325, 80))], topo.geometry.circle(8, center=(200, 40)))
         self.assertPart(result, 47000, 1)
         self.assertEqual(len(result.clusters[0].inners), 1)
 

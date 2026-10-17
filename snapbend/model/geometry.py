@@ -3,18 +3,18 @@ snapbend/model/geometry.py
 -------------------------
 FlatGeometry — il contratto neutro tra il motore matematico di Unfold e
 qualsiasi consumatore a valle. Puri dati Python (dataclass + dict), zero
-import di forge: ogni entità in `.entities` è nello stesso schema accettato
-da `forge.load_geometry()` — {"type": "line"|"arc"|"circle"|"polygon", ...,
-"role": ...} — così Unfold non deve conoscere alcun tipo interno di forge, e
-forge non deve conoscere nulla di Unfold.
+import di topo: ogni entità in `.entities` è nello stesso schema accettato
+da `topo.load_geometry()` — {"type": "line"|"arc"|"circle"|"polygon", ...,
+"role": ...} — così Unfold non deve conoscere alcun tipo interno di topo, e
+topo non deve conoscere nulla di Unfold.
 
-forge entra in gioco SOLO in `snapbend/io/dxf.py` (`to_forge_result()`/
-`to_dxf()`), con import lazy: se forge non è installato, `Cone(...).develop()`
+topo entra in gioco SOLO in `snapbend/io/dxf.py` (`to_topo_result()`/
+`to_dxf()`), con import lazy: se topo non è installato, `Cone(...).develop()`
 funziona comunque e i dati grezzi restano leggibili/utilizzabili da
-`.entities`/`.meta` — solo il salvataggio DXF richiede forge installato a
-fianco (`pip install -e <percorso a forge>`). `FlatGeometry.to_dxf()`/
-`.to_forge_result()` restano metodi comodi da chiamare, ma il loro corpo
-vive in `snapbend/io/dxf.py`: questo modulo non importa mai forge, nemmeno
+`.entities`/`.meta` — solo il salvataggio DXF richiede topo installato a
+fianco (`pip install -e <percorso a topo>`). `FlatGeometry.to_dxf()`/
+`.to_topo_result()` restano metodi comodi da chiamare, ma il loro corpo
+vive in `snapbend/io/dxf.py`: questo modulo non importa mai topo, nemmeno
 lazy — lo strato `model` resta pulito, lo strato `io` fa da ponte.
 """
 
@@ -83,12 +83,12 @@ class FlatGeometry:
     Sviluppo piano di una forma sviluppabile — output di Cone.develop() /
     Cylinder.develop().
 
-    entities:           geometria di taglio, schema di forge.load_geometry()
+    entities:           geometria di taglio, schema di topo.load_geometry()
     label:               nome della parte
     meta:                 valori calcolati (diametri medi, generatrice, ...)
     reference_entities:    geometria SOLO di riferimento (es. i due bordi del
                            foglio pieno prima del margine di saldatura) — mai
-                           passata a forge.load_geometry(), disegnata solo in
+                           passata a topo.load_geometry(), disegnata solo in
                            to_dxf() su un layer separato, tratteggiato
     bends:                 una BendResult per piega (solo da
                            BentProfile.develop()); dice per ogni piega
@@ -103,18 +103,18 @@ class FlatGeometry:
     bends: List[Any] = field(default_factory=list)
 
     # ------------------------------------------------------------------
-    # Integrazione con forge — deleghe sottili a snapbend/io/dxf.py, che è
-    # l'unico modulo a importare forge (lazy). Questo file resta pulito.
+    # Integrazione con topo — deleghe sottili a snapbend/io/dxf.py, che è
+    # l'unico modulo a importare topo (lazy). Questo file resta pulito.
     # ------------------------------------------------------------------
 
-    def to_forge_result(self, tolerance: float = 0.05):
+    def to_topo_result(self, tolerance: float = 0.05):
         """
-        Traduce questo sviluppo in un ForgeResult passando da
-        forge.load_geometry() + snapbend.flat.heal_and_detect() — stesso contratto
-        di qualsiasi altra sorgente forge (DXF, PDF, ...).
+        Traduce questo sviluppo in un Result passando da
+        topo.load_geometry() + snapbend.flat.heal_and_detect() — stesso contratto
+        di qualsiasi altra sorgente topo (DXF, PDF, ...).
         """
-        from ..io.dxf import to_forge_result
-        return to_forge_result(self, tolerance=tolerance)
+        from ..io.dxf import to_topo_result
+        return to_topo_result(self, tolerance=tolerance)
 
     def to_dxf(
         self,
@@ -124,8 +124,8 @@ class FlatGeometry:
         show_margin_reference: bool = False,
     ):
         """
-        Scrive lo sviluppo su file DXF via forge.to_dxf() — layer/colori
-        coerenti col resto dell'output forge.
+        Scrive lo sviluppo su file DXF via topo.to_dxf() — layer/colori
+        coerenti col resto dell'output topo.
 
         annotate:               blocco di testo con i valori di `.meta`,
                                  layer "Notes" — riferimento in officina, non

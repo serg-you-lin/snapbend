@@ -322,7 +322,7 @@ class Cone:
         entities = _faceted_sector_outline(r_inner, r_outer, vertex_angles, role="outer")
         # Le linee di piega si fermano un filo prima del vero raggio interno/
         # esterno (_BEND_LINE_INSET): se toccassero esattamente lo stesso
-        # nodo dei vertici del contorno, il grafo di forge le userebbe per
+        # nodo dei vertici del contorno, il grafo di topo le userebbe per
         # richiudere ogni singola faccetta come loop a sé — 1 parte diventa
         # N parti. Stesso principio per cui in BentProfile/Cylinder le linee
         # di piega non toccano mai gli angoli del rettangolo.

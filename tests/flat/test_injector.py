@@ -1,7 +1,7 @@
 """
 tests/flat/test_injector.py
 ---------------------------
-(arrivato da forge tests/integration/test_injector.py, forge MAP.md D88)
+(arrivato da topo tests/integration/test_injector.py, topo MAP.md D88)
 Test Suite per dxf_forge.injector
 
 Prerequisiti DXF da aggiungere a generate_examples.py:
@@ -35,7 +35,7 @@ import ezdxf
 project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
-import forge
+import topo
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
 from snapbend.flat.roles import LAYER_BENDING, LAYER_ENGRAVE
 from snapbend.flat.detect import describe_features
@@ -54,14 +54,14 @@ def load(name):
 
 def _heal_and_inject(dxf_name, name_roles=None, data_injector=None, interpreter=None):
     from snapbend.flat.roles import is_structural
-    doc = forge.document_from_msp(
-        load(dxf_name).modelspace(), role_rules=forge.name_rules(name_roles or {})
+    doc = topo.document_from_msp(
+        load(dxf_name).modelspace(), role_rules=topo.name_rules(name_roles or {})
     )
-    result = forge.heal(doc, is_structural=is_structural)
+    result = topo.heal(doc, is_structural=is_structural)
     detect_flat(
         result, features="all"
     )
-    forge.inject(result, data_injector=data_injector)
+    topo.inject(result, data_injector=data_injector)
     return doc, result
 
 # ---------------------------------------------------------------------------
@@ -72,10 +72,10 @@ class TestInjectEmptyResult(unittest.TestCase):
 
     def test_001_no_parts_no_crash(self):
         """inject() su un result vuoto non deve sollevare eccezioni."""
-        doc = forge.document_from_msp(ezdxf.new().modelspace())
-        result = forge.heal(doc)
+        doc = topo.document_from_msp(ezdxf.new().modelspace())
+        result = topo.heal(doc)
         # non deve esplodere
-        forge.inject(result)
+        topo.inject(result)
         self.assertEqual(result.clusters, [])
 
 
@@ -102,7 +102,7 @@ class TestInjectBendingLines(unittest.TestCase):
         def add_metric(cluster, testi):
             return {"bending_lines": 2}
 
-        forge.inject(self.result, data_injector=add_metric)
+        topo.inject(self.result, data_injector=add_metric)
         self.assertEqual(self.result.clusters[0].custom["bending_lines"], 2)
 
 
@@ -126,14 +126,14 @@ class TestInjectEngraveLength(unittest.TestCase):
         def add_metric(cluster, testi):
             return {"total_engrave_length": 141.42}
 
-        forge.inject(self.result, data_injector=add_metric)
+        topo.inject(self.result, data_injector=add_metric)
         self.assertAlmostEqual(self.result.clusters[0].custom["total_engrave_length"], 141.42, delta=0.1)
 
     def test_003_engrave_metric_is_float(self):
         def add_metric(cluster, testi):
             return {"total_engrave_length": 141.42}
 
-        forge.inject(self.result, data_injector=add_metric)
+        topo.inject(self.result, data_injector=add_metric)
         self.assertIsInstance(self.result.clusters[0].custom["total_engrave_length"], float)
 
 
@@ -194,16 +194,16 @@ class TestInjectThreadedHoles(unittest.TestCase):
 class TestInjectDataInjector(unittest.TestCase):
 
     def setUp(self):
-        self.doc = forge.document_from_msp(
+        self.doc = topo.document_from_msp(
             load("rect_with_special_layers.dxf").modelspace(),
-            role_rules=forge.name_rules({"BEND": "bending", "MARK": "engrave"}),
+            role_rules=topo.name_rules({"BEND": "bending", "MARK": "engrave"}),
         )
-        self.result = forge.heal(self.doc)
+        self.result = topo.heal(self.doc)
         detect_flat(self.result, features="all")
 
     def test_001_data_injector_viene_chiamato(self):
         """Il data_injector deve essere chiamato e il risultato finire in custom."""
-        forge.inject(
+        topo.inject(
             self.result,
             data_injector=lambda cluster, testi: {"materiale": "acciaio"},
         )
@@ -215,13 +215,13 @@ class TestInjectDataInjector(unittest.TestCase):
         def spy(cluster, testi):
             received["testi"] = testi
             return {}
-        forge.inject(self.result, data_injector=spy)
+        topo.inject(self.result, data_injector=spy)
         self.assertIn("testi", received)
         self.assertIsInstance(received["testi"], list)
 
     def test_003_data_injector_none_non_crasha(self):
         """Senza data_injector non devono esserci eccezioni."""
-        forge.inject(self.result, data_injector=None)
+        topo.inject(self.result, data_injector=None)
         # nessuna eccezione = test passa
 
     def test_004_data_injector_eccezione_produce_warning(self):
@@ -229,21 +229,21 @@ class TestInjectDataInjector(unittest.TestCase):
         def bad_injector(cluster, testi):
             raise ValueError("errore simulato")
 
-        forge.inject(self.result, data_injector=bad_injector)
+        topo.inject(self.result, data_injector=bad_injector)
         warnings_text = " ".join(self.result.warnings)
         self.assertIn("data_injector", warnings_text)
 
     def test_005_data_injector_restituisce_none_non_crasha(self):
         """Se il data_injector restituisce None, inject() non deve crashare."""
-        forge.inject(
+        topo.inject(
             self.result,
             data_injector=lambda cluster, testi: None,
         )
         # nessuna eccezione = test passa
 
-    def test_006_data_injector_merge_con_forge_metrics(self):
+    def test_006_data_injector_merge_con_topo_metrics(self):
         """Il data_injector può aggiungere dati custom senza interferire con il resto del custom."""
-        forge.inject(
+        topo.inject(
             self.result,
             data_injector=lambda cluster, testi: {"spessore": 3.0},
         )
@@ -272,7 +272,7 @@ class TestInjectMultiPart(unittest.TestCase):
         def add_metric(cluster, testi):
             return {"marker": cluster.outer.polygon.area}
 
-        forge.inject(self.result, data_injector=add_metric)
+        topo.inject(self.result, data_injector=add_metric)
         areas = [cluster.custom["marker"] for cluster in self.result.clusters]
         self.assertEqual(len(areas), 2)
         self.assertTrue(all(isinstance(a, float) for a in areas))

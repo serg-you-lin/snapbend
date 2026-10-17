@@ -2,7 +2,7 @@
 snapbend/flat/model/classified.py
 ---------------------------------
 Una entità classificata da `detect_flat()` senza una classe dedicata
-(marking, work_type custom). Finisce in `result.classified_entities` di forge.
+(marking, work_type custom). Finisce in `result.classified_entities` di topo.
 """
 from dataclasses import dataclass
 from dataclasses import field

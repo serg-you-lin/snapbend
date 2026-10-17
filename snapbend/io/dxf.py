@@ -1,14 +1,14 @@
 """
 snapbend/io/dxf.py
 -----------------
-Export di un FlatGeometry (snapbend.model.geometry) su file DXF, via forge.
-Unico modulo di `snapbend` che importa forge — e lo fa lazy: se forge non è
+Export di un FlatGeometry (snapbend.model.geometry) su file DXF, via topo.
+Unico modulo di `snapbend` che importa topo — e lo fa lazy: se topo non è
 installato, il resto del pacchetto (calcolo dello sviluppo) funziona
 comunque; solo queste due funzioni sollevano ImportError.
 
-`FlatGeometry.to_forge_result()`/`.to_dxf()` sono deleghe sottili a queste
+`FlatGeometry.to_topo_result()`/`.to_dxf()` sono deleghe sottili a queste
 due funzioni: da fuori si continua a chiamare `flat.to_dxf(...)`, il corpo
-vive qui per tenere lo strato `model` pulito da forge.
+vive qui per tenere lo strato `model` pulito da topo.
 """
 
 from __future__ import annotations
@@ -22,22 +22,22 @@ if TYPE_CHECKING:
     from ..model.section import FlangeQuote, Section
 
 
-def to_forge_result(flat: "FlatGeometry", tolerance: float = 0.05):
+def to_topo_result(flat: "FlatGeometry", tolerance: float = 0.05):
     """
-    Traduce `flat` in un ForgeResult passando da forge.load_geometry() +
+    Traduce `flat` in un Result passando da topo.load_geometry() +
     snapbend.flat.heal_and_detect() — stesso contratto di qualsiasi altra
-    sorgente forge (DXF, PDF, ...).
+    sorgente topo (DXF, PDF, ...).
     """
     try:
-        import forge
+        import topo
     except ImportError as exc:
         raise ImportError(
-            "FlatGeometry.to_forge_result()/.to_dxf() richiedono il "
-            "pacchetto 'forge' installato a fianco "
-            "(pip install -e <percorso a forge>)."
+            "FlatGeometry.to_topo_result()/.to_dxf() richiedono il "
+            "pacchetto 'topo' installato a fianco "
+            "(pip install -e <percorso a topo>)."
         ) from exc
 
-    doc = forge.load_geometry(
+    doc = topo.load_geometry(
         flat.entities, tolerance=tolerance, source_path=flat.label,
     )
     from ..flat import heal_and_detect
@@ -58,8 +58,8 @@ def to_dxf(
     show_margin_reference: bool = False,
 ):
     """
-    Scrive `flat` su file DXF via forge.to_dxf() — layer/colori coerenti
-    col resto dell'output forge.
+    Scrive `flat` su file DXF via topo.to_dxf() — layer/colori coerenti
+    col resto dell'output topo.
 
     annotate:               blocco di testo con i valori di `flat.meta`,
                              layer "Notes" — riferimento in officina, non
@@ -70,10 +70,10 @@ def to_dxf(
                              tratteggiato sul layer "MarginReference" —
                              solo riferimento, mai geometria di taglio
     """
-    import forge
+    import topo
 
-    result = to_forge_result(flat, tolerance=tolerance)
-    doc_out = forge.to_dxf(result, allow_invalid=False)
+    result = to_topo_result(flat, tolerance=tolerance)
+    doc_out = topo.to_dxf(result, allow_invalid=False)
 
     if annotate and flat.meta:
         _write_meta_block(doc_out, result, flat.label, flat.meta, flat.bends)
@@ -108,11 +108,11 @@ def write_section_dxf(
     ambiguo da che faccia è presa una quota, perché quando non lo è si
     vede scritto.
     """
-    import forge
+    import topo
 
     flat = section.section()
-    result = to_forge_result(flat, tolerance=tolerance)
-    doc_out = forge.to_dxf(result, allow_invalid=False)
+    result = to_topo_result(flat, tolerance=tolerance)
+    doc_out = topo.to_dxf(result, allow_invalid=False)
 
     _write_flange_quotes(doc_out, quotes, section.thickness, quote_clearance)
 
@@ -139,10 +139,10 @@ def write_part_dxf(
     (Fase 3, MAP.md D32) — mai affiancati, un solo asse di offset (Y) da
     gestire per qualunque combinazione di livelli:
 
-      1. taglio          (`flat`, sempre — via forge, come `to_dxf()`)
+      1. taglio          (`flat`, sempre — via topo, come `to_dxf()`)
       2. vista in sezione (se `section_flat` è dato — SOLO riferimento:
                            linee/archi disegnati diretti, non passa da
-                           forge/snapbend.flat.heal_and_detect, per non farla scambiare
+                           topo/snapbend.flat.heal_and_detect, per non farla scambiare
                            per una seconda parte da tagliare)
       3. header           (se `include_header`: il blocco note di `flat.meta`
                            + `flat.bends` — gli angoli di piega, una riga
@@ -153,19 +153,19 @@ def write_part_dxf(
     del taglio — chiamata da `human_layer.export_part()`, non pensata per
     essere usata da sola.
     """
-    import forge
+    import topo
 
-    result = to_forge_result(flat, tolerance=tolerance)
+    result = to_topo_result(flat, tolerance=tolerance)
     # Verde SCURO per il layer "SectionView", deliberatamente diverso dal
     # verde di OuterContour (color 3, la sagoma da tagliare): la vista in
     # sezione è solo riferimento, non va scambiata per la parte vera.
-    # RoleStyle (forge D37) fa creare/colorare il layer a forge.to_dxf()
+    # RoleStyle (topo D37) fa creare/colorare il layer a topo.to_dxf()
     # stesso — non serve più farlo a mano dopo su doc_out.
     role_styles = (
-        {"SectionView": forge.RoleStyle(color=(0, 100, 0))}
+        {"SectionView": topo.RoleStyle(color=(0, 100, 0))}
         if section_flat is not None else None
     )
-    doc_out = forge.to_dxf(result, role_styles=role_styles, allow_invalid=False)
+    doc_out = topo.to_dxf(result, role_styles=role_styles, allow_invalid=False)
 
     cut_bbox = result.clusters[0].outer.bbox if result.clusters else (0.0, 0.0, 0.0, 0.0)
     x0 = cut_bbox[0]
@@ -195,7 +195,7 @@ def write_part_dxf(
 
 def _entities_bbox(entities: List[Dict[str, Any]]):
     """Bbox degli entity grezzi (linee/archi, schema `FlatGeometry.entities`)
-    senza passare da forge. Per gli archi usa il cerchio completo
+    senza passare da topo. Per gli archi usa il cerchio completo
     (centro±raggio) invece del solo arco spazzato — conservativo (mai
     sottostima), sufficiente per non sovrapporsi nello stacking."""
     xs: List[float] = []
@@ -218,13 +218,13 @@ def _entities_bbox(entities: List[Dict[str, Any]]):
 def _write_section_view_entities(doc_out, entities: List[Dict[str, Any]], dx: float, dy: float,
                                  layer: str = "SectionView") -> None:
     """Disegna la vista in sezione come linee/archi diretti, traslati di
-    (dx, dy) — SOLO riferimento, non passa da forge/snapbend.flat.heal_and_detect: se lo
+    (dx, dy) — SOLO riferimento, non passa da topo/snapbend.flat.heal_and_detect: se lo
     facesse, verrebbe rilevata come una seconda parte da tagliare, che non
     è (stesso principio di `_write_reference_lines`, qui su un layer
     pieno invece che tratteggiato perché non è un fantasma del foglio ma
     un disegno vero da leggere).
 
-    Il layer (verde scuro) è già creato e colorato da `forge.to_dxf()`
+    Il layer (verde scuro) è già creato e colorato da `topo.to_dxf()`
     via `role_styles` (vedi `write_part_dxf`) — qui si scrive solo la
     geometria."""
     msp = doc_out.modelspace()

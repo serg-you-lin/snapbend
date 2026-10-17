@@ -21,7 +21,7 @@ Due pezzi, liscio E sfaccettato:
      con `write_part_dxf()` — non passa da `export_part()` (ricalcolerebbe
      lo sviluppo con la formula sbagliata, MAP.md D45/D48).
 
-Richiede forge installato a fianco: pip install -e ../dxf-forge
+Richiede topo installato a fianco: pip install -e ../dxf-forge
 """
 
 from pathlib import Path

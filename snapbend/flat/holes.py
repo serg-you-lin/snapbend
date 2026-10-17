@@ -2,16 +2,16 @@
 snapbend/flat/holes.py
 ----------------------
 Foro filettato: il significato che snapbend dà a un arco attorno a un cerchio.
-Il fatto geometrico (arco concentrico, angolo, rapporto dei raggi) è di forge,
-`forge.geometry.arcs_around` (forge MAP.md D91); qui restano le soglie.
+Il fatto geometrico (arco concentrico, angolo, rapporto dei raggi) è di topo,
+`topo.geometry.arcs_around` (topo MAP.md D91); qui restano le soglie.
 
     is_threaded_hole — True se il cerchio è un foro filettato
 """
 
 from typing import Tuple
 
-from forge.core.geometry import arcs_around
-from forge.core.primitives.segments import ArcSeg
+from topo.core.geometry import arcs_around
+from topo.core.primitives.segments import ArcSeg
 from snapbend.flat.thresholds import THREADED_ARC_MAX_RADIUS_RATIO
 
 

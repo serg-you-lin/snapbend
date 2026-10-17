@@ -6,7 +6,7 @@ rettangolo da calandra, un cono o cilindro approssimato con N faccette
 piane (8 di default) unite da pieghe a pressopiega, per chi non ha la
 calandra. Le API di sempre (senza faceted) restano identiche.
 
-Richiede forge installato a fianco: pip install -e ../dxf-forge
+Richiede topo installato a fianco: pip install -e ../dxf-forge
 """
 
 from pathlib import Path

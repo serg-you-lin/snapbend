@@ -11,15 +11,15 @@ import unittest
 from pathlib import Path
 
 try:
-    import forge  # noqa: F401
-    FORGE_AVAILABLE = True
+    import topo  # noqa: F401
+    TOPO_AVAILABLE = True
 except ImportError:
-    FORGE_AVAILABLE = False
+    TOPO_AVAILABLE = False
 
 from snapbend import Section, export_part
 
 
-@unittest.skipUnless(FORGE_AVAILABLE, "forge non installato — pip install -e ../dxf-forge")
+@unittest.skipUnless(TOPO_AVAILABLE, "topo non installato — pip install -e ../dxf-forge")
 class TestExportPart(unittest.TestCase):
 
     def _section(self) -> Section:

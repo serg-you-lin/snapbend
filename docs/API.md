@@ -1,7 +1,7 @@
 # API — una scheda per ogni nome pubblico di `snapbend`
 
 Copre ogni nome in `snapbend.__all__` (24 nomi), più `snapbend.flat` in
-fondo (richiede forge, non è in `__all__`). Non ripete il *perché*
+fondo (richiede topo, non è in `__all__`). Non ripete il *perché*
 (quello è `MAP.md`) né il flusso generale (quello è
 `docs/ARCHITECTURE.md`) — qui solo: cosa prende, cosa ritorna, cosa
 solleva, un esempio copiabile.
@@ -61,7 +61,7 @@ uguali saldati (`split=2` = due metà). A differenza di `Cylinder`, qui
 ```python
 from snapbend import Cone
 flat = Cone(top_diameter=1600, bottom_diameter=1016, height=1000, thickness=5).develop()
-flat.to_dxf("cone.dxf")   # richiede forge installato a fianco
+flat.to_dxf("cone.dxf")   # richiede topo installato a fianco
 ```
 
 ### `Cylinder`
@@ -311,8 +311,8 @@ read_section(
 
 Legge un contorno (linee/archi/cerchi) e decide se è lamiera piegata —
 l'inverso di `Section`: da un contorno a spessore/segmenti/angoli
-invece che il contrario. Zero dipendenze da forge (MAP.md D43/D44 —
-provata e ritrattata un'integrazione nativa con forge). Non solleva
+invece che il contrario. Zero dipendenze da topo (MAP.md D43/D44 —
+provata e ritrattata un'integrazione nativa con topo). Non solleva
 mai: un contorno non riconosciuto torna con `is_sheet_metal=False` e/o
 `notes` che spiega perché, mai un'eccezione.
 
@@ -360,7 +360,7 @@ ESTERNO-ESTERNO (come le dà un carpentiere) e converte da sola.
 | `.flange_faces() -> list[FlangeFace]` | per ogni flangia, la faccia esterna se coerente |
 | `.flange_quotes() -> list[FlangeQuote]` | la quota da disegnare per ogni flangia |
 | `.section() -> FlatGeometry` | il contorno pieno del pezzo piegato, un loop chiuso |
-| `.to_dxf(path, tolerance=0.05, quote_clearance=8.0)` | scrive la vista in sezione quotata su file (richiede forge) |
+| `.to_dxf(path, tolerance=0.05, quote_clearance=8.0)` | scrive la vista in sezione quotata su file (richiede topo) |
 
 `.section()`/`._centerline_primitives()` sollevano `ValueError` se una
 flangia è troppo corta per il raggio/angolo delle pieghe adiacenti
@@ -390,15 +390,15 @@ FlatGeometry(
 
 Il contratto neutro fra `snapbend` e chiunque a valle — output di ogni
 `.develop()`/`.section()`. `entities` è nello stesso schema di
-`forge.load_geometry()`, zero import di forge in questo modulo.
+`topo.load_geometry()`, zero import di topo in questo modulo.
 
 | metodo | ritorna | richiede |
 |---|---|---|
-| `.to_forge_result(tolerance=0.05)` | `ForgeResult` di forge | forge installato |
-| `.to_dxf(path, tolerance=0.05, annotate=True, show_margin_reference=False)` | scrive un file DXF (con `annotate=True`, il blocco note include anche `.bends`, MAP.md D47) | forge installato |
+| `.to_topo_result(tolerance=0.05)` | `Result` di topo | topo installato |
+| `.to_dxf(path, tolerance=0.05, annotate=True, show_margin_reference=False)` | scrive un file DXF (con `annotate=True`, il blocco note include anche `.bends`, MAP.md D47) | topo installato |
 
-**Raises**: `ImportError` da entrambi i metodi se forge non è
-installato (messaggio esplicito, `pip install -e <path a forge>`).
+**Raises**: `ImportError` da entrambi i metodi se topo non è
+installato (messaggio esplicito, `pip install -e <path a topo>`).
 
 ### `polar_point`
 
@@ -455,7 +455,7 @@ Esporta un pezzo su un unico file DXF a livelli impilati in verticale:
 taglio (sempre) + vista in sezione quotata (`include_section=True`) +
 header con i valori di `meta` **e gli angoli di piega** (`flat.bends`,
 una riga sola se sono tutti uguali — MAP.md D47) se `include_header=True`.
-**Mutates**: scrive `path` su disco. **Raises**: richiede forge
+**Mutates**: scrive `path` su disco. **Raises**: richiede topo
 installato (via `io.dxf.write_part_dxf`); propaga le eccezioni di
 `section.to_bent_profile(width, calibration).develop()`.
 
@@ -543,34 +543,34 @@ flangia — succede sull'anima di una Z/omega (MAP.md D1), mai su L/U.
 
 ---
 
-## Lettura di un pezzo piano — `snapbend.flat` (richiede forge)
+## Lettura di un pezzo piano — `snapbend.flat` (richiede topo)
 
-Arrivato da forge (forge MAP.md D88/D90, qui D51). Lavora sopra un
-`forge.ForgeResult` e scrive su `cluster.detected` (l'overlay di forge).
+Arrivato da topo (topo MAP.md D88/D90, qui D51). Lavora sopra un
+`topo.Result` e scrive su `cluster.detected` (l'overlay di topo).
 Presuppone un pezzo piano visto dalla faccia (file di taglio, sviluppo): mai
-sull'output di `forge.island()`.
+sull'output di `topo.island()`.
 
 ```python
 snapbend.flat.heal_and_detect(doc, tolerance=None, label="", source_file="",
                               features="all", max_drill_diameter=32.1,
-                              bending_tolerance=1.0, engrave_tolerance=1.0) -> ForgeResult
+                              bending_tolerance=1.0, engrave_tolerance=1.0) -> Result
 snapbend.flat.detect_flat(result, features=None, *, max_drill_diameter=32.1,
-                          bending_tolerance=1.0, engrave_tolerance=1.0) -> ForgeResult
+                          bending_tolerance=1.0, engrave_tolerance=1.0) -> Result
 snapbend.flat.describe_features(cluster) -> dict
 ```
 
-- **`heal_and_detect`** — `forge.heal(doc, is_structural=snapbend.flat.is_structural)`
+- **`heal_and_detect`** — `topo.heal(doc, is_structural=snapbend.flat.is_structural)`
   + `detect_flat(features="all")`; salta la detection se heal non produce
   parti valide.
 - **`detect_flat`** — nudo: solo i ruoli assegnati al load (`role_rules` di
-  forge). `features` (`"holes"`, `"bending"`, `"engrave"`, `"all"`):
+  topo). `features` (`"holes"`, `"bending"`, `"engrave"`, `"all"`):
   - fori: contorno interno circolare Ø < `max_drill_diameter` → `Hole`
     (`plain` / `countersink` / `threaded`); sopra soglia resta contorno.
-    Svasatura: nel gruppo di cerchi concentrici (`forge.geometry.concentric_groups`,
+    Svasatura: nel gruppo di cerchi concentrici (`topo.geometry.concentric_groups`,
     centri entro 1 mm) ogni cerchio prende come anello esterno il più
     piccolo dei più grandi ancora liberi; l'anello sparisce da `inners`,
     il suo Ø va in `outer_diameter`. Filettato: attorno al cerchio un arco
-    (`forge.geometry.arcs_around`, centro entro 1 mm) a 270° ± 35° con rapporto dei
+    (`topo.geometry.arcs_around`, centro entro 1 mm) a 270° ± 35° con rapporto dei
     raggi ≤ 1.6 — `snapbend.flat.holes.is_threaded_hole` (D55);
   - pieghe: una linea dritta che, prolungata di 1 mm, divide il pezzo in due
     (D52); tratti sulla stessa retta separati solo da un vuoto valgono come
@@ -583,22 +583,22 @@ snapbend.flat.describe_features(cluster) -> dict
   collineari), `total_engrave_length`, `total_marking_length`.
 - Ruoli e layer: `HOLE`, `COUNTERSINK`, `THREADED_HOLE`, `BEND`, `ENGRAVE`,
   `MARKING`, `LAYER_*`, `is_structural(role)`; all'import registra colori e
-  nomi layer in forge (`register_role_style`).
-- Tipi: `Hole` (`is_void = True`: forge lo toglie dall'area), `BendingLine`,
-  `Engraving`, `ClassifiedEntity`; `contours` dice a forge su che layer
+  nomi layer in topo (`register_role_style`).
+- Tipi: `Hole` (`is_void = True`: topo lo toglie dall'area), `BendingLine`,
+  `Engraving`, `ClassifiedEntity`; `contours` dice a topo su che layer
   disegnarli (una svasatura sul suo layer, una piega come LINE).
 
 ### `trim_bending_lines`, `DashPattern`
 
 ```python
 snapbend.flat.DashPattern(head, tail, middle=0.0, n_middle=0)
-snapbend.flat.trim_bending_lines(result, pattern: DashPattern | DashRule) -> ForgeResult
+snapbend.flat.trim_bending_lines(result, pattern: DashPattern | DashRule) -> Result
 # DashRule = Callable[[BendingLine], DashPattern | None]
 ```
 
 Tratteggia le pieghe (D63): un tratto `head` sul primo capo, uno `tail`
 sull'ultimo, `n_middle` tratti `middle` in mezzo, vuoti uguali
-(`forge.geometry.dash_line`). `pattern` è una misura per tutte le pieghe, o una
+(`topo.geometry.dash_line`). `pattern` è una misura per tutte le pieghe, o una
 regola che la sceglie piega per piega; `None` dalla regola, o tratti che coprono
 tutta la piega, la lasciano intera.
 
@@ -614,13 +614,13 @@ trim_bending_lines(result, lambda bl: None if bl.length < 100 else DashPattern(2
 ```
 
 ```python
-import forge
+import topo
 from snapbend.flat import heal_and_detect, describe_features
 
-result = heal_and_detect(forge.load_dxf("pezzo.dxf", tolerance=0.5))
+result = heal_and_detect(topo.load_dxf("pezzo.dxf", tolerance=0.5))
 if result.is_valid:
     print(describe_features(result.clusters[0]))
-    forge.to_dxf(result, allow_invalid=False).saveas("pezzo_letto.dxf")
+    topo.to_dxf(result, allow_invalid=False).saveas("pezzo_letto.dxf")
 ```
 
 ---
@@ -636,7 +636,7 @@ flat = BentProfile(
     flanges=[100, 110], bends=[Bend(angle=90)],
     thickness=3, width=300, calibration="default",
 ).develop()
-flat.to_dxf("sviluppo.dxf")           # richiede forge
+flat.to_dxf("sviluppo.dxf")           # richiede topo
 
 # 2. Le quote come le dà un carpentiere (esterno-esterno), non a mezzeria
 sec = Section.from_external_flanges("L", [100, 110], [90], thickness=3)

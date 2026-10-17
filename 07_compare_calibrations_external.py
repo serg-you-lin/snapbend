@@ -12,7 +12,7 @@ la calibrazione calcola l'accorciamento. `inside_sum` è a parte (MAP.md
 D35): lavora in quote INTERNE, quindi qui si convertono le quote esterne
 in interne e si sommano — niente passaggio per la mezzeria.
 
-Richiede forge installato a fianco per il DXF: pip install -e ../dxf-forge
+Richiede topo installato a fianco per il DXF: pip install -e ../dxf-forge
 """
 
 from pathlib import Path

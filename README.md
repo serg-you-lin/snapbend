@@ -16,8 +16,8 @@ Z, an omega…).
 
 `.develop()` has **no dependencies**: it does trigonometry and returns a
 `FlatGeometry` — plain Python data (a list of geometric entities in a neutral
-schema + computed values). No DXF, no forge. Only `.to_dxf()` touches
-[forge](https://github.com/serg-you-lin/forge), and only if you call it.
+schema + computed values). No DXF, no topo. Only `.to_dxf()` touches
+[topo](https://github.com/serg-you-lin/topo), and only if you call it.
 
 ```python
 from snapbend import Cone, Cylinder
@@ -36,10 +36,10 @@ pip install -e .
 ```
 
 `.develop()` works immediately, with nothing else. For `.to_dxf()` and `snapbend.flat` you also need
-[forge](https://github.com/serg-you-lin/forge) installed alongside (it is not on PyPI):
+[topo](https://github.com/serg-you-lin/topo) installed alongside (it is not on PyPI):
 
 ```
-pip install -e ../forge
+pip install -e ../topo
 ```
 
 ## The conventions that matter
@@ -174,12 +174,12 @@ variable, no setup (MAP D61). The two built-in calibrations are `default` and `i
 in a script, and snapbend reads `<officina>/calibrations/<name>.json` and
 `<officina>/sheet_thicknesses.json` before the built-in ones (MAP D60).
 
-## The neutral contract with forge
+## The neutral contract with topo
 
-`FlatGeometry.entities` is in the same schema `forge.load_geometry()` accepts —
-it is the neutral contract between the two projects. `snapbend` never imports forge
-for the calculation; forge is only needed by `to_dxf()` and by `snapbend.flat`,
-the reading of a flat cutting file on top of `forge.heal()` (holes, countersinks,
+`FlatGeometry.entities` is in the same schema `topo.load_geometry()` accepts —
+it is the neutral contract between the two projects. `snapbend` never imports topo
+for the calculation; topo is only needed by `to_dxf()` and by `snapbend.flat`,
+the reading of a flat cutting file on top of `topo.heal()` (holes, countersinks,
 threaded holes, bend lines, engraving). If you do not want to go
 through `to_dxf()`, consume `.entities` / `.meta` / `.bends` directly.
 

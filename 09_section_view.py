@@ -13,7 +13,7 @@ Due esempi:
   - una Z: la flangia centrale (fra due pieghe di verso opposto) non ha
     faccia coerente, la sua quota esce "a mezzeria" col testo che lo dice.
 
-Richiede forge installato a fianco: pip install -e ../dxf-forge
+Richiede topo installato a fianco: pip install -e ../dxf-forge
 """
 
 from pathlib import Path

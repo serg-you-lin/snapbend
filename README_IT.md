@@ -16,8 +16,8 @@ una staffa a U, una Z, un'omega…).
 
 `.develop()` **non ha dipendenze**: fa trigonometria e ritorna un
 `FlatGeometry` — dati Python puri (una lista di entità geometriche in uno schema
-neutro + i valori calcolati). Niente DXF, niente forge. Solo `.to_dxf()` tocca
-[forge](https://github.com/serg-you-lin/forge), e solo se lo chiami tu.
+neutro + i valori calcolati). Niente DXF, niente topo. Solo `.to_dxf()` tocca
+[topo](https://github.com/serg-you-lin/topo), e solo se lo chiami tu.
 
 ```python
 from snapbend import Cone, Cylinder
@@ -36,10 +36,10 @@ pip install -e .
 ```
 
 `.develop()` funziona subito, senza altro. Per `.to_dxf()` e `snapbend.flat` serve anche
-[forge](https://github.com/serg-you-lin/forge) installato a fianco (non è su PyPI):
+[topo](https://github.com/serg-you-lin/topo) installato a fianco (non è su PyPI):
 
 ```
-pip install -e ../forge
+pip install -e ../topo
 ```
 
 ## Le convenzioni che contano
@@ -174,13 +174,13 @@ una sua **cartella officina**, fuori dal pacchetto: `snapbend.set_officina(perco
 in uno script, e snapbend legge `<officina>/calibrations/<nome>.json` e
 `<officina>/sheet_thicknesses.json` prima di quelli inclusi (MAP D60).
 
-## Il contratto neutro con forge
+## Il contratto neutro con topo
 
 `FlatGeometry.entities` è nello stesso schema accettato da
-`forge.load_geometry()` — è il contratto neutro fra i due progetti (la lettura di
-un file di taglio sopra `forge.heal()` — fori, svasature, filettati, pieghe,
-incisioni — sta in `snapbend.flat`, che richiede forge). `snapbend` non
-importa mai forge per il calcolo; forge serve solo a `to_dxf()`. Se non vuoi
+`topo.load_geometry()` — è il contratto neutro fra i due progetti (la lettura di
+un file di taglio sopra `topo.heal()` — fori, svasature, filettati, pieghe,
+incisioni — sta in `snapbend.flat`, che richiede topo). `snapbend` non
+importa mai topo per il calcolo; topo serve solo a `to_dxf()`. Se non vuoi
 passare da `to_dxf()`, consuma `.entities` / `.meta` / `.bends` direttamente.
 
 ## Documentazione

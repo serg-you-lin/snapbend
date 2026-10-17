@@ -8,7 +8,7 @@ fianco (apri i due DXF in AutoCAD, o guarda i numeri stampati qui sotto).
 Modifica i parametri qui sotto per riprodurre il caso che ti sembra "molto
 diverso" e rilancia.
 
-Richiede forge installato a fianco: pip install -e ../dxf-forge
+Richiede topo installato a fianco: pip install -e ../dxf-forge
 """
 
 from pathlib import Path
@@ -46,8 +46,8 @@ def main() -> None:
     ).develop()
     faceted.to_dxf(OUTPUT_DIR / "confronto_cono_sfaccettato.dxf")
 
-    result_smooth = smooth.to_forge_result()
-    result_faceted = faceted.to_forge_result()
+    result_smooth = smooth.to_topo_result()
+    result_faceted = faceted.to_topo_result()
     area_smooth = result_smooth.parts[0].outer.area
     area_faceted = result_faceted.parts[0].outer.area
     bbox_smooth = result_smooth.parts[0].outer.bbox

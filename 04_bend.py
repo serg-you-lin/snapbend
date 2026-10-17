@@ -141,7 +141,7 @@ def main() -> None:
     print("  - ogni riga dice quale cava ha usato e da dove viene il numero.")
     print()
 
-    # --- un DXF, giusto per vederlo (serve forge installato a fianco) ---
+    # --- un DXF, giusto per vederlo (serve topo installato a fianco) ---
     try:
         sviluppo("default").to_dxf(OUTPUT_DIR / "squadra_a_l.dxf")
         print(f"DXF di controllo (default) in {OUTPUT_DIR.resolve()}")

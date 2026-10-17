@@ -1,7 +1,7 @@
 """
 tests/flat/test_helpers.py
 --------------------------
-(arrivato da forge tests/integration/test_helpers.py, forge MAP.md D88)
+(arrivato da topo tests/integration/test_helpers.py, topo MAP.md D88)
 
 Helper condivisi per test pipeline e semantic integrity.
 
@@ -16,7 +16,7 @@ from pathlib import Path
 import tempfile
 import ezdxf
 
-import forge
+import topo
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
 
 
@@ -65,14 +65,14 @@ def run_pipeline(
 
     path = load(dxf_name)
 
-    doc = forge.load_dxf(
+    doc = topo.load_dxf(
         path,
         explode_inserts=True,
         tolerance=tolerance,
-        role_rules=forge.name_rules(special_layers or {}),
+        role_rules=topo.name_rules(special_layers or {}),
     )
 
-    result = forge.heal(
+    result = topo.heal(
         doc,
         tolerance=tolerance,
         label=Path(dxf_name).stem,
@@ -85,11 +85,11 @@ def run_pipeline(
         )
 
     if do_inject:
-        forge.inject(result)
+        topo.inject(result)
 
     doc_out = None
     if do_write:
-        doc_out = forge.to_dxf(result, doc)
+        doc_out = topo.to_dxf(result, doc)
 
     output = {
         "doc": doc,
@@ -110,11 +110,11 @@ def run_pipeline(
 
         tmp.close()
 
-        (doc_out or forge.to_dxf(result, doc)).saveas(tmp.name)
+        (doc_out or topo.to_dxf(result, doc)).saveas(tmp.name)
 
-        reloaded_doc = forge.load_dxf(tmp.name, explode_inserts=True, tolerance=tolerance)
+        reloaded_doc = topo.load_dxf(tmp.name, explode_inserts=True, tolerance=tolerance)
 
-        reloaded_result = forge.heal(
+        reloaded_result = topo.heal(
             reloaded_doc,
             tolerance=tolerance,
             label=f"{Path(dxf_name).stem}_reloaded",
@@ -141,7 +141,7 @@ def count_entities_on_layer(msp, layer_name):
 
 def get_part(result, index=0):
     """
-    Restituisce un ForgeCluster.
+    Restituisce un Cluster.
     """
     return result.clusters[index]
 

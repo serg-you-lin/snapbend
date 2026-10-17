@@ -1,7 +1,7 @@
 """
 tests/flat/test_pipeline.py
 ---------------------------
-(arrivato da forge tests/integration/test_pipeline.py, forge MAP.md D88)
+(arrivato da topo tests/integration/test_pipeline.py, topo MAP.md D88)
 
 Test semantic pipeline integrity.
 

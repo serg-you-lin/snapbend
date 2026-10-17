@@ -10,10 +10,10 @@ import math
 import unittest
 
 try:
-    import forge  # noqa: F401
-    FORGE_AVAILABLE = True
+    import topo  # noqa: F401
+    TOPO_AVAILABLE = True
 except ImportError:
-    FORGE_AVAILABLE = False
+    TOPO_AVAILABLE = False
 
 from snapbend import Section
 from snapbend.rules.deduction import external_flanges_to_centerline
@@ -108,7 +108,7 @@ class TestFlangeQuotes(unittest.TestCase):
         self.assertIn("FlangeQuote", snapbend.__all__)
 
 
-@unittest.skipUnless(FORGE_AVAILABLE, "forge non installato — pip install -e ../dxf-forge")
+@unittest.skipUnless(TOPO_AVAILABLE, "topo non installato — pip install -e ../dxf-forge")
 class TestSectionToDxf(unittest.TestCase):
 
     def test_scrive_un_file_con_le_quote(self):

@@ -73,8 +73,8 @@ python tests/generate_section.py
 ```
 
 Scrive in `output/sections/` (rigenerabile, ignorata da git) sia
-`.dxf` (via forge, per guardarle) sia `.json` (entita' neutre + parametri,
-per i test con `forge.load_geometry` senza passare da un file). Una
+`.dxf` (via topo, per guardarle) sia `.json` (entita' neutre + parametri,
+per i test con `topo.load_geometry` senza passare da un file). Una
 sezione per forma x spessore (1, 3, 10): 12 in totale, meno quelle
 geometricamente impossibili.
 
@@ -86,5 +86,5 @@ raggio interno 1 mm le 12 sezioni del set golden si generano tutte.
 
 `tests/test_read_section.py` — giro chiuso: `Section` -> sezione -> buttata
 via tutto tranne il contorno -> `read_section` ricava spessore,
-segmenti e angoli; devono tornare i parametri di partenza. Non serve forge
+segmenti e angoli; devono tornare i parametri di partenza. Non serve topo
 ne' i dati cliente, gira sempre.

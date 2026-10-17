@@ -3,7 +3,7 @@ snapbend/flat/detect.py
 -----------------------
 `detect_flat()`: la lettura di processo di un pezzo piano visto dalla sua
 faccia (file di taglio / sviluppo) — fori, pieghe, incisioni, sopra il
-risultato di `forge.heal()`. Arrivato da forge (forge MAP.md D88).
+risultato di `topo.heal()`. Arrivato da topo (topo MAP.md D88).
 """
 
 from __future__ import annotations
@@ -12,12 +12,12 @@ from typing import Optional
 
 from shapely.geometry import LineString, Point
 
-from forge.model import ForgeResult, ForgeCluster
-from forge.model.curve import OpenCurve
-from forge.model.role import ContourRole, role_str, is_structural_role
+from topo.model import Result, Cluster
+from topo.model.curve import OpenCurve
+from topo.model.role import ContourRole, role_str, is_structural_role
 from .roles import HOLE, COUNTERSINK, THREADED_HOLE, BEND, ENGRAVE, MARKING
-from forge.model.detected import DetectedFeatures
-from forge.core.geometry import concentric_groups
+from topo.model.detected import DetectedFeatures
+from topo.core.geometry import concentric_groups
 from .model import (
     BendingLine,
     ClassifiedEntity,
@@ -27,20 +27,20 @@ from .model import (
     HOLE_TYPE_THREADED,
 )
 from .holes import is_threaded_hole
-from forge.core.geometry.measure import (
+from topo.core.geometry.measure import (
     track_points, track_length, track_shape_type, circular_geometry, chord_angle_deg,
 )
-from forge.core.geometry.lines import group_collinear_lines, splits_polygon, bridged_runs
+from topo.core.geometry.lines import group_collinear_lines, splits_polygon, bridged_runs
 from .thresholds import HOLE_DIAMETER_THRESHOLD
 
 # Tolleranza per raggruppare le bending line collineari in un'unica piega
-# logica. Era `_BENDING_GROUP_TOLERANCE` su `ForgeCluster.summary` prima del
+# logica. Era `_BENDING_GROUP_TOLERANCE` su `Cluster.summary` prima del
 # refactor detect-overlay — `describe_features()` ha preso il posto di quella
 # property (MAP.md D8, D44).
 _BENDING_GROUP_TOLERANCE = 0.1
 
 
-def _ensure_detected(cluster: ForgeCluster) -> DetectedFeatures:
+def _ensure_detected(cluster: Cluster) -> DetectedFeatures:
     """`cluster.detected`, creandolo alla prima scrittura."""
     if cluster.detected is None:
         cluster.detected = DetectedFeatures()
@@ -99,13 +99,13 @@ _ROLE_TO_HOLE_TYPE = {
 # ---------------------------------------------------------------------------
 
 def detect_flat(
-    result:            ForgeResult,
+    result:            Result,
     features=None,
     *,
     max_drill_diameter: float = HOLE_DIAMETER_THRESHOLD,
     bending_tolerance: float = 1.0,
     engrave_tolerance: float = 1.0,
-) -> ForgeResult:
+) -> Result:
     """
     Classifica le feature dentro le parti già trovate da heal().
 
@@ -123,7 +123,7 @@ def detect_flat(
     punta, sopra resta un contorno interno.
 
     Muta `result` in-place (parti, trash_entities, classified_entities) e lo
-    ritorna, così la catena resta esplicita: `result = forge.detect_flat(result)`.
+    ritorna, così la catena resta esplicita: `result = topo.detect_flat(result)`.
     """
     feats = _normalize_features(features)
 
@@ -137,17 +137,17 @@ def detect_flat(
     return result
 
 
-def describe_features(cluster: ForgeCluster) -> dict:
+def describe_features(cluster: Cluster) -> dict:
     """
-    Conteggio ricco per i tipi **noti di forge** — fori per tipo, pieghe
-    raggruppate, lunghezza incisioni/marcature. Era `ForgeCluster.summary`
+    Conteggio ricco per i tipi **noti di topo** — fori per tipo, pieghe
+    raggruppate, lunghezza incisioni/marcature. Era `Cluster.summary`
     per intero prima del refactor detect-overlay (MAP.md D8, D44): si è
     spostato qui perché serve le costanti `HOLE_TYPE_*`, che `model/` non può
     importare da `tools/`.
 
     Non sostituisce `cluster.summary` (property, generica, sempre
     disponibile anche con solo `heal()`): è un livello in più sopra, per chi
-    vuole il dettaglio dei tipi che solo forge sa riconoscere. Un tool
+    vuole il dettaglio dei tipi che solo topo sa riconoscere. Un tool
     esterno che attacca un suo nome custom a `cluster.detected` non compare
     qui — compare già in `cluster.summary` come conteggio grezzo.
     """
@@ -186,7 +186,7 @@ def describe_features(cluster: ForgeCluster) -> dict:
 # Step 1 — labeled shapes
 # ---------------------------------------------------------------------------
 
-def _detect_labeled(result: ForgeResult) -> None:
+def _detect_labeled(result: Result) -> None:
     classified_ids = set()
 
     for proxy in result.trash_entities:
@@ -264,7 +264,7 @@ def _detect_labeled(result: ForgeResult) -> None:
                 continue
 
             if inner.role not in _DETECT_KNOWN_ROLES:
-                # Ruolo di un consumatore su un loop interno: forge non lo
+                # Ruolo di un consumatore su un loop interno: topo non lo
                 # classifica, resta un inner del cluster (D27, D30).
                 remaining.append(inner)
                 continue
@@ -315,9 +315,9 @@ def _bending_line(cluster, start, end, length, source="geometric"):
     )
 
 
-def _detect_bending(result: ForgeResult, bending_tolerance: float = 1.0) -> None:
+def _detect_bending(result: Result, bending_tolerance: float = 1.0) -> None:
     """
-    Una piega attraversa il pezzo (`forge.geometry.splits_polygon`, prolungata di
+    Una piega attraversa il pezzo (`topo.geometry.splits_polygon`, prolungata di
     `_BEND_REACH`). Se un vuoto la interrompe,
     i tratti sulla stessa retta separati solo da vuoti valgono come una
     piega: la retta che li unisce deve attraversare il pezzo, e sul layer
@@ -382,7 +382,7 @@ def _detect_bending(result: ForgeResult, bending_tolerance: float = 1.0) -> None
 _CONCENTRIC_TOLERANCE = 1.0   # mm — distanza max fra i centri per un countersink
 
 
-def _detect_holes(result: ForgeResult, max_drill_diameter: float = HOLE_DIAMETER_THRESHOLD) -> None:
+def _detect_holes(result: Result, max_drill_diameter: float = HOLE_DIAMETER_THRESHOLD) -> None:
     """
     Lane geometrica: promuove a `Hole` i contorni interni circolari.
 
@@ -391,13 +391,13 @@ def _detect_holes(result: ForgeResult, max_drill_diameter: float = HOLE_DIAMETER
       - coppie concentriche (cerchio piccolo dentro cerchio grande) → countersink
         (il piccolo diventa `Hole`, l'anello grande viene assorbito);
       - contorni circolari con Ø < `max_drill_diameter` → foro (plain / threaded);
-      - Ø >= `max_drill_diameter` → restano `ForgeContour` in `cluster.inners`.
+      - Ø >= `max_drill_diameter` → restano `Contour` in `cluster.inners`.
     """
     for cluster in result.clusters:
         _promote_geometric_holes(cluster, result, max_drill_diameter)
 
 
-def _circular_inners(cluster: ForgeCluster) -> list:
+def _circular_inners(cluster: Cluster) -> list:
     """(contour, diameter, center) per ogni inner geometricamente circolare."""
     out = []
     for c in cluster.inners:
@@ -409,7 +409,7 @@ def _circular_inners(cluster: ForgeCluster) -> list:
     return out
 
 
-def _promote_geometric_holes(cluster: ForgeCluster, result: ForgeResult,
+def _promote_geometric_holes(cluster: Cluster, result: Result,
                              max_drill_diameter: float) -> None:
     circ = _circular_inners(cluster)
     if not circ:
@@ -418,7 +418,7 @@ def _promote_geometric_holes(cluster: ForgeCluster, result: ForgeResult,
     swallowed: set = set()      # id(contour) degli anelli esterni di countersink
     promoted:  dict = {}        # id(contour) -> Hole
 
-    # --- countersink: nel gruppo concentrico (forge D91) ogni cerchio si
+    # --- countersink: nel gruppo concentrico (topo D91) ogni cerchio si
     #     accoppia col più piccolo dei cerchi più grandi ancora liberi ---
     by_id = {id(c): (c, d, ctr) for c, d, ctr in circ}
     for group in concentric_groups([c for c, _, _ in circ], tolerance=_CONCENTRIC_TOLERANCE):
@@ -487,7 +487,7 @@ def _hole_from_contour(contour, diameter, center, *, hole_type, confidence,
 
 
 def _labeled_hole_from_contour(contour):
-    """`ForgeContour` con ruolo foro da role_rules → `Hole(source="labeled")`."""
+    """`Contour` con ruolo foro da role_rules → `Hole(source="labeled")`."""
     from .model import Hole
 
     dia, ctr = circular_geometry(contour.polygon, getattr(contour, "segments", []))
@@ -509,7 +509,7 @@ def _labeled_hole_from_contour(contour):
 # Step — inferenza engrave (PLACEHOLDER)
 # ---------------------------------------------------------------------------
 
-def _detect_engrave(result: ForgeResult, engrave_tolerance: float = 1.0) -> None:
+def _detect_engrave(result: Result, engrave_tolerance: float = 1.0) -> None:
     """
     Inferenza geometrica delle incisioni — NON ANCORA IMPLEMENTATA.
 
@@ -564,7 +564,7 @@ def _engraving_from_closed(polygon, segments, cluster_label: str = "",
     )
 
 
-def _handle_engrave_open(proxy: OpenCurve, result: ForgeResult) -> bool:
+def _handle_engrave_open(proxy: OpenCurve, result: Result) -> bool:
     """
     Smista una traccia engrave aperta per contenimento.
 
@@ -592,7 +592,7 @@ def _handle_engrave_open(proxy: OpenCurve, result: ForgeResult) -> bool:
     return False
 
 
-def _handle_engrave_closed_trash(proxy, result: ForgeResult) -> bool:
+def _handle_engrave_closed_trash(proxy, result: Result) -> bool:
     """
     Come _handle_engrave_open ma per una traccia engrave già chiusa
     (CIRCLE / SPLINE chiusa su layer engrave). Contenimento sul
@@ -611,7 +611,7 @@ def _handle_engrave_closed_trash(proxy, result: ForgeResult) -> bool:
     return False
 
 
-def _handle_engrave_closed(inner, cluster: ForgeCluster) -> None:
+def _handle_engrave_closed(inner, cluster: Cluster) -> None:
     _ensure_detected(cluster).add("engrave_lines", _engraving_from_closed(
         inner.polygon,
         getattr(inner, "segments", []),
@@ -627,7 +627,7 @@ def _handle_engrave_closed(inner, cluster: ForgeCluster) -> None:
 _LABEL_COVER_EPS = 1e-3  # mm — precisione geometrica, non tolleranza utente (v. MAP.md D54)
 
 
-def _belongs_to_cluster(ce: ClassifiedEntity, cluster: ForgeCluster) -> bool:
+def _belongs_to_cluster(ce: ClassifiedEntity, cluster: Cluster) -> bool:
     """
     Un'entità aperta (marking/bending) appartiene al cluster se la sua
     geometria INTERA è coperta dal contorno outer — non solo un punto
@@ -642,7 +642,7 @@ def _belongs_to_cluster(ce: ClassifiedEntity, cluster: ForgeCluster) -> bool:
     return probe is not None and cluster.outer.polygon.contains(probe)
 
 
-def _assign_to_part(ce: ClassifiedEntity, result: ForgeResult) -> None:
+def _assign_to_part(ce: ClassifiedEntity, result: Result) -> None:
     work_type = ce.work_type.lower()
 
     for cluster in result.clusters:
@@ -663,7 +663,7 @@ def _assign_to_part(ce: ClassifiedEntity, result: ForgeResult) -> None:
     )
 
 
-def _write_custom(ce: ClassifiedEntity, cluster: ForgeCluster) -> None:
+def _write_custom(ce: ClassifiedEntity, cluster: Cluster) -> None:
     key_map = {
         "bending": "bending_lines",
         "marking": "marking_entities",

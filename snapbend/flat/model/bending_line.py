@@ -1,7 +1,7 @@
 """
 snapbend/flat/model/bending_line.py
 -----------------------------------
-Linea di piega letta da `detect_flat()` (arrivata da forge, forge MAP.md D88).
+Linea di piega letta da `detect_flat()` (arrivata da topo, topo MAP.md D88).
 `geometry` è sempre l'asse intero; `dashes`, se c'è, è come la piega si
 disegna (`trim_bending_lines`, MAP.md D63).
 """
@@ -13,9 +13,9 @@ from typing import Any, Optional
 
 from shapely.geometry import LineString
 
-from forge.core.primitives import LineSeg
-from forge.model.curve import OpenCurve
-from forge.model.role import ContourRole
+from topo.core.primitives import LineSeg
+from topo.model.curve import OpenCurve
+from topo.model.role import ContourRole
 from snapbend.flat.roles import BEND
 from .render import RenderContour
 
@@ -41,7 +41,7 @@ class BendingLine(OpenCurve):
 
     @property
     def contours(self) -> list:
-        """Disegno per forge: una LINE dal primo all'ultimo punto, o una LINE per tratto."""
+        """Disegno per topo: una LINE dal primo all'ultimo punto, o una LINE per tratto."""
         if self.dashes:
             return [RenderContour(role=self.role, segments=[LineSeg(a, b)]) for a, b in self.dashes]
         coords = list(self.geometry.coords) if self.geometry is not None else []

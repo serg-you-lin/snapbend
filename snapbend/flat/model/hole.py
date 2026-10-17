@@ -1,16 +1,16 @@
 """
 snapbend/flat/model/hole.py
 ---------------------------
-Foro letto da `detect_flat()` su un contorno interno di forge (arrivato da
-forge, forge MAP.md D88).
+Foro letto da `detect_flat()` su un contorno interno di topo (arrivato da
+topo, topo MAP.md D88).
 """
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, Any, List
 from shapely.geometry import Polygon
 
-from forge.core.primitives import LineSeg, ArcSeg, CircleSeg, SplineSeg
-from forge.model.curve import ClosedCurve
-from forge.model.role import ContourRole
+from topo.core.primitives import LineSeg, ArcSeg, CircleSeg, SplineSeg
+from topo.model.curve import ClosedCurve
+from topo.model.role import ContourRole
 from snapbend.flat.roles import HOLE, COUNTERSINK, THREADED_HOLE
 from .render import RenderContour
 
@@ -45,12 +45,12 @@ class Hole(ClosedCurve):
 
     @property
     def is_void(self) -> bool:
-        """Per forge (D90): un foro è un vuoto del pezzo, conta nell'area netta."""
+        """Per topo (D90): un foro è un vuoto del pezzo, conta nell'area netta."""
         return True
 
     @property
     def contours(self) -> list:
-        """Disegno per forge: la svasatura e il filettato hanno il loro layer."""
+        """Disegno per topo: la svasatura e il filettato hanno il loro layer."""
         role = {HOLE_TYPE_COUNTERSINK: COUNTERSINK,
                 HOLE_TYPE_THREADED: THREADED_HOLE}.get(self.hole_type, self.role)
         return [RenderContour(role=role, segments=self.segments,

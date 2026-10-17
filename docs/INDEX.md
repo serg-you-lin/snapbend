@@ -46,8 +46,8 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `deduction_din6935` | func | `snapbend/rules/deduction.py:81` | Accorciamento di piega con K stimato DIN 6935 (scorciatoia di |
 | `DeductionInfo` | class | `snapbend/rules/deduction.py:197` | Accorciamento di piega + da dove viene il numero. |
 | `default_radius` | func | `snapbend/rules/deduction.py:102` | Raggio interno quando non c'è né un raggio esplicito né una cava nota: |
-| `describe_features` | func | `snapbend/flat/detect.py:140` | Conteggio ricco per i tipi **noti di forge** — fori per tipo, pieghe |
-| `_detect_bending` | func | `snapbend/flat/detect.py:318` | Una piega attraversa il pezzo (`forge.geometry.splits_polygon`, prolungata di |
+| `describe_features` | func | `snapbend/flat/detect.py:140` | Conteggio ricco per i tipi **noti di topo** — fori per tipo, pieghe |
+| `_detect_bending` | func | `snapbend/flat/detect.py:318` | Una piega attraversa il pezzo (`topo.geometry.splits_polygon`, prolungata di |
 | `_detect_engrave` | func | `snapbend/flat/detect.py:512` | Inferenza geometrica delle incisioni — NON ANCORA IMPLEMENTATA. |
 | `detect_flat` | func | `snapbend/flat/detect.py:101` | Classifica le feature dentro le parti già trovate da heal(). |
 | `_detect_holes` | func | `snapbend/flat/detect.py:385` | Lane geometrica: promuove a `Hole` i contorni interni circolari. |
@@ -89,7 +89,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `is_structural` | func | `snapbend/flat/roles.py:68` | Predicato strutturale COMPLETO: outer/inner (motore) + hole/countersink/ |
 | `is_threaded_hole` | func | `snapbend/flat/holes.py:18` | True se attorno al cerchio c'è un arco a ~270° (entro ``angle_tolerance`` |
 | `k_din6935` | func | `snapbend/rules/deduction.py:65` | Stima DIN 6935 del fattore K (in [0, 0.5]), dal SOLO rapporto |
-| `_labeled_hole_from_contour` | func | `snapbend/flat/detect.py:489` | `ForgeContour` con ruolo foro da role_rules → `Hole(source="labeled")`. |
+| `_labeled_hole_from_contour` | func | `snapbend/flat/detect.py:489` | `Contour` con ruolo foro da role_rules → `Hole(source="labeled")`. |
 | `_meta_lines` | func | `snapbend/io/dxf.py:289` |  |
 | `_mid` | func | `snapbend/rules/read_section.py:109` |  |
 | `_mode` | func | `snapbend/rules/read_section.py:317` |  |
@@ -121,8 +121,8 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_sweep_deg` | func | `snapbend/rules/read_section.py:118` | Signed sweep from a0 to a1 in (-360, 360), positive when ccw. |
 | `_thickness` | func | `snapbend/rules/read_section.py:224` |  |
 | `tipo_cliente_coerente` | func | `snapbend/rules/deduction.py:428` | Controlla che una calibrazione mantenga la promessa del suo |
-| `to_dxf` | func | `snapbend/io/dxf.py:53` | Scrive `flat` su file DXF via forge.to_dxf() — layer/colori coerenti |
-| `to_forge_result` | func | `snapbend/io/dxf.py:25` | Traduce `flat` in un ForgeResult passando da forge.load_geometry() + |
+| `to_dxf` | func | `snapbend/io/dxf.py:53` | Scrive `flat` su file DXF via topo.to_dxf() — layer/colori coerenti |
+| `to_topo_result` | func | `snapbend/io/dxf.py:25` | Traduce `flat` in un Result passando da topo.load_geometry() + |
 | `trim_bending_lines` | func | `snapbend/flat/trim.py:35` | Tratteggia ogni `BendingLine` di `result` con `pattern`: le stesse misure |
 | `_turn_deg` | func | `snapbend/model/section.py:67` | Signed rotation relative to going straight (>0 = to the left). |
 | `_unit` | func | `snapbend/model/section.py:72` |  |
@@ -141,9 +141,9 @@ No module-level name is defined in more than one module.
 
 ## Dependency rule
 
-- `core` never imports `forge`, `io`, `human_layer`, `flat`
-- `model` never imports `forge`, `human_layer`, `flat`
-- `rules` never imports `forge`, `io`, `human_layer`, `flat`
+- `core` never imports `topo`, `io`, `human_layer`, `flat`
+- `model` never imports `topo`, `human_layer`, `flat`
+- `rules` never imports `topo`, `io`, `human_layer`, `flat`
 
 `TYPE_CHECKING`-only imports count as violations here and must be verified by hand.
 
@@ -209,28 +209,28 @@ No module-level function or class.
 
 _snapbend/flat/detect.py_
 
-- `_ensure_detected(cluster: ForgeCluster) -> DetectedFeatures` — L43 — `cluster.detected`, creandolo alla prima scrittura.
+- `_ensure_detected(cluster: Cluster) -> DetectedFeatures` — L43 — `cluster.detected`, creandolo alla prima scrittura.
 - `_normalize_features(features) -> frozenset` — L70 — Normalizza l'argomento `features` di detect_flat() in un set di stringhe.
 - `_proxy_pts(proxy) -> list` — L87 — Vertici di un proxy aperto (OpenCurve), derivati dai suoi segmenti nativi.
-- `detect_flat(result: ForgeResult, features=None, *, max_drill_diameter: float=HOLE_DIAMETER_THRESHOLD, bending_tolerance: float=1.0, engrave_tolerance: float=1.0) -> ForgeResult` — L101 — Classifica le feature dentro le parti già trovate da heal().
-- `describe_features(cluster: ForgeCluster) -> dict` — L140 — Conteggio ricco per i tipi **noti di forge** — fori per tipo, pieghe
-- `_detect_labeled(result: ForgeResult) -> None` — L189
+- `detect_flat(result: Result, features=None, *, max_drill_diameter: float=HOLE_DIAMETER_THRESHOLD, bending_tolerance: float=1.0, engrave_tolerance: float=1.0) -> Result` — L101 — Classifica le feature dentro le parti già trovate da heal().
+- `describe_features(cluster: Cluster) -> dict` — L140 — Conteggio ricco per i tipi **noti di topo** — fori per tipo, pieghe
+- `_detect_labeled(result: Result) -> None` — L189
 - `_bending_line(cluster, start, end, length, source='geometric')` — L306
-- `_detect_bending(result: ForgeResult, bending_tolerance: float=1.0) -> None` — L318 — Una piega attraversa il pezzo (`forge.geometry.splits_polygon`, prolungata di
-- `_detect_holes(result: ForgeResult, max_drill_diameter: float=HOLE_DIAMETER_THRESHOLD) -> None` — L385 — Lane geometrica: promuove a `Hole` i contorni interni circolari.
-- `_circular_inners(cluster: ForgeCluster) -> list` — L400 — (contour, diameter, center) per ogni inner geometricamente circolare.
-- `_promote_geometric_holes(cluster: ForgeCluster, result: ForgeResult, max_drill_diameter: float) -> None` — L412
+- `_detect_bending(result: Result, bending_tolerance: float=1.0) -> None` — L318 — Una piega attraversa il pezzo (`topo.geometry.splits_polygon`, prolungata di
+- `_detect_holes(result: Result, max_drill_diameter: float=HOLE_DIAMETER_THRESHOLD) -> None` — L385 — Lane geometrica: promuove a `Hole` i contorni interni circolari.
+- `_circular_inners(cluster: Cluster) -> list` — L400 — (contour, diameter, center) per ogni inner geometricamente circolare.
+- `_promote_geometric_holes(cluster: Cluster, result: Result, max_drill_diameter: float) -> None` — L412
 - `_hole_from_contour(contour, diameter, center, *, hole_type, confidence, geometric_hint='', outer_diameter=None)` — L471
-- `_labeled_hole_from_contour(contour)` — L489 — `ForgeContour` con ruolo foro da role_rules → `Hole(source="labeled")`.
-- `_detect_engrave(result: ForgeResult, engrave_tolerance: float=1.0) -> None` — L512 — Inferenza geometrica delle incisioni — NON ANCORA IMPLEMENTATA.
+- `_labeled_hole_from_contour(contour)` — L489 — `Contour` con ruolo foro da role_rules → `Hole(source="labeled")`.
+- `_detect_engrave(result: Result, engrave_tolerance: float=1.0) -> None` — L512 — Inferenza geometrica delle incisioni — NON ANCORA IMPLEMENTATA.
 - `_engraving_from_open(proxy, cluster_label: str='', source: str='labeled', confidence: float=1.0) -> Engraving` — L535
 - `_engraving_from_closed(polygon, segments, cluster_label: str='', source: str='labeled', confidence: float=1.0, styles=None) -> Engraving` — L551
-- `_handle_engrave_open(proxy: OpenCurve, result: ForgeResult) -> bool` — L567 — Smista una traccia engrave aperta per contenimento.
-- `_handle_engrave_closed_trash(proxy, result: ForgeResult) -> bool` — L595 — Come _handle_engrave_open ma per una traccia engrave già chiusa
-- `_handle_engrave_closed(inner, cluster: ForgeCluster) -> None` — L614
-- `_belongs_to_cluster(ce: ClassifiedEntity, cluster: ForgeCluster) -> bool` — L630 — Un'entità aperta (marking/bending) appartiene al cluster se la sua
-- `_assign_to_part(ce: ClassifiedEntity, result: ForgeResult) -> None` — L645
-- `_write_custom(ce: ClassifiedEntity, cluster: ForgeCluster) -> None` — L666
+- `_handle_engrave_open(proxy: OpenCurve, result: Result) -> bool` — L567 — Smista una traccia engrave aperta per contenimento.
+- `_handle_engrave_closed_trash(proxy, result: Result) -> bool` — L595 — Come _handle_engrave_open ma per una traccia engrave già chiusa
+- `_handle_engrave_closed(inner, cluster: Cluster) -> None` — L614
+- `_belongs_to_cluster(ce: ClassifiedEntity, cluster: Cluster) -> bool` — L630 — Un'entità aperta (marking/bending) appartiene al cluster se la sua
+- `_assign_to_part(ce: ClassifiedEntity, result: Result) -> None` — L645
+- `_write_custom(ce: ClassifiedEntity, cluster: Cluster) -> None` — L666
 - `_probe_point(ce: ClassifiedEntity) -> Optional[Point]` — L687
 - `_extract_data(proxy: OpenCurve, work_type: str) -> dict` — L695
 - `_extract_data_from_source(work_type: str, polygon=None) -> dict` — L728
@@ -285,7 +285,7 @@ _snapbend/flat/model/render.py_
 
 _snapbend/flat/pipeline.py_
 
-- `heal_and_detect(doc: ForgeDocument, tolerance=None, label='', source_file='', features='all', max_drill_diameter: float=HOLE_DIAMETER_THRESHOLD, bending_tolerance: float=1.0, engrave_tolerance: float=1.0) -> ForgeResult` — L19 — heal() + detect_flat(). `detect_flat()` viene saltato se heal() non produce
+- `heal_and_detect(doc: Document, tolerance=None, label='', source_file='', features='all', max_drill_diameter: float=HOLE_DIAMETER_THRESHOLD, bending_tolerance: float=1.0, engrave_tolerance: float=1.0) -> Result` — L19 — heal() + detect_flat(). `detect_flat()` viene saltato se heal() non produce
 
 #### `snapbend/flat/roles.py` — 102 lines
 
@@ -305,7 +305,7 @@ No module-level function or class.
 _snapbend/flat/trim.py_
 
 - **class** `DashPattern` — L22 — Misure del tratteggio di una piega: `head` sul primo capo, `tail`
-- `trim_bending_lines(result: ForgeResult, pattern: Union[DashPattern, DashRule]) -> ForgeResult` — L35 — Tratteggia ogni `BendingLine` di `result` con `pattern`: le stesse misure
+- `trim_bending_lines(result: Result, pattern: Union[DashPattern, DashRule]) -> Result` — L35 — Tratteggia ogni `BendingLine` di `result` con `pattern`: le stesse misure
 
 ### `snapbend/` (root)
 
@@ -328,8 +328,8 @@ No module-level function or class.
 
 _snapbend/io/dxf.py_
 
-- `to_forge_result(flat: 'FlatGeometry', tolerance: float=0.05)` — L25 — Traduce `flat` in un ForgeResult passando da forge.load_geometry() +
-- `to_dxf(flat: 'FlatGeometry', path: str, tolerance: float=0.05, annotate: bool=True, show_margin_reference: bool=False)` — L53 — Scrive `flat` su file DXF via forge.to_dxf() — layer/colori coerenti
+- `to_topo_result(flat: 'FlatGeometry', tolerance: float=0.05)` — L25 — Traduce `flat` in un Result passando da topo.load_geometry() +
+- `to_dxf(flat: 'FlatGeometry', path: str, tolerance: float=0.05, annotate: bool=True, show_margin_reference: bool=False)` — L53 — Scrive `flat` su file DXF via topo.to_dxf() — layer/colori coerenti
 - `write_section_dxf(section: 'Section', quotes: List['FlangeQuote'], path: str, tolerance: float=0.05, quote_clearance: float=8.0, annotate: bool=True)` — L88 — Esporta la vista in sezione (Fase 3.3/3.4, MAP.md D31): il contorno
 - `write_part_dxf(flat: 'FlatGeometry', path: str, section_flat: Optional['FlatGeometry']=None, quotes: Optional[List['FlangeQuote']]=None, thickness: Optional[float]=None, include_header: bool=False, tolerance: float=0.05, quote_clearance: float=8.0, margin: float=20.0)` — L126 — Esporta un pezzo su un unico file a LIVELLI impilati in VERTICALE
 - `_entities_bbox(entities: List[Dict[str, Any]])` — L196 — Bbox degli entity grezzi (linee/archi, schema `FlatGeometry.entities`)
@@ -357,7 +357,7 @@ _snapbend/model/geometry.py_
 - `_check_orientation(orientation: str) -> None` — L40
 - `swap_xy(entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]` — L47 — Riflette la geometria lungo la diagonale y=x (scambia gli assi X/Y) — il
 - **class** `FlatGeometry` — L81 — Sviluppo piano di una forma sviluppabile — output di Cone.develop() /
-  - methods: `to_forge_result`, `to_dxf`
+  - methods: `to_topo_result`, `to_dxf`
 
 #### `snapbend/model/section.py` — 428 lines
 

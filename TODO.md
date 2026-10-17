@@ -4,9 +4,9 @@ Unico posto per il lavoro aperto. Le decisioni e il perché stanno in
 `MAP.md`; qui non si ripetono, si rimanda con "vedi `MAP.md` D...".
 
 
-## `snapbend.flat` — arrivato da forge (MAP.md D51-D53, 4 ottobre)
+## `snapbend.flat` — arrivato da topo (MAP.md D51-D53, 4 ottobre)
 
-- [x] detection di un pezzo piano spostata da forge, con test e golden di
+- [x] detection di un pezzo piano spostata da topo, con test e golden di
   processo (`tests/flat/`, `tests/data/flat/`).
 - [x] una piega attraversa il pezzo (D52); interrotta da un vuoto resta una (D53).
 - [ ] **Misura minima di una piega = regola di processo (Federico, 4
@@ -22,13 +22,13 @@ Unico posto per il lavoro aperto. Le decisioni e il perché stanno in
   contano. Nel disegno sono uno smusso: riconoscerlo come tale è di snapdraw
   (lettura per viste, non ancora fatta), non di `detect_flat`.
 - [ ] `_detect_engrave` resta un segnaposto (inferenza geometrica delle
-  incisioni non fatta, era forge D13).
-- [ ] **Lo script di produzione dello split** (ex `scripts/13_…` di forge, ora
+  incisioni non fatta, era topo D13).
+- [ ] **Lo script di produzione dello split** (ex `scripts/13_…` di topo, ora
   alla radice di snapbend, **non versionato**: ha un percorso con un codice
   pezzo; escluso con `.git/info/exclude`). È su API morte e non parte: importa
-  `forge.io.text_utils` (sparito), spacchetta `load_dxf` in `(doc, msp)` (oggi
-  ritorna solo il `ForgeDocument`), chiama `forge.validate_msp` e
-  `forge.detect` (spariti: la detection è `snapbend.flat.detect_flat`),
+  `topo.io.text_utils` (sparito), spacchetta `load_dxf` in `(doc, msp)` (oggi
+  ritorna solo il `Document`), chiama `topo.validate_msp` e
+  `topo.detect` (spariti: la detection è `snapbend.flat.detect_flat`),
   `inject(texts=...)` (oggi `inject(result, data_injector, snap_distance)`,
   i testi da `result.annotations`), `split(msp, result, output_folder=...)`
   (oggi `split(result, source_doc, ...)`, e su disco `split_to_files`). Da
@@ -112,7 +112,7 @@ limite e si va avanti (vedi MAP.md D36).
   riallineati a D36 (raggio fisso dichiarato per il caso A, tabella dei
   4 casi A/B/C/D).
 - [x] `docs/ARCHITECTURE.md` — scritto (11 set 2026): il flusso
-  forge→pippo→snapbend, cosa riceve/manda pippo da/a `read_section()`,
+  topo→pippo→snapbend, cosa riceve/manda pippo da/a `read_section()`,
   i layer e la regola di dipendenza, cosa non è ancora pulito.
 - [x] `docs/API.md` — scritto (11 set 2026), D16 chiusa: una scheda per
   ognuno dei 24 nomi di `snapbend.__all__`, ogni esempio verificato
@@ -196,45 +196,45 @@ ogni pezzo piccolo e verificabile da solo:
   questo caso (si degrada a nota, non crasha) — è il punto 3. 3 test
   nuovi, 166/166 verdi.
 - [x] ~~3. percorso per profilo ad arco puro~~ e ~~4. `BentProfile.from_section_reading()`~~
-  — non più su questa base: `read_section()` stesso passa a forge
+  — non più su questa base: `read_section()` stesso passa a topo
   nativo (MAP.md D43). Si fanno lì, una volta sola, non due (vedi sotto).
 
-## `read_section()` su forge — provato e ritrattato per intero (MAP.md D43, CHIUSA)
+## `read_section()` su topo — provato e ritrattato per intero (MAP.md D43, CHIUSA)
 
-`rules/read_section.py` ha importato forge per una notte (prima gli interni
-`forge.core.topology.*`, poi la superficie pubblica
-`load_geometry`+`heal_and_detect`, allora di forge, entrambe verificate funzionanti) ed è
+`rules/read_section.py` ha importato topo per una notte (prima gli interni
+`topo.core.topology.*`, poi la superficie pubblica
+`load_geometry`+`heal_and_detect`, allora di topo, entrambe verificate funzionanti) ed è
 tornato al loop-walker fatto a mano — non perché rotto, ma perché non
 c'è ancora un consumatore vero (`pippo`) per cui decidere quel
-contratto. `snapbend` oggi importa forge SOLO in `io/dxf.py` e in `flat/` (D51).
+contratto. `snapbend` oggi importa topo SOLO in `io/dxf.py` e in `flat/` (D51).
 Restano dal giro di stanotte: il rilevamento delle coppie di cerchi e
 l'instradamento dell'arco puro (sella) verso `Cylinder`/`Cone`, portati
 sul loop-walker originale — 167/167 verdi. Storico delle fasi valutate:
 
-- [x] **0. Decisione + `pyproject.toml`** — dipendenza `forge` ora
+- [x] **0. Decisione + `pyproject.toml`** — dipendenza `topo` ora
   richiesta (non più opzionale), descrizione riscritta.
-- [x] **1. `read_section()` su `forge/core/topology/graph.py` +
+- [x] **1. `read_section()` su `topo/core/topology/graph.py` +
   `loop_finder.py`** — sostituisce `_Edge`/`_split_into_sides`/
   `_order_chain` fatti a mano. Assorbe qui il caso "profilo ad arco puro
   → `Cylinder`/`Cone`" (ex punto 3 sopra) direttamente sulla base nuova.
-  Fatto: `forge.load_geometry()` costruisce il `ForgeDocument`,
+  Fatto: `topo.load_geometry()` costruisce il `Document`,
   `build_node_graph()`+`LoopFinder()` camminano il loop chiuso già
   ordinato. **Ritrattato lo stesso giorno** (vedi sotto): tornato al
-  loop-walker fatto a mano, `snapbend` non importa più forge da
+  loop-walker fatto a mano, `snapbend` non importa più topo da
   `rules/read_section.py`. Sopravvive il risultato buono: caso arco puro
   (sella, cap→arco→cap, zero flange) riconosciuto, `centerline_segments`/
   `angles` vuoti per quel caso, campi `pure_arc_radius`/
   `pure_arc_angle_deg` su `SectionReading` — portati sul walker
   originale. 1 test nuovo (sella R300/60°/s3), **167/167 verdi**.
 - [x] ~~2. `Cone`/`Cylinder`/`BentProfile.develop()` costruiscono `Edge`~~,
-  ~~3. `io/dxf.py` via `to_forge_result()`~~, ~~4. test → `Edge`~~ —
-  **ritrattate (MAP.md D43), non si fanno.** `forge.load_geometry()` è
-  già il modo con cui forge vuole ricevere geometria da un generatore
+  ~~3. `io/dxf.py` via `to_topo_result()`~~, ~~4. test → `Edge`~~ —
+  **ritrattate (MAP.md D43), non si fanno.** `topo.load_geometry()` è
+  già il modo con cui topo vuole ricevere geometria da un generatore
   (il suo stesso docstring usa un settore di cono come esempio) —
   costruire `Edge` a mano rifarebbe peggio quello che fa già lui.
-  `FlatGeometry` non è ridondante con `ForgeDocument`: porta `meta`
+  `FlatGeometry` non è ridondante con `Document`: porta `meta`
   (i numeri leggibili da un piegatore) e `reference_entities` (il
-  margine tratteggiato), roba di dominio `snapbend` che `ForgeDocument`
+  margine tratteggiato), roba di dominio `snapbend` che `Document`
   non ha. D43 resta chiusa alla fase 0-1 sopra.
 
 ## `BentProfile` da un disegno letto — resta da fare, indipendente da D43
@@ -264,7 +264,7 @@ scritti) — non è bloccato in attesa di pippo, pippo è un consumatore a
 parte. Questi tre restano lavoro VERO di `snapbend`, non rimandati a un
 altro repo, perché modificano/estendono la geometria che `snapbend` stesso
 genera — diverso dal caso "foro nella posizione che dice il cliente"
-(quello sì resta di forge/pippo a valle, vedi sotto):
+(quello sì resta di topo/pippo a valle, vedi sotto):
 
 - [ ] **Smussi/raggi ai 4 angoli dello sviluppo** — già prassi
   d'officina, `snapbend` oggi genera sempre spigoli vivi. Sostituisce il
@@ -286,15 +286,15 @@ genera — diverso dal caso "foro nella posizione che dice il cliente"
   vista in sezione) — oggi `BentProfile.develop()` calcola internamente
   le posizioni delle linee di piega ma non le espone in `meta` come
   range per-flangia. Senza quello, pippo (o chiunque) non sa DOVE su un
-  cut file piazzare una feature con `forge.inject()` — questo è il pezzo
+  cut file piazzare una feature con `topo.inject()` — questo è il pezzo
   che manca perché `snapbend` continui a dire "le coordinate", non "la
   feature" (vedi sotto).
 
 ## Fuori scope (di un altro layer, non "non deciso")
 
 - [ ] Fori/altre feature sul pezzo, in posizione decisa dal disegno
-  cliente — resta compito di `forge`/pippo a valle
-  (`forge.inject()` esiste già per questo). Principio che li separa dai
+  cliente — resta compito di `topo`/pippo a valle
+  (`topo.inject()` esiste già per questo). Principio che li separa dai
   tre sopra: uno smusso d'angolo è `snapbend` che completa la SUA propria
   geometria generata; un foro a una coordinata del cliente è pippo che
   aggiunge qualcosa che `snapbend` non ha motivo di conoscere.

@@ -2,7 +2,7 @@
 snapbend/flat/model/__init__.py
 -------------------------------
 Tipi prodotti da `detect_flat()`: la lettura di processo di un pezzo piano.
-Si attaccano a `cluster.detected` di forge (l'overlay aperto, forge D44).
+Si attaccano a `cluster.detected` di topo (l'overlay aperto, topo D44).
 """
 from .hole import (
     Hole,

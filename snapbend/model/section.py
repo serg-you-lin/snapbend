@@ -368,7 +368,7 @@ class Section:
         """Vista in sezione del pezzo PIEGATO (non sviluppato), con le
         quote di riferimento marcate — quota esterna dove la flangia ha una
         faccia esterna coerente, a mezzeria con nota esplicita altrimenti
-        (Fase 3.3/3.4, MAP.md D31). Esce in DXF via forge/ezdxf.
+        (Fase 3.3/3.4, MAP.md D31). Esce in DXF via topo/ezdxf.
         """
         from ..io.dxf import write_section_dxf
         return write_section_dxf(self, self.flange_quotes(), path,

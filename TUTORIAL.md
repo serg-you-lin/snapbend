@@ -21,14 +21,14 @@ in testa:
 
 - `snapbend` calcola, non disegna: ogni `.develop()` ritorna un
   `FlatGeometry` — dati Python puri (entità + numeri), zero dipendenze.
-  Solo `.to_dxf()` tocca forge, e solo se lo chiami tu.
+  Solo `.to_dxf()` tocca topo, e solo se lo chiami tu.
 - Il motore calcola sempre a **mezzeria** (centro spessore), mai a quote
   esterne o interne — è la decisione fondativa, `MAP.md` D1. Tienila a
   mente: spiega perché serve un "layer umano" sopra per chi lavora a
   quote esterne (le tappe 6+ sotto).
 - Il pacchetto è a strati: `model/` (dati puri) → `core/` (motore) →
   `rules/` (regole di calibrazione) → `human_layer.py` (li incolla per
-  chi non vuole vedere la mezzeria) → `io/` (unico punto che sa di forge).
+  chi non vuole vedere la mezzeria) → `io/` (unico punto che sa di topo).
   Non serve saperlo a memoria per usare la libreria, ma spiega perché un
   import viene da un posto piuttosto che un altro.
 

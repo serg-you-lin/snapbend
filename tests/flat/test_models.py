@@ -1,14 +1,14 @@
 """
 tests/flat/test_models.py
 -------------------------
-(arrivato da forge tests/unit/test_models.py, forge MAP.md D88)
+(arrivato da topo tests/unit/test_models.py, topo MAP.md D88)
 Test puri sui tipi di snapbend.flat: Hole, BendingLine.
 """
 import unittest
 
 from shapely.geometry import Point, Polygon, LineString
 
-from forge.model.role import ContourRole
+from topo.model.role import ContourRole
 from snapbend.flat.model import (
     Hole, BendingLine,
     HOLE_TYPE_UNKNOWN, HOLE_TYPE_PLAIN, HOLE_TYPE_COUNTERSINK, HOLE_TYPE_THREADED,

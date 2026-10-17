@@ -2,11 +2,11 @@
 snapbend/flat/roles.py
 ----------------------
 Vocabolario di processo — foro, foro filettato, svasatura, piega, incisione,
-marcatura (arrivato da forge `tools/manufacturing_role.py`, forge MAP.md D88).
+marcatura (arrivato da topo `tools/manufacturing_role.py`, topo MAP.md D88).
 
-forge non conosce questi ruoli: `heal(doc, is_structural=...)` riceve
+topo non conosce questi ruoli: `heal(doc, is_structural=...)` riceve
 `is_structural` da qui (lo passa `heal_and_detect()`), e i colori/layer di
-output si registrano in forge con `register_role_style`, lo stesso meccanismo
+output si registrano in topo con `register_role_style`, lo stesso meccanismo
 di qualunque consumatore.
 """
 
@@ -14,12 +14,12 @@ from __future__ import annotations
 
 from typing import Dict
 
-from forge.model.role import ContourRole, is_structural_role as _core_is_structural
+from topo.model.role import ContourRole, is_structural_role as _core_is_structural
 
 # ---------------------------------------------------------------------------
 # I ruoli manifatturieri — stringhe semplici, non un ContourRole: il motore
 # non deve poterli importare per nome. Confrontabili con `==` come qualunque
-# altro ruolo (tutto in forge lo confronta per valore, mai per identità/tipo
+# altro ruolo (tutto in topo lo confronta per valore, mai per identità/tipo
 # — vedi model/role.py::role_str).
 # ---------------------------------------------------------------------------
 HOLE          = "hole"
@@ -80,13 +80,13 @@ def _register_default_styles() -> None:
     Registra colore + nome layer di default per i ruoli manifatturieri —
     stessi valori che stavano hardcoded in rules/palette.py e
     adapters/dxf/layers.py prima del refactor. Gira all'import di questo
-    modulo (quindi automaticamente quando forge viene importato, dato che
-    forge/__init__.py importa detect): zero regressione sull'output di
+    modulo (quindi automaticamente quando topo viene importato, dato che
+    topo/__init__.py importa detect): zero regressione sull'output di
     default, zero sapere manifatturiero fuori da qui — detect si registra
     con lo stesso meccanismo pubblico (`register_role_style`) che userebbe
     un consumatore esterno, nessun trattamento privilegiato.
     """
-    from forge.rules.palette import register_role_style, RoleStyle
+    from topo.rules.palette import register_role_style, RoleStyle
 
     # Valori copiati da rules.palette.ACI_TO_HEX (mai dal commento accanto a
     # COLOR_BENDING — diceva "bianco" ma ACI 11 è "#ff7f7f", rosa: il

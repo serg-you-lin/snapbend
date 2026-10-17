@@ -1,7 +1,7 @@
 """
 snapbend/flat/model/engraving.py
 --------------------------------
-Incisione rilevata da detect_flat() (arrivata da forge, forge MAP.md D88).
+Incisione rilevata da detect_flat() (arrivata da topo, topo MAP.md D88).
 
 Un solo tipo: `Engraving`. Un'incisione è concettualmente una traccia aperta
 (N segmenti su layer engrave). Un contorno chiuso su layer engrave NON viene
@@ -22,8 +22,8 @@ from typing import List, Optional, Tuple
 
 from shapely.geometry import LineString, Polygon
 
-from forge.model.curve import OpenCurve
-from forge.model.role import ContourRole
+from topo.model.curve import OpenCurve
+from topo.model.role import ContourRole
 from snapbend.flat.roles import ENGRAVE
 from .render import RenderContour
 
@@ -49,7 +49,7 @@ class Engraving(OpenCurve):
 
     @property
     def contours(self) -> list:
-        """Disegno per forge: N primitive separate, mai un contorno chiuso."""
+        """Disegno per topo: N primitive separate, mai un contorno chiuso."""
         return [RenderContour(role=self.role, segments=self.segments, styles=self.styles)]
 
     def to_dict(self) -> dict:

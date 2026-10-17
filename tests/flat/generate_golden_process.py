@@ -1,13 +1,13 @@
 """
 tests/flat/generate_golden_process.py
 -------------------------------------
-Genera la metà di processo dei golden (arrivata da forge, forge MAP.md D88):
+Genera la metà di processo dei golden (arrivata da topo, topo MAP.md D88):
 fori, pieghe, incisioni, summary letti da detect_flat().
 
     tests/data/flat/golden/process/           ← un JSON per disegno singolo
     tests/data/flat/golden_multipli/process/  ← un JSON per pezzo dei fogli multipli
 
-La geometria (outer, perimetri) la genera forge. Runna UNA VOLTA quando sei
+La geometria (outer, perimetri) la genera topo. Runna UNA VOLTA quando sei
 soddisfatto dell'output corrente, mai per far passare un test.
 
     python tests/flat/generate_golden_process.py            # solo i mancanti
@@ -19,8 +19,8 @@ import argparse
 import json
 from pathlib import Path
 
-import forge
-from forge.adapters.dxf.layers import role_to_dxf_layer
+import topo
+from topo.adapters.dxf.layers import role_to_dxf_layer
 
 from snapbend.flat import detect_flat, describe_features, is_structural
 
@@ -87,9 +87,9 @@ def generate_single(force: bool, only: str = None) -> None:
         config = _config(dxf_path)
         tol = config.get("tolerance", DEFAULT_TOLERANCE)
         roles = {**GLOBAL_NAME_ROLES, **config.get("name_roles", {})}
-        doc = forge.load_dxf(dxf_path, upgrade=True, explode_inserts=True, flatten_z_flag=True,
-                             tolerance=tol, verbose=False, role_rules=forge.name_rules(roles))
-        result = forge.heal(doc, tolerance=tol, is_structural=is_structural)
+        doc = topo.load_dxf(dxf_path, upgrade=True, explode_inserts=True, flatten_z_flag=True,
+                             tolerance=tol, verbose=False, role_rules=topo.name_rules(roles))
+        result = topo.heal(doc, tolerance=tol, is_structural=is_structural)
         detect_flat(result, features="all")
         if not result.is_valid:
             print(f"  SKIP (non valido): {dxf_path.name}")
@@ -105,7 +105,7 @@ def generate_multipli(force: bool, only: str = None) -> None:
         if only and parent_path.stem != only:
             continue
         tol = _config(parent_path).get("tolerance", DEFAULT_TOLERANCE)
-        result = forge.heal(forge.load_dxf(parent_path, upgrade=True, explode_inserts=True),
+        result = topo.heal(topo.load_dxf(parent_path, upgrade=True, explode_inserts=True),
                             tolerance=tol)
         if not result.is_valid or not result.clusters:
             print(f"  SKIP (non valido): {parent_path.name}")

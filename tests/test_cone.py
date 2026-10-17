@@ -7,7 +7,7 @@ from snapbend import Cone
 class TestConeMath(unittest.TestCase):
     """
     Verifica la matematica dello sviluppo contro calcoli indipendenti — non
-    contro forge (develop() non ne ha bisogno).
+    contro topo (develop() non ne ha bisogno).
     """
 
     def test_sector_angle_and_radii(self):
@@ -101,7 +101,7 @@ class TestConeFaceted(unittest.TestCase):
         # pari alla generatrice, indipendentemente da N. Le linee di piega
         # si fermano un filo prima dei due raggi veri (vedi
         # cone.py::_BEND_LINE_INSET) per non condividere nodo coi vertici
-        # del contorno — altrimenti forge spezza ogni faccetta in una parte
+        # del contorno — altrimenti topo spezza ogni faccetta in una parte
         # a sé (bug osservato e corretto: 8 parti invece di 1).
         from snapbend.core.cone import _BEND_LINE_INSET
 

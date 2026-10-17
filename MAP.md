@@ -1385,3 +1385,17 @@ steps on a flat part are functions that mutate and return the result, like
 `ForgeResult` does not (thickness, material, bend direction and angle).
 
 Version **0.3.1** (additive; needs forge 0.15.1 for `dash_line`).
+
+### D64 — forge is now `topo` (`g-topo`); `to_forge_result` → `to_topo_result` ✅
+forge renamed itself (topo MAP.md D108, D117, applied in D119): `import topo`,
+distribution `g-topo`, model types without the brand (`topo.Result`,
+`topo.Cluster`, `topo.Contour`, `topo.Document`), the steps of `heal()` in
+`topo.steps`. snapbend follows in one pass, no alias: imports, the
+`[tool.gen_index.layers]` rule (`core`/`model`/`rules` never import `topo`),
+docs, tests. The method that hands a computed flat to the engine follows the
+name: `to_forge_result()` → `to_topo_result()`, on `FlatGeometry` and the
+shapes. `FORGE_AVAILABLE` → `TOPO_AVAILABLE`; `ALL_FORGE_LAYERS` comes from
+topo as `ALL_LAYERS`. Decisions above keep saying "forge": history as written.
+
+Version **0.4.0** (breaking: the method name; needs topo 0.17.0).
+

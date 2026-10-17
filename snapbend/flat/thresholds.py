@@ -1,7 +1,7 @@
 """
 snapbend/flat/thresholds.py
 ---------------------------
-Soglie di processo di `detect_flat()` (arrivate da forge, forge MAP.md D88).
+Soglie di processo di `detect_flat()` (arrivate da topo, topo MAP.md D88).
 
     detect.py — HOLE_DIAMETER_THRESHOLD, default di `max_drill_diameter`
     holes.py  — THREADED_ARC_MAX_RADIUS_RATIO
@@ -14,7 +14,7 @@ Soglie di processo di `detect_flat()` (arrivate da forge, forge MAP.md D88).
 # una costante di topologia: per questo la classificazione hole/inner vive in
 # detect_flat() e non in heal()/hierarchy (MAP.md D15).
 # contorno circolare con Ø < soglia  → Hole (foro da punta)
-# contorno circolare con Ø >= soglia → ForgeContour (inner, tagliato a contorno)
+# contorno circolare con Ø >= soglia → Contour (inner, tagliato a contorno)
 HOLE_DIAMETER_THRESHOLD: float = 32.1   # mm
 
 # ---------------------------------------------------------------------------
