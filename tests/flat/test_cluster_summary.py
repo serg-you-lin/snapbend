@@ -13,15 +13,12 @@ import unittest
 
 from shapely.geometry import Polygon, LineString
 
-from topo.model.cluster import Cluster
-from topo.model.contour import Contour
-from topo.model.role import ContourRole
+import topo
 from snapbend.flat.roles import HOLE, BEND, ENGRAVE
 from snapbend.flat.detect import describe_features
 from snapbend.flat.model import (
     Hole, HOLE_TYPE_PLAIN, HOLE_TYPE_COUNTERSINK, HOLE_TYPE_THREADED, BendingLine, Engraving,
 )
-from topo.model import DetectedFeatures
 
 
 def _part(**detected_kw):
@@ -31,11 +28,11 @@ def _part(**detected_kw):
     del refactor, ma passando per `DetectedFeatures.attach()` invece di
     campi fissi sul cluster.
     """
-    outer = Contour(polygon=Polygon([(0, 0), (100, 0), (100, 100), (0, 100)]),
-                         role=ContourRole.OUTER)
-    cluster = Cluster(outer=outer)
+    outer = topo.Contour(polygon=Polygon([(0, 0), (100, 0), (100, 100), (0, 100)]),
+                         role=topo.model.ContourRole.OUTER)
+    cluster = topo.Cluster(outer=outer)
     if detected_kw:
-        cluster.detected = DetectedFeatures()
+        cluster.detected = topo.model.DetectedFeatures()
         for name, items in detected_kw.items():
             cluster.detected.attach(name, items)
     return cluster
@@ -99,7 +96,7 @@ class TestClusterSummaryGeneric(unittest.TestCase):
 
     def test_works_for_any_custom_name(self):
         cluster = _part()
-        cluster.detected = DetectedFeatures()
+        cluster.detected = topo.model.DetectedFeatures()
         cluster.detected.attach("flange_view_hint", [object(), object(), object()])
         self.assertEqual(cluster.summary, {"flange_view_hint_count": 3})
 

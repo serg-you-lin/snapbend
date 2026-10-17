@@ -12,8 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Optional, Union
 
-from topo.core.geometry import dash_line
-from topo.model import Result
+import topo
 
 from .model import BendingLine
 
@@ -32,8 +31,8 @@ class DashPattern:
 DashRule = Callable[[BendingLine], Optional[DashPattern]]
 
 
-def trim_bending_lines(result: Result,
-                       pattern: Union[DashPattern, DashRule]) -> Result:
+def trim_bending_lines(result: topo.Result,
+                       pattern: Union[DashPattern, DashRule]) -> topo.Result:
     """
     Tratteggia ogni `BendingLine` di `result` con `pattern`: le stesse misure
     per tutte, o una regola che le sceglie piega per piega (per esempio dalla
@@ -48,7 +47,7 @@ def trim_bending_lines(result: Result,
         for bl in cluster.features("bending_lines"):
             p = rule(bl)
             coords = list(bl.geometry.coords)
-            dashes = [] if p is None else dash_line(coords[0], coords[-1], p.head, p.tail,
+            dashes = [] if p is None else topo.geometry.dash_line(coords[0], coords[-1], p.head, p.tail,
                                                     p.middle, p.n_middle)
             bl.dashes = dashes if len(dashes) > 1 else []
     return result

@@ -10,15 +10,14 @@ Il fatto geometrico (arco concentrico, angolo, rapporto dei raggi) è di topo,
 
 from typing import Tuple
 
-from topo.core.geometry import arcs_around
-from topo.core.primitives.segments import ArcSeg
+import topo
 from snapbend.flat.thresholds import THREADED_ARC_MAX_RADIUS_RATIO
 
 
 def is_threaded_hole(
     center:           Tuple[float, float],
     radius:           float,
-    all_arcs:         list[ArcSeg],
+    all_arcs:         list[topo.primitives.ArcSeg],
     tolerance_center: float = 1.0,
     angle_tolerance:  float = 35.0,
     max_radius_ratio: float = THREADED_ARC_MAX_RADIUS_RATIO,
@@ -30,4 +29,4 @@ def is_threaded_hole(
     estremità raggiata di un profilo) gira attorno al foro ma non è un filetto.
     """
     return any(abs(a.sweep - 270.0) < angle_tolerance and a.radius_ratio <= max_radius_ratio
-               for a in arcs_around(center, radius, all_arcs, tolerance=tolerance_center))
+               for a in topo.geometry.arcs_around(center, radius, all_arcs, tolerance=tolerance_center))

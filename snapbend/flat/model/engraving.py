@@ -22,14 +22,13 @@ from typing import List, Optional, Tuple
 
 from shapely.geometry import LineString, Polygon
 
-from topo.model.curve import OpenCurve
-from topo.model.role import ContourRole
+import topo
 from snapbend.flat.roles import ENGRAVE
 from .render import RenderContour
 
 
 @dataclass
-class Engraving(OpenCurve):
+class Engraving(topo.model.OpenCurve):
     length:     float                    = 0.0
     cluster_label: str                      = ""
     pts:        List[Tuple[float, float]] = field(default_factory=list)
@@ -39,7 +38,7 @@ class Engraving(OpenCurve):
     source:     str                      = "labeled"
 
     def __post_init__(self):
-        if self.role == ContourRole.UNKNOWN:
+        if self.role == topo.model.ContourRole.UNKNOWN:
             self.role = ENGRAVE
 
     @property

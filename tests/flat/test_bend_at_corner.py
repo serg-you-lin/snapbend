@@ -10,13 +10,12 @@ il pezzo diventava due rettangoli sovrapposti.
 import unittest
 
 import topo
-from topo.core.primitives import LineSeg
 from snapbend.flat import detect_flat
 
 
 def _read(outline, bends, extra=()):
     segments = topo.geometry.polygon(outline) + list(extra)
-    segments += [LineSeg(start=a, end=b) for a, b in bends]
+    segments += [topo.primitives.LineSeg(start=a, end=b) for a, b in bends]
     return detect_flat(topo.heal(topo.load_segments(segments)), "bending")
 
 

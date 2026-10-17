@@ -24,7 +24,6 @@ from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_F
 from topo.adapters.dxf.layers import ALL_LAYERS, TRASH_LAYER
 from topo.adapters.dxf.layers import LAYER_OUTER, ROLE_TO_LAYER
 from snapbend.flat.roles import LAYER_BENDING
-from topo.model.role import ContourRole
 from snapbend.flat.roles import HOLE, THREADED_HOLE, COUNTERSINK
 
 EXAMPLES_DIR = project_root / "tests" / "data" / "flat"
@@ -142,7 +141,7 @@ class TestEntitaBylayer(unittest.TestCase):
 
     def test_holes_su_layer_corretto(self):
         """I fori devono avere un role foro-compatibile (hole, inner, threaded_hole, countersink)."""
-        role_fori_validi = {HOLE, ContourRole.INNER, THREADED_HOLE, COUNTERSINK}
+        role_fori_validi = {HOLE, topo.model.ContourRole.INNER, THREADED_HOLE, COUNTERSINK}
         for i, cluster in enumerate(self.result.clusters):
             for j, hole in enumerate(cluster.features("holes")):
                 with self.subTest(cluster=i, hole=j):

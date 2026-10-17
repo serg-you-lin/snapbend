@@ -9,7 +9,6 @@ di un altro consumatore (D30).
 import unittest
 
 import topo
-from topo.model.role import role_str
 from snapbend.flat import detect_flat, is_structural
 
 
@@ -47,13 +46,13 @@ class TestConsumerRolesSurviveDetect(unittest.TestCase):
         result = topo.heal(self._framed_doc())
         trash_prima = len(result.trash_entities)
         frame_prima = sum(1 for t in result.trash_entities
-                          if role_str(getattr(t, "role", "")) == "frame")
+                          if topo.model.role_str(getattr(t, "role", "")) == "frame")
         self.assertGreater(frame_prima, 0)
 
         detect_flat(result, features="all")
 
         frame_dopo = sum(1 for t in result.trash_entities
-                         if role_str(getattr(t, "role", "")) == "frame")
+                         if topo.model.role_str(getattr(t, "role", "")) == "frame")
         self.assertEqual(frame_dopo, frame_prima)
         self.assertEqual(len(result.trash_entities), trash_prima)
         # niente ClassifiedEntity scollegato, niente warning "non contenuta"

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Dict
 
-from topo.model.role import ContourRole, is_structural_role as _core_is_structural
+import topo
 
 # ---------------------------------------------------------------------------
 # I ruoli manifatturieri — stringhe semplici, non un ContourRole: il motore
@@ -72,7 +72,7 @@ def is_structural(role) -> bool:
     passa a `heal(doc, is_structural=...)` — il motore da solo conosce solo
     la metà `model.role.is_structural_role`.
     """
-    return _core_is_structural(role) or role in STRUCTURAL_MANUFACTURING_ROLES
+    return topo.model.is_structural_role(role) or role in STRUCTURAL_MANUFACTURING_ROLES
 
 
 def _register_default_styles() -> None:
@@ -86,17 +86,16 @@ def _register_default_styles() -> None:
     con lo stesso meccanismo pubblico (`register_role_style`) che userebbe
     un consumatore esterno, nessun trattamento privilegiato.
     """
-    from topo.rules.palette import register_role_style, RoleStyle
 
     # Valori copiati da rules.palette.ACI_TO_HEX (mai dal commento accanto a
     # COLOR_BENDING — diceva "bianco" ma ACI 11 è "#ff7f7f", rosa: il
     # commento era sbagliato, il valore vero è quello della tabella hex).
-    register_role_style(HOLE,          RoleStyle(color=(255, 0, 255),   layer_name=LAYER_HOLE))          # magenta, ACI 6
-    register_role_style(COUNTERSINK,   RoleStyle(color=(0, 0, 255),     layer_name=LAYER_COUNTERSINK))   # blu, ACI 5
-    register_role_style(THREADED_HOLE, RoleStyle(color=(0, 255, 255),   layer_name=LAYER_THREADED_HOLE)) # ciano, ACI 4
-    register_role_style(BEND,          RoleStyle(color=(255, 127, 127), layer_name=LAYER_BENDING))       # rosa, ACI 11
-    register_role_style(ENGRAVE,       RoleStyle(color=(192, 192, 192), layer_name=LAYER_ENGRAVE))       # grigio chiaro, ACI 9
-    register_role_style(MARKING,       RoleStyle(color=(128, 128, 128), layer_name=LAYER_MARKING))       # grigio scuro, ACI 8
+    topo.register_role_style(HOLE,          topo.RoleStyle(color=(255, 0, 255),   layer_name=LAYER_HOLE))          # magenta, ACI 6
+    topo.register_role_style(COUNTERSINK,   topo.RoleStyle(color=(0, 0, 255),     layer_name=LAYER_COUNTERSINK))   # blu, ACI 5
+    topo.register_role_style(THREADED_HOLE, topo.RoleStyle(color=(0, 255, 255),   layer_name=LAYER_THREADED_HOLE)) # ciano, ACI 4
+    topo.register_role_style(BEND,          topo.RoleStyle(color=(255, 127, 127), layer_name=LAYER_BENDING))       # rosa, ACI 11
+    topo.register_role_style(ENGRAVE,       topo.RoleStyle(color=(192, 192, 192), layer_name=LAYER_ENGRAVE))       # grigio chiaro, ACI 9
+    topo.register_role_style(MARKING,       topo.RoleStyle(color=(128, 128, 128), layer_name=LAYER_MARKING))       # grigio scuro, ACI 8
 
 
 _register_default_styles()

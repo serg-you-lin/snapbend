@@ -13,15 +13,13 @@ from typing import Any, Optional
 
 from shapely.geometry import LineString
 
-from topo.core.primitives import LineSeg
-from topo.model.curve import OpenCurve
-from topo.model.role import ContourRole
+import topo
 from snapbend.flat.roles import BEND
 from .render import RenderContour
 
 
 @dataclass
-class BendingLine(OpenCurve):
+class BendingLine(topo.model.OpenCurve):
     geometry:   LineString    = field(default=None)
     length:     float         = 0.0
     angle_deg:  float         = 0.0
@@ -36,18 +34,18 @@ class BendingLine(OpenCurve):
     dashes:     list          = field(default_factory=list)
 
     def __post_init__(self):
-        if self.role == ContourRole.UNKNOWN:
+        if self.role == topo.model.ContourRole.UNKNOWN:
             self.role = BEND
 
     @property
     def contours(self) -> list:
         """Disegno per topo: una LINE dal primo all'ultimo punto, o una LINE per tratto."""
         if self.dashes:
-            return [RenderContour(role=self.role, segments=[LineSeg(a, b)]) for a, b in self.dashes]
+            return [RenderContour(role=self.role, segments=[topo.primitives.LineSeg(a, b)]) for a, b in self.dashes]
         coords = list(self.geometry.coords) if self.geometry is not None else []
         if len(coords) < 2:
             return []
-        return [RenderContour(role=self.role, segments=[LineSeg(coords[0], coords[-1])])]
+        return [RenderContour(role=self.role, segments=[topo.primitives.LineSeg(coords[0], coords[-1])])]
 
     def to_dict(self) -> dict:
         coords = list(self.geometry.coords)

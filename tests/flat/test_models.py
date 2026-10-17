@@ -8,7 +8,7 @@ import unittest
 
 from shapely.geometry import Point, Polygon, LineString
 
-from topo.model.role import ContourRole
+import topo
 from snapbend.flat.model import (
     Hole, BendingLine,
     HOLE_TYPE_UNKNOWN, HOLE_TYPE_PLAIN, HOLE_TYPE_COUNTERSINK, HOLE_TYPE_THREADED,

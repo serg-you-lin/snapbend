@@ -8,9 +8,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Tuple, Any, List
 from shapely.geometry import Polygon
 
-from topo.core.primitives import LineSeg, ArcSeg, CircleSeg, SplineSeg
-from topo.model.curve import ClosedCurve
-from topo.model.role import ContourRole
+import topo
 from snapbend.flat.roles import HOLE, COUNTERSINK, THREADED_HOLE
 from .render import RenderContour
 
@@ -28,7 +26,7 @@ VALID_HOLE_TYPES = {
 
 
 @dataclass
-class Hole(ClosedCurve):
+class Hole(topo.model.ClosedCurve):
     diameter:       float                     = 0.0
     center:         Tuple[float, float]       = field(default_factory=lambda: (0.0, 0.0))
     hole_type:      str                       = HOLE_TYPE_UNKNOWN
@@ -40,7 +38,7 @@ class Hole(ClosedCurve):
     is_hole:          bool                    = True
 
     def __post_init__(self):
-        if self.role == ContourRole.UNKNOWN:
+        if self.role == topo.model.ContourRole.UNKNOWN:
             self.role = HOLE
 
     @property

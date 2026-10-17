@@ -11,7 +11,6 @@ import unittest
 import ezdxf
 
 import topo
-from topo import RoleStyle
 from snapbend.flat import detect_flat, LAYER_HOLE
 
 
@@ -74,7 +73,7 @@ class TestRoleStyleColorOverride(unittest.TestCase):
         self.result, self.doc_in = _rect_with_hole_and_frame()
         self.doc_out = topo.to_dxf(
             self.result, self.doc_in,
-            role_styles={"hole": RoleStyle(color=(0, 0, 0))},
+            role_styles={"hole": topo.RoleStyle(color=(0, 0, 0))},
         )
 
     def test_001_hole_layer_true_color_is_black(self):
@@ -93,7 +92,7 @@ class TestRoleStyleColorOverride(unittest.TestCase):
         self.result, self.doc_in = _rect_with_hole_and_frame()
         self.doc_out = topo.to_dxf(
             self.result, self.doc_in,
-            role_styles={"hole": RoleStyle(color=(0, 0, 0))},
+            role_styles={"hole": topo.RoleStyle(color=(0, 0, 0))},
         )
 
     def test_001_hole_layer_true_color_is_black(self):

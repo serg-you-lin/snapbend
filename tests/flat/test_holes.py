@@ -9,14 +9,14 @@ Test unitari per snapbend.flat.holes:
 import math
 import unittest
 
-from topo.core.primitives.segments import ArcSeg
+import topo
 
 from snapbend.flat.holes import is_threaded_hole
 
 
 def make_arc(cx, cy, radius, start_angle, end_angle):
     """Crea un ArcSeg con angoli in gradi."""
-    return ArcSeg(
+    return topo.primitives.ArcSeg(
         center=(cx, cy),
         radius=radius,
         start_angle=math.radians(start_angle),

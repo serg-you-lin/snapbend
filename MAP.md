@@ -1399,3 +1399,21 @@ topo as `ALL_LAYERS`. Decisions above keep saying "forge": history as written.
 
 Version **0.4.0** (breaking: the method name; needs topo 0.17.0).
 
+### D65 — topo's public names, written in full; reopening D57 ✅
+Reopening D57 (geometry imported from the engine's submodules). topo now has
+public namespaces (topo MAP.md D120): `topo.primitives` (the segments),
+`topo.model` (curves, roles, `Edge`, detected features), `topo.geometry`,
+`topo.steps`, and the top level. snapbend imports only `import topo` and
+writes every name in full — `topo.primitives.LineSeg`,
+`topo.model.ClosedCurve`, `topo.model.ContourRole`, `topo.geometry.splits_polygon`
+(topo D119: a name read bare in the middle of a module doesn't say whose it
+is). `Hole`, `BendingLine`, `Engraving` subclass `topo.model.ClosedCurve` /
+`topo.model.OpenCurve`.
+
+Still imported from inside topo, waiting for a public name (topo TODO, the
+second half of the public surface): the track helpers of
+`topo.core.geometry.measure` and `group_collinear_lines` in `flat/detect.py`,
+and the DXF layer table (`topo.adapters.dxf.layers`) in the tests. When they
+have one, `[tool.gen_index.layers]` gets `"*" = ["topo.core", "topo.adapters"]`
+and `tests/test_index.py` forbids the way back.
+

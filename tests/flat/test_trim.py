@@ -9,13 +9,12 @@ import math
 import unittest
 
 import topo
-from topo.core.primitives import LineSeg
 from snapbend.flat import LAYER_BENDING, DashPattern, describe_features, detect_flat, trim_bending_lines
 
 
 def _read(outline, bends):
     segments = topo.geometry.polygon(outline)
-    segments += [LineSeg(start=a, end=b) for a, b in bends]
+    segments += [topo.primitives.LineSeg(start=a, end=b) for a, b in bends]
     return detect_flat(topo.heal(topo.load_segments(segments)), "bending")
 
 
