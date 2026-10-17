@@ -8,7 +8,7 @@ python tests/gen_index.py
 
 What this is: the lookup table of *what already exists* in the package, down to internal helpers. `docs/API.md` documents the public surface (`snapbend.<name>`) with full cards; this file lists every module-level function and class so nothing gets rewritten because it was not found. Signatures and docstring lines come straight from the source, so they cannot drift.
 
-`27` modules · `92` module-level functions · `20` classes · `4411` lines of code.
+`28` modules · `93` module-level functions · `21` classes · `4477` lines of code.
 
 Sections: [Lookup](#lookup) · [Duplicate names](#duplicate-names) · [Dependency rule](#dependency-rule) · [By module](#by-module) · [Internal dependencies](#internal-dependencies)
 
@@ -29,7 +29,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_bend_lines` | func | `snapbend/io/dxf.py:299` | Una riga per piega nell'header — gli stessi numeri che dice |
 | `_bending_line` | func | `snapbend/flat/detect.py:306` |  |
 | `_bending_line_from_data` | func | `snapbend/flat/detect.py:746` |  |
-| `BendingLine` | class | `snapbend/flat/model/bending_line.py:22` |  |
+| `BendingLine` | class | `snapbend/flat/model/bending_line.py:24` |  |
 | `BendResult` | class | `snapbend/core/bend.py:168` | Esito del calcolo di UNA piega dentro `BentProfile.develop()` (o di |
 | `BentProfile` | class | `snapbend/core/bend.py:200` | Profilo piegato: N flange (quote a MEZZERIA) unite da N-1 pieghe. |
 | `Calibration` | class | `snapbend/rules/deduction.py:237` | Una calibrazione = i dati di calcolo di un'officina. |
@@ -42,6 +42,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `ClassifiedEntity` | class | `snapbend/flat/model/classified.py:13` | Risultato della classificazione di una entità da detect_flat(). |
 | `Cone` | class | `snapbend/core/cone.py:140` |  |
 | `Cylinder` | class | `snapbend/core/cylinder.py:79` |  |
+| `DashPattern` | class | `snapbend/flat/trim.py:22` | Misure del tratteggio di una piega: `head` sul primo capo, `tail` |
 | `deduction_din6935` | func | `snapbend/rules/deduction.py:81` | Accorciamento di piega con K stimato DIN 6935 (scorciatoia di |
 | `DeductionInfo` | class | `snapbend/rules/deduction.py:197` | Accorciamento di piega + da dove viene il numero. |
 | `default_radius` | func | `snapbend/rules/deduction.py:102` | Raggio interno quando non c'è né un raggio esplicito né una cava nota: |
@@ -122,6 +123,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `tipo_cliente_coerente` | func | `snapbend/rules/deduction.py:428` | Controlla che una calibrazione mantenga la promessa del suo |
 | `to_dxf` | func | `snapbend/io/dxf.py:53` | Scrive `flat` su file DXF via forge.to_dxf() — layer/colori coerenti |
 | `to_forge_result` | func | `snapbend/io/dxf.py:25` | Traduce `flat` in un ForgeResult passando da forge.load_geometry() + |
+| `trim_bending_lines` | func | `snapbend/flat/trim.py:35` | Tratteggia ogni `BendingLine` di `result` con `pattern`: le stesse misure |
 | `_turn_deg` | func | `snapbend/model/section.py:67` | Signed rotation relative to going straight (>0 = to the left). |
 | `_unit` | func | `snapbend/model/section.py:72` |  |
 | `_write_custom` | func | `snapbend/flat/detect.py:666` |  |
@@ -197,7 +199,7 @@ _snapbend/core/cylinder.py_
 
 ### `snapbend/flat/`
 
-#### `snapbend/flat/__init__.py` — 33 lines
+#### `snapbend/flat/__init__.py` — 35 lines
 
 _snapbend/flat/__init__.py_
 
@@ -246,11 +248,11 @@ _snapbend/flat/model/__init__.py_
 
 No module-level function or class.
 
-#### `snapbend/flat/model/bending_line.py` — 55 lines
+#### `snapbend/flat/model/bending_line.py` — 65 lines
 
 _snapbend/flat/model/bending_line.py_
 
-- **class** `BendingLine(OpenCurve)` — L22
+- **class** `BendingLine(OpenCurve)` — L24
   - methods: `contours`, `to_dict`
 
 #### `snapbend/flat/model/classified.py` — 31 lines
@@ -297,6 +299,13 @@ _snapbend/flat/roles.py_
 _snapbend/flat/thresholds.py_
 
 No module-level function or class.
+
+#### `snapbend/flat/trim.py` — 54 lines
+
+_snapbend/flat/trim.py_
+
+- **class** `DashPattern` — L22 — Misure del tratteggio di una piega: `head` sul primo capo, `tail`
+- `trim_bending_lines(result: ForgeResult, pattern: Union[DashPattern, DashRule]) -> ForgeResult` — L35 — Tratteggia ogni `BendingLine` di `result` con `pattern`: le stesse misure
 
 ### `snapbend/` (root)
 
@@ -441,7 +450,7 @@ Which `snapbend` modules each module imports — "what works with what". Modules
 | `snapbend/core/bend.py` | `snapbend.model.geometry` · `snapbend.rules.deduction` |
 | `snapbend/core/cone.py` | `snapbend.core.bend` · `snapbend.model.geometry` |
 | `snapbend/core/cylinder.py` | `snapbend.core.bend` · `snapbend.model.geometry` |
-| `snapbend/flat/__init__.py` | `snapbend.flat.detect` · `snapbend.flat.model` · `snapbend.flat.pipeline` · `snapbend.flat.roles` · `snapbend.flat.thresholds` |
+| `snapbend/flat/__init__.py` | `snapbend.flat.detect` · `snapbend.flat.model` · `snapbend.flat.pipeline` · `snapbend.flat.roles` · `snapbend.flat.thresholds` · `snapbend.flat.trim` |
 | `snapbend/flat/detect.py` | `snapbend.flat.holes` · `snapbend.flat.model` · `snapbend.flat.roles` · `snapbend.flat.thresholds` |
 | `snapbend/flat/holes.py` | `snapbend.flat.thresholds` |
 | `snapbend/flat/model/__init__.py` | `snapbend.flat.model.bending_line` · `snapbend.flat.model.classified` · `snapbend.flat.model.engraving` · `snapbend.flat.model.hole` · `snapbend.flat.model.render` |
@@ -449,6 +458,7 @@ Which `snapbend` modules each module imports — "what works with what". Modules
 | `snapbend/flat/model/engraving.py` | `snapbend.flat.model.render` · `snapbend.flat.roles` |
 | `snapbend/flat/model/hole.py` | `snapbend.flat.model.render` · `snapbend.flat.roles` |
 | `snapbend/flat/pipeline.py` | `snapbend.flat.detect` · `snapbend.flat.roles` · `snapbend.flat.thresholds` |
+| `snapbend/flat/trim.py` | `snapbend.flat.model` |
 | `snapbend/human_layer.py` | `snapbend.core.bend` · `snapbend.io.dxf` · `snapbend.model.geometry` · `snapbend.model.section` · `snapbend.rules.deduction` |
 | `snapbend/io/dxf.py` | `snapbend.flat` · `snapbend.model.geometry` · `snapbend.model.section` |
 | `snapbend/model/geometry.py` | `snapbend.io.dxf` |

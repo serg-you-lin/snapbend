@@ -588,6 +588,31 @@ snapbend.flat.describe_features(cluster) -> dict
   `Engraving`, `ClassifiedEntity`; `contours` dice a forge su che layer
   disegnarli (una svasatura sul suo layer, una piega come LINE).
 
+### `trim_bending_lines`, `DashPattern`
+
+```python
+snapbend.flat.DashPattern(head, tail, middle=0.0, n_middle=0)
+snapbend.flat.trim_bending_lines(result, pattern: DashPattern | DashRule) -> ForgeResult
+# DashRule = Callable[[BendingLine], DashPattern | None]
+```
+
+Tratteggia le pieghe (D63): un tratto `head` sul primo capo, uno `tail`
+sull'ultimo, `n_middle` tratti `middle` in mezzo, vuoti uguali
+(`forge.geometry.dash_line`). `pattern` è una misura per tutte le pieghe, o una
+regola che la sceglie piega per piega; `None` dalla regola, o tratti che coprono
+tutta la piega, la lasciano intera.
+
+**Muta** `result`: scrive `BendingLine.dashes` (lista di `(start, end)`), che
+`contours` disegna come una LINE per tratto e `to_dict()` riporta sotto
+`"dashes"`. `geometry` e `length` restano l'asse intero e la piega resta una:
+`describe_features` la conta come prima. Ripeterlo sostituisce i tratti.
+
+```python
+from snapbend.flat import DashPattern, trim_bending_lines
+trim_bending_lines(result, DashPattern(head=20, tail=20, middle=20, n_middle=2))
+trim_bending_lines(result, lambda bl: None if bl.length < 100 else DashPattern(25, 25))
+```
+
 ```python
 import forge
 from snapbend.flat import heal_and_detect, describe_features

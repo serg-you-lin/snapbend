@@ -1358,3 +1358,30 @@ gives a reasonable flat, and how a shop's values should enter (per die, per
 machine, measured) is not known yet. Building that now would freeze a shape
 nobody understands. When a real shop asks, it is designed then — in pippo.
 
+### D63 — bend lines can be drawn as dashes; a dashed bend is still one bend (17 Oct 2026)
+Some shops mark the bend on the sheet instead of drawing it whole: a dash at
+each end, a few in the middle, equal gaps. The construction is geometry and
+went to forge (`forge.geometry.dash_line`, forge MAP.md D115); what stays here
+is its meaning — which lines, with what measures.
+
+`trim_bending_lines(result, pattern)` writes `BendingLine.dashes`; it does not
+replace one `BendingLine` with N. `geometry` keeps the whole axis, `contours`
+draws one LINE per dash. Replacing the bend with its dashes would lose the
+axis for every step after it (where the bend starts and stops), and a dashed
+bend is the same bend, as in D53 for a bend interrupted by a void.
+Trimming always starts from the axis, so doing it again replaces the dashes.
+
+`pattern` is a `DashPattern(head, tail, middle, n_middle)` for every bend, or a
+rule `BendingLine → DashPattern | None`: how many dashes and how long depends on
+the caller (coverage, maximum dash length, a shop's habit), so snapbend takes
+the rule instead of choosing one. `None`, or dashes that cover the whole bend,
+leave it whole.
+
+It works on any `ForgeResult` read by `detect_flat`, so on the computed side
+too (`FlatGeometry.to_forge_result()` goes through `heal_and_detect`): no
+separate adapter. No `FlatPattern` object around `ForgeResult` for now: the
+steps on a flat part are functions that mutate and return the result, like
+`detect_flat`. An object becomes worth it when a part has to carry what
+`ForgeResult` does not (thickness, material, bend direction and angle).
+
+Version **0.3.1** (additive; needs forge 0.15.1 for `dash_line`).

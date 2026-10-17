@@ -2,6 +2,8 @@
 snapbend/flat/model/bending_line.py
 -----------------------------------
 Linea di piega letta da `detect_flat()` (arrivata da forge, forge MAP.md D88).
+`geometry` è sempre l'asse intero; `dashes`, se c'è, è come la piega si
+disegna (`trim_bending_lines`, MAP.md D63).
 """
 
 from __future__ import annotations
@@ -29,6 +31,9 @@ class BendingLine(OpenCurve):
     #   source="geometric" → inferenza in detect_flat()     (confidence < 1.0)
     confidence: float         = 1.0
     source:     str           = ""
+    # Tratti con cui la piega si disegna, (start, end) lungo l'asse; vuoto =
+    # linea intera. Una piega tratteggiata resta UNA piega (MAP.md D63).
+    dashes:     list          = field(default_factory=list)
 
     def __post_init__(self):
         if self.role == ContourRole.UNKNOWN:
@@ -36,7 +41,9 @@ class BendingLine(OpenCurve):
 
     @property
     def contours(self) -> list:
-        """Disegno per forge: una LINE dal primo all'ultimo punto."""
+        """Disegno per forge: una LINE dal primo all'ultimo punto, o una LINE per tratto."""
+        if self.dashes:
+            return [RenderContour(role=self.role, segments=[LineSeg(a, b)]) for a, b in self.dashes]
         coords = list(self.geometry.coords) if self.geometry is not None else []
         if len(coords) < 2:
             return []
@@ -44,7 +51,7 @@ class BendingLine(OpenCurve):
 
     def to_dict(self) -> dict:
         coords = list(self.geometry.coords)
-        return {
+        data = {
             "start":      coords[0],
             "end":        coords[-1],
             "length":     round(self.length, 4),
@@ -53,3 +60,6 @@ class BendingLine(OpenCurve):
             "source":     self.source,
             "confidence": round(self.confidence, 4),
         }
+        if self.dashes:
+            data["dashes"] = [[a, b] for a, b in self.dashes]
+        return data

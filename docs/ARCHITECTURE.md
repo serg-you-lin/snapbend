@@ -162,6 +162,7 @@ esterno ipotetico:
 - `snapbend.flat` — `heal_and_detect()`, `detect_flat()`,
   `describe_features()`, i ruoli e i tipi (`Hole`, `BendingLine`,
   `Engraving`): la lettura di un file di taglio sopra `forge.heal()`.
+  `trim_bending_lines()` tratteggia le pieghe (D63).
   Una piega è una linea che attraversa il pezzo (D52), anche se un vuoto la
   interrompe (D53). Non entra in `snapbend.__all__`: richiede forge.
 - `FlatGeometry` — entities/meta grezzi, per chi vuole la propria
