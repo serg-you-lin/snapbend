@@ -584,7 +584,7 @@ snapbend.flat.describe_features(cluster) -> dict
 - Ruoli e layer: `HOLE`, `COUNTERSINK`, `THREADED_HOLE`, `BEND`, `ENGRAVE`,
   `MARKING`, `LAYER_*`, `is_structural(role)`; `ROLE_STYLES` e `LAYERS`, le
   mappe ruolo → colore e ruolo → layer che chi esporta passa a topo
-  (`topo.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS)`, anche
+  (`topo_dxf.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS)`, anche
   `split`, `to_svg`, `to_view_model`): topo non tiene un registro (topo D128).
 - Tipi: `Hole` (`is_void = True`: topo lo toglie dall'area), `BendingLine`,
   `Engraving`, `ClassifiedEntity`; `contours` dice a topo su che layer
@@ -616,13 +616,13 @@ trim_bending_lines(result, lambda bl: None if bl.length < 100 else DashPattern(2
 ```
 
 ```python
-import topo
+import topo, topo_dxf
 from snapbend.flat import heal_and_detect, describe_features
 
-result = heal_and_detect(topo.load_dxf("pezzo.dxf", tolerance=0.5))
+result = heal_and_detect(topo_dxf.load_dxf("pezzo.dxf", tolerance=0.5))
 if result.is_valid:
     print(describe_features(result.clusters[0]))
-    topo.to_dxf(result, allow_invalid=False).saveas("pezzo_letto.dxf")
+    topo_dxf.to_dxf(result, allow_invalid=False).saveas("pezzo_letto.dxf")
 ```
 
 ---

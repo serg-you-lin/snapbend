@@ -39,7 +39,7 @@ non il codice.
 file CAD (DXF/PDF)
       |
       v
-  topo.load_dxf() / load_pdf()
+  topo_dxf.load_dxf() / topo_pdf.load_pdf()
       |
       v
   snapdraw -- toglie cornice/cartiglio dal conto, PRIMA di heal --
