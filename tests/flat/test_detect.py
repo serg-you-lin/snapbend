@@ -264,8 +264,9 @@ class TestDetectStyleMap(unittest.TestCase):
         self.assertEqual(len(cluster.features("engrave_lines")), 1)
         self.assertEqual(cluster.features("engrave_lines")[0].role, "engrave")
 
-    def test_003_color_accepts_aci_int_and_numeric_string(self):
-        for key in (4, "4"):
+    def test_003_color_accepts_rgb_and_hex(self):
+        # topo legge l'indice ACI 4 come il suo RGB: la regola parla RGB (topo D126)
+        for key in ((0, 255, 255), "#00ffff"):
             msp = self._rect_with_internal_lines({}, {"color": 4})
             doc = topo.document_from_msp(msp, role_rules=[topo.RoleRule("engrave", color=key)])
             result = topo.heal(doc)
