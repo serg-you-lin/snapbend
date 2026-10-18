@@ -1458,6 +1458,8 @@ whoever calls `topo.to_dxf`/`split`/`to_svg` directly passes them too, or
 composes them (`{**ROLE_STYLES, "hole": ...}`). Without them a hole goes on
 the `hole` layer, gray — topo's DXF adapter default.
 
-Tests pass the maps wherever they read an output layer; the process goldens
-are untouched (`role_to_dxf_layer(role, layers=LAYERS)` gives the same names).
-Suite all green.
+Tests pass the maps wherever they read an output layer; the layer names in
+the process goldens are unchanged (`role_to_dxf_layer(role, layers=LAYERS)`
+gives the same names). One golden does change, for another reason: `F6` goes
+from 1 to 2 clusters, the strip being a part of its own after topo D111 (an
+edge case accepted there, never brought over here). Suite all green.
