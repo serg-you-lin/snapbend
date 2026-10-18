@@ -290,6 +290,11 @@ genera — diverso dal caso "foro nella posizione che dice il cliente"
   che manca perché `snapbend` continui a dire "le coordinate", non "la
   feature" (vedi sotto).
 
+### Feature di tracciatura.
+  Il caso: un disegno (quello dei segni tracciati stretti, oggi non più su disco)
+  ha una serie di dentelli che partono da una linea orizzontale, che sono considerati parte del grafo giustamnete. vorrei aggiungere un parametro che sotto una certa distanza queste linee siano considerate solo dei segni di marcatura, completando il grafo solo con la linea orizzontale. Anche se ho degli inner che hanno distanza inferiore alla tolleranza di cui sopra, devono essere detectati come segni di incisione e posti sul layer 'Engrave'. probabilmente questa cosa va implementata nel modulo detect e può essere individuato il tutto solo passando detect_flat() come facciamo con le bl che hanno la loro tolleranza.
+  (roba per snapbend)
+
 ## Fuori scope (di un altro layer, non "non deciso")
 
 - [ ] Fori/altre feature sul pezzo, in posizione decisa dal disegno

@@ -2,8 +2,9 @@
 tests/flat/test_role_style.py
 -----------------------------
 (arrivato da topo tests/integration/test_role_style.py, topo MAP.md D88)
-RoleStyle di topo sui ruoli registrati da snapbend: il magenta di "hole" è
-registrato da snapbend.flat.roles con `register_role_style`.
+RoleStyle di topo sui ruoli di snapbend: il magenta e il layer `Hole` di
+"hole" sono le mappe `ROLE_STYLES`/`LAYERS` di snapbend.flat.roles, che chi
+esporta passa a topo (topo MAP.md D128). Senza, topo non ne sa niente.
 """
 
 import unittest
@@ -11,7 +12,7 @@ import unittest
 import ezdxf
 
 import topo
-from snapbend.flat import detect_flat, LAYER_HOLE
+from snapbend.flat import detect_flat, LAYER_HOLE, LAYERS, ROLE_STYLES
 
 
 def _rect_with_hole_and_frame():
@@ -37,62 +38,50 @@ def _rect_with_hole_and_frame():
     return result, doc_in
 
 
-class TestRoleStyleDefaultUnchanged(unittest.TestCase):
+class TestSnapbendMaps(unittest.TestCase):
     """
-    Senza `role_styles=` passato a to_dxf(), il comportamento visivo di
-    "hole" è identico a prima di D37 (stesso magenta) — ma il MECCANISMO è
-    cambiato ("roles out of core"): non è più una voce hardcoded nella
-    palette del motore, è `snapbend.flat.roles` che si registra il
-    proprio colore con `register_role_style`, lo stesso meccanismo pubblico
-    che userebbe un consumatore esterno. Per questo "hole" HA un
-    `true_color` di default (registrato), mentre un ruolo di consumatore
-    mai registrato (`frame`, qui) non ce l'ha.
+    Con le mappe di snapbend "hole" va sul layer `Hole` in magenta; un ruolo
+    di consumatore che nessuno nomina (`frame`) prende il grigio di default
+    dell'adapter, senza `true_color` (D31).
     """
 
     def setUp(self):
         self.result, self.doc_in = _rect_with_hole_and_frame()
-        self.doc_out = topo.to_dxf(self.result, self.doc_in)
+        self.doc_out = topo.to_dxf(self.result, self.doc_in, role_styles=ROLE_STYLES, layers=LAYERS)
 
-    def test_001_hole_layer_has_registered_true_color(self):
+    def test_001_hole_layer_is_magenta(self):
         layer = self.doc_out.layers.get(LAYER_HOLE)
         self.assertTrue(layer.dxf.hasattr("true_color"))
-        self.assertEqual(layer.rgb, (255, 0, 255))  # magenta, registrato da snapbend.flat.roles
+        self.assertEqual(layer.rgb, (255, 0, 255))
 
     def test_002_frame_layer_created_with_consumer_color(self):
-        # Layer creato al volo col nome dello slug (D31), colore di default
-        # (grigio consumatore), nessun override richiesto.
         self.assertIn('frame', self.doc_out.layers)
         layer = self.doc_out.layers.get('frame')
         self.assertFalse(layer.dxf.hasattr("true_color"))
 
 
+class TestWithoutMaps(unittest.TestCase):
+    """Senza le mappe di snapbend topo non sa cos'è un foro: lo scrive sul
+    layer col nome dello slug, grigio (D128 — niente registro)."""
+
+    def test_001_hole_on_slug_layer(self):
+        result, doc_in = _rect_with_hole_and_frame()
+        doc_out = topo.to_dxf(result, doc_in)
+        names = [layer.dxf.name for layer in doc_out.layers]   # la tabella DXF ignora le maiuscole
+        self.assertIn("hole", names)
+        self.assertNotIn(LAYER_HOLE, names)
+        self.assertFalse(doc_out.layers.get("hole").dxf.hasattr("true_color"))
+
+
 class TestRoleStyleColorOverride(unittest.TestCase):
-    """role_styles fa override del colore di un ruolo noto a topo."""
+    """Il chiamante cambia un colore di snapbend componendo le mappe."""
 
     def setUp(self):
         self.result, self.doc_in = _rect_with_hole_and_frame()
         self.doc_out = topo.to_dxf(
             self.result, self.doc_in,
-            role_styles={"hole": topo.RoleStyle(color=(0, 0, 0))},
-        )
-
-    def test_001_hole_layer_true_color_is_black(self):
-        layer = self.doc_out.layers.get(LAYER_HOLE)
-        self.assertEqual(layer.rgb, (0, 0, 0))
-
-    def test_002_other_layers_untouched(self):
-        outer_layer = self.doc_out.layers.get("OuterContour")
-        self.assertFalse(outer_layer.dxf.hasattr("true_color"))
-
-
-class TestRoleStyleColorOverride(unittest.TestCase):
-    """role_styles fa override del colore di un ruolo noto a topo."""
-
-    def setUp(self):
-        self.result, self.doc_in = _rect_with_hole_and_frame()
-        self.doc_out = topo.to_dxf(
-            self.result, self.doc_in,
-            role_styles={"hole": topo.RoleStyle(color=(0, 0, 0))},
+            role_styles={**ROLE_STYLES, "hole": topo.RoleStyle(color=(0, 0, 0))},
+            layers=LAYERS,
         )
 
     def test_001_hole_layer_true_color_is_black(self):

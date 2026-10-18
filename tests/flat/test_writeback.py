@@ -10,6 +10,7 @@ import unittest
 from pathlib import Path
 
 import topo
+from snapbend.flat import ROLE_STYLES, LAYERS
 from snapbend.flat import (
     detect_flat, LAYER_HOLE, LAYER_COUNTERSINK, LAYER_BENDING, LAYER_ENGRAVE,
 )
@@ -23,7 +24,7 @@ def _pipeline(name, *, detect=False, name_roles=None):
     result = topo.heal(doc)
     if detect:
         detect_flat(result, features="all")
-    doc_out = topo.to_dxf(result, doc)
+    doc_out = topo.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)
     return result, doc_out.modelspace()
 
 

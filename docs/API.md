@@ -582,8 +582,10 @@ snapbend.flat.describe_features(cluster) -> dict
   `countersink_count`, `threaded_holes_count`, `bending_lines` (gruppi
   collineari), `total_engrave_length`, `total_marking_length`.
 - Ruoli e layer: `HOLE`, `COUNTERSINK`, `THREADED_HOLE`, `BEND`, `ENGRAVE`,
-  `MARKING`, `LAYER_*`, `is_structural(role)`; all'import registra colori e
-  nomi layer in topo (`register_role_style`).
+  `MARKING`, `LAYER_*`, `is_structural(role)`; `ROLE_STYLES` e `LAYERS`, le
+  mappe ruolo → colore e ruolo → layer che chi esporta passa a topo
+  (`topo.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS)`, anche
+  `split`, `to_svg`, `to_view_model`): topo non tiene un registro (topo D128).
 - Tipi: `Hole` (`is_void = True`: topo lo toglie dall'area), `BendingLine`,
   `Engraving`, `ClassifiedEntity`; `contours` dice a topo su che layer
   disegnarli (una svasatura sul suo layer, una piega come LINE).

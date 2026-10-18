@@ -9,6 +9,7 @@ import math
 import unittest
 
 import topo
+from snapbend.flat import ROLE_STYLES, LAYERS
 from snapbend.flat import LAYER_BENDING, DashPattern, describe_features, detect_flat, trim_bending_lines
 
 
@@ -73,7 +74,7 @@ class TestTrimBendingLines(unittest.TestCase):
 
     def test_dxf_has_one_line_per_dash(self):
         result = trim_bending_lines(_plate(), DashPattern(head=20, tail=20, middle=20, n_middle=1))
-        lines = [e for e in topo.to_dxf(result).modelspace().query("LINE")
+        lines = [e for e in topo.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS).modelspace().query("LINE")
                  if e.dxf.layer == LAYER_BENDING]
         self.assertEqual(len(lines), 6)
 

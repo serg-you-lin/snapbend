@@ -71,9 +71,10 @@ def to_dxf(
                              solo riferimento, mai geometria di taglio
     """
     import topo
+    from ..flat.roles import LAYERS, ROLE_STYLES
 
     result = to_topo_result(flat, tolerance=tolerance)
-    doc_out = topo.to_dxf(result, allow_invalid=False)
+    doc_out = topo.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS, allow_invalid=False)
 
     if annotate and flat.meta:
         _write_meta_block(doc_out, result, flat.label, flat.meta, flat.bends)
@@ -109,10 +110,11 @@ def write_section_dxf(
     vede scritto.
     """
     import topo
+    from ..flat.roles import LAYERS, ROLE_STYLES
 
     flat = section.section()
     result = to_topo_result(flat, tolerance=tolerance)
-    doc_out = topo.to_dxf(result, allow_invalid=False)
+    doc_out = topo.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS, allow_invalid=False)
 
     _write_flange_quotes(doc_out, quotes, section.thickness, quote_clearance)
 
@@ -154,18 +156,18 @@ def write_part_dxf(
     essere usata da sola.
     """
     import topo
+    from ..flat.roles import LAYERS, ROLE_STYLES
 
     result = to_topo_result(flat, tolerance=tolerance)
     # Verde SCURO per il layer "SectionView", deliberatamente diverso dal
     # verde di OuterContour (color 3, la sagoma da tagliare): la vista in
     # sezione è solo riferimento, non va scambiata per la parte vera.
-    # RoleStyle (topo D37) fa creare/colorare il layer a topo.to_dxf()
-    # stesso — non serve più farlo a mano dopo su doc_out.
-    role_styles = (
-        {"SectionView": topo.RoleStyle(color=(0, 100, 0))}
-        if section_flat is not None else None
-    )
-    doc_out = topo.to_dxf(result, role_styles=role_styles, allow_invalid=False)
+    # Un RoleStyle (topo D37, D128) fa creare/colorare il layer a
+    # topo.to_dxf() stesso — non serve farlo a mano dopo su doc_out.
+    role_styles = dict(ROLE_STYLES)
+    if section_flat is not None:
+        role_styles["SectionView"] = topo.RoleStyle(color=(0, 100, 0))
+    doc_out = topo.to_dxf(result, role_styles=role_styles, layers=LAYERS, allow_invalid=False)
 
     cut_bbox = result.clusters[0].outer.bbox if result.clusters else (0.0, 0.0, 0.0, 0.0)
     x0 = cut_bbox[0]

@@ -12,7 +12,7 @@ installato (il resto di snapbend no). Arrivato da topo, topo MAP.md D88.
 from .roles import (
     HOLE, COUNTERSINK, THREADED_HOLE, BEND, ENGRAVE, MARKING,
     LAYER_HOLE, LAYER_COUNTERSINK, LAYER_THREADED_HOLE, LAYER_BENDING,
-    LAYER_ENGRAVE, LAYER_MARKING, is_structural,
+    LAYER_ENGRAVE, LAYER_MARKING, ROLE_STYLES, LAYERS, is_structural,
 )
 from .thresholds import HOLE_DIAMETER_THRESHOLD
 from .detect import detect_flat, describe_features, ALL_FEATURES
@@ -26,7 +26,7 @@ from .model import (
 __all__ = [
     "HOLE", "COUNTERSINK", "THREADED_HOLE", "BEND", "ENGRAVE", "MARKING",
     "LAYER_HOLE", "LAYER_COUNTERSINK", "LAYER_THREADED_HOLE", "LAYER_BENDING",
-    "LAYER_ENGRAVE", "LAYER_MARKING", "is_structural",
+    "LAYER_ENGRAVE", "LAYER_MARKING", "ROLE_STYLES", "LAYERS", "is_structural",
     "HOLE_DIAMETER_THRESHOLD",
     "detect_flat", "describe_features", "ALL_FEATURES", "heal_and_detect",
     "DashPattern", "DashRule", "trim_bending_lines",

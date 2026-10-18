@@ -20,9 +20,10 @@ project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 import topo
+from snapbend.flat import ROLE_STYLES, LAYERS
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
 from topo.adapters.dxf.layers import ALL_LAYERS, TRASH_LAYER
-from topo.adapters.dxf.layers import LAYER_OUTER, ROLE_TO_LAYER
+from topo.adapters.dxf.layers import LAYER_OUTER, role_to_dxf_layer
 from snapbend.flat.roles import LAYER_BENDING
 from snapbend.flat.roles import HOLE, THREADED_HOLE, COUNTERSINK
 
@@ -55,7 +56,7 @@ def _run_pipeline(dxf_path: Path) -> tuple:
         is_structural=is_structural,
     )
     detect_flat(result, features="all", bending_tolerance=0.2)
-    doc_out = topo.to_dxf(result, source_doc)
+    doc_out = topo.to_dxf(result, source_doc, role_styles=ROLE_STYLES, layers=LAYERS)
 
     return source_doc, doc_out, result
 
@@ -134,7 +135,7 @@ class TestEntitaBylayer(unittest.TestCase):
         for i, cluster in enumerate(self.result.clusters):
             with self.subTest(cluster=i):
                 self.assertEqual(
-                    ROLE_TO_LAYER.get(cluster.outer.role),
+                    role_to_dxf_layer(cluster.outer.role),
                     LAYER_OUTER,
                     msg=f"Part {i}: outer.role atteso 'outer', trovato '{cluster.outer.role}'",
                 )
@@ -163,7 +164,7 @@ class TestLayerSplit(unittest.TestCase):
         cls.src_doc, cls.doc, cls.result = _run_pipeline(MULTIFEATURE)
         cls.msp = cls.doc.modelspace()
         cls.output_dir = tempfile.mkdtemp()
-        drawings = topo.split(cls.result, cls.src_doc)
+        drawings = topo.split(cls.result, cls.src_doc, role_styles=ROLE_STYLES, layers=LAYERS)
         cls.generated = []
         for i, drawing in enumerate(drawings):
             path = str(Path(cls.output_dir) / f"child_{i:03d}.dxf")
@@ -236,14 +237,14 @@ class TestLineetteSpurie(unittest.TestCase):
             source_file=cls.dxf_path.name,
         )
         detect_flat(cls.result, features="all")
-        cls.msp = topo.to_dxf(cls.result, src_doc).modelspace()
+        cls.msp = topo.to_dxf(cls.result, src_doc, role_styles=ROLE_STYLES, layers=LAYERS).modelspace()
 
     def test_un_solo_part(self):
         self.assertEqual(self.result.cluster_count, 1, "Atteso 1 cluster")
 
     def test_outer_su_layer_corretto(self):
         cluster = self.result.clusters[0]
-        self.assertEqual(ROLE_TO_LAYER.get(cluster.outer.role), LAYER_OUTER)
+        self.assertEqual(role_to_dxf_layer(cluster.outer.role), LAYER_OUTER)
 
     def test_due_entita_su_bending(self):
         bending = [e for e in self.msp if e.dxf.hasattr("layer") and e.dxf.layer == LAYER_BENDING]

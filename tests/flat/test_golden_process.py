@@ -25,6 +25,7 @@ sys.path.insert(0, str(project_root))
 import topo
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
 from topo.adapters.dxf.layers import role_to_dxf_layer
+from snapbend.flat import LAYERS
 from snapbend.flat.detect import describe_features
 
 
@@ -393,7 +394,7 @@ def _make_multipli_test(path):
         self.assertLess(cluster.outer.polygon.symmetric_difference(
             shapely_wkt.loads(golden["outer_wkt"])).area, TOL_SHAPE, msg=f"{label} outer shape")
 
-        layers = [role_to_dxf_layer(c.role) for c in cluster.features("holes") + cluster.inners]
+        layers = [role_to_dxf_layer(c.role, layers=LAYERS) for c in cluster.features("holes") + cluster.inners]
         self.assertEqual(Counter(layers), Counter(golden["inners_layers"]),
                          msg=f"{label} inners_layers")
 

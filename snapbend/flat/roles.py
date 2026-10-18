@@ -5,9 +5,10 @@ Vocabolario di processo — foro, foro filettato, svasatura, piega, incisione,
 marcatura (arrivato da topo `tools/manufacturing_role.py`, topo MAP.md D88).
 
 topo non conosce questi ruoli: `heal(doc, is_structural=...)` riceve
-`is_structural` da qui (lo passa `heal_and_detect()`), e i colori/layer di
-output si registrano in topo con `register_role_style`, lo stesso meccanismo
-di qualunque consumatore.
+`is_structural` da qui (lo passa `heal_and_detect()`), e colori e layer di
+output sono due mappe di snapbend, `ROLE_STYLES` e `LAYERS`, che chi
+esporta passa a topo (`topo.to_dxf(result, role_styles=ROLE_STYLES,
+layers=LAYERS)`) — topo non ne tiene nessuna (topo MAP.md D128).
 """
 
 from __future__ import annotations
@@ -54,9 +55,9 @@ WORK_TYPE_TO_ROLE: Dict[str, str] = {
 }
 
 
-# Nomi layer DXF di default per l'output — registrati sotto via
-# register_role_style, e la fonte di verità per chi (tipicamente i test)
-# deve confrontare un layer scritto in output senza reinventare la stringa.
+# Nomi layer DXF dell'output di snapbend — in `LAYERS` qui sotto, e la fonte
+# di verità per chi (tipicamente i test) deve confrontare un layer scritto in
+# output senza reinventare la stringa.
 LAYER_HOLE          = "Hole"
 LAYER_COUNTERSINK   = "Countersink"
 LAYER_THREADED_HOLE = "ThreadHole"
@@ -75,27 +76,23 @@ def is_structural(role) -> bool:
     return topo.model.is_structural_role(role) or role in STRUCTURAL_MANUFACTURING_ROLES
 
 
-def _register_default_styles() -> None:
-    """
-    Registra colore + nome layer di default per i ruoli manifatturieri —
-    stessi valori che stavano hardcoded in rules/palette.py e
-    adapters/dxf/layers.py prima del refactor. Gira all'import di questo
-    modulo (quindi automaticamente quando topo viene importato, dato che
-    topo/__init__.py importa detect): zero regressione sull'output di
-    default, zero sapere manifatturiero fuori da qui — detect si registra
-    con lo stesso meccanismo pubblico (`register_role_style`) che userebbe
-    un consumatore esterno, nessun trattamento privilegiato.
-    """
+# Colore di ogni ruolo di processo in uscita (gli RGB canonici dei vecchi ACI
+# 6, 5, 4, 11, 9, 8 — l'11 è rosa, non bianco).
+ROLE_STYLES: Dict[str, "topo.RoleStyle"] = {
+    HOLE:          topo.RoleStyle(color=(255, 0, 255)),     # magenta
+    COUNTERSINK:   topo.RoleStyle(color=(0, 0, 255)),       # blu
+    THREADED_HOLE: topo.RoleStyle(color=(0, 255, 255)),     # ciano
+    BEND:          topo.RoleStyle(color=(255, 127, 127)),   # rosa
+    ENGRAVE:       topo.RoleStyle(color=(192, 192, 192)),   # grigio chiaro
+    MARKING:       topo.RoleStyle(color=(128, 128, 128)),   # grigio scuro
+}
 
-    # Valori copiati da rules.palette.ACI_TO_HEX (mai dal commento accanto a
-    # COLOR_BENDING — diceva "bianco" ma ACI 11 è "#ff7f7f", rosa: il
-    # commento era sbagliato, il valore vero è quello della tabella hex).
-    topo.register_role_style(HOLE,          topo.RoleStyle(color=(255, 0, 255),   layer_name=LAYER_HOLE))          # magenta, ACI 6
-    topo.register_role_style(COUNTERSINK,   topo.RoleStyle(color=(0, 0, 255),     layer_name=LAYER_COUNTERSINK))   # blu, ACI 5
-    topo.register_role_style(THREADED_HOLE, topo.RoleStyle(color=(0, 255, 255),   layer_name=LAYER_THREADED_HOLE)) # ciano, ACI 4
-    topo.register_role_style(BEND,          topo.RoleStyle(color=(255, 127, 127), layer_name=LAYER_BENDING))       # rosa, ACI 11
-    topo.register_role_style(ENGRAVE,       topo.RoleStyle(color=(192, 192, 192), layer_name=LAYER_ENGRAVE))       # grigio chiaro, ACI 9
-    topo.register_role_style(MARKING,       topo.RoleStyle(color=(128, 128, 128), layer_name=LAYER_MARKING))       # grigio scuro, ACI 8
-
-
-_register_default_styles()
+# Layer DXF di ogni ruolo di processo in uscita.
+LAYERS: Dict[str, str] = {
+    HOLE:          LAYER_HOLE,
+    COUNTERSINK:   LAYER_COUNTERSINK,
+    THREADED_HOLE: LAYER_THREADED_HOLE,
+    BEND:          LAYER_BENDING,
+    ENGRAVE:       LAYER_ENGRAVE,
+    MARKING:       LAYER_MARKING,
+}

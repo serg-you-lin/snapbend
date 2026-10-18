@@ -22,7 +22,7 @@ from pathlib import Path
 import topo
 from topo.adapters.dxf.layers import role_to_dxf_layer
 
-from snapbend.flat import detect_flat, describe_features, is_structural
+from snapbend.flat import LAYERS, detect_flat, describe_features, is_structural
 
 DATA = Path(__file__).resolve().parent.parent / "data" / "flat"
 GOLDEN_DXF_DIR = DATA / "golden"
@@ -122,8 +122,8 @@ def generate_multipli(force: bool, only: str = None) -> None:
                 "area_mm2":      round(cluster.area, 4),
                 "outer_wkt":     cluster.outer.polygon.wkt,
                 # role_to_dxf_layer: un ruolo di processo (es. "hole") ha il
-                # suo layer solo via il registro di rules/palette.py
-                "inners_layers": [role_to_dxf_layer(i.role)
+                # suo layer dalla mappa LAYERS di snapbend (topo D128)
+                "inners_layers": [role_to_dxf_layer(i.role, layers=LAYERS)
                                   for i in cluster.features("holes") + cluster.inners],
                 "summary":       {
                     k: v for k, v in

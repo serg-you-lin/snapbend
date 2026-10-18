@@ -1445,3 +1445,19 @@ goldens; the rest of each file is untouched.
 Behaviour change for a caller: hole diameters and centres are now exact. A
 contour that is a single near-round ellipse is no longer a hole (it is not a
 circle). Version **0.5.0**, needs topo 0.19.0.
+
+### D67 — snapbend's output colours and layers are two maps, not a registration ✅
+topo drops its global registry `register_role_style` (topo MAP.md D128,
+reopening topo D47): registering at import changed the colours of anyone's
+`to_dxf` in the same process, and snapdraw's violet hole silently overrode
+snapbend's magenta. `flat/roles.py` now publishes `ROLE_STYLES` (role →
+`topo.RoleStyle`, the same RGB as before) and `LAYERS` (role → DXF layer:
+`Hole`, `Countersink`, `ThreadHole`, `Bending`, `Engrave`, `Marking`),
+exported by `snapbend.flat`. snapbend's own exports (`io/dxf.py`) pass them;
+whoever calls `topo.to_dxf`/`split`/`to_svg` directly passes them too, or
+composes them (`{**ROLE_STYLES, "hole": ...}`). Without them a hole goes on
+the `hole` layer, gray — topo's DXF adapter default.
+
+Tests pass the maps wherever they read an output layer; the process goldens
+are untouched (`role_to_dxf_layer(role, layers=LAYERS)` gives the same names).
+Suite all green.
