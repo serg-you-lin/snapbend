@@ -16,6 +16,7 @@ from __future__ import annotations
 import math
 from dataclasses import replace
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
+import topo_dxf
 
 if TYPE_CHECKING:
     from ..model.geometry import FlatGeometry
@@ -58,7 +59,7 @@ def to_dxf(
     show_margin_reference: bool = False,
 ):
     """
-    Scrive `flat` su file DXF via topo.to_dxf() — layer/colori coerenti
+    Scrive `flat` su file DXF via topo_dxf.to_dxf() — layer/colori coerenti
     col resto dell'output topo.
 
     annotate:               blocco di testo con i valori di `flat.meta`,
@@ -74,7 +75,7 @@ def to_dxf(
     from ..flat.roles import LAYERS, ROLE_STYLES
 
     result = to_topo_result(flat, tolerance=tolerance)
-    doc_out = topo.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS, allow_invalid=False)
+    doc_out = topo_dxf.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS, allow_invalid=False)
 
     if annotate and flat.meta:
         _write_meta_block(doc_out, result, flat.label, flat.meta, flat.bends)
@@ -114,7 +115,7 @@ def write_section_dxf(
 
     flat = section.section()
     result = to_topo_result(flat, tolerance=tolerance)
-    doc_out = topo.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS, allow_invalid=False)
+    doc_out = topo_dxf.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS, allow_invalid=False)
 
     _write_flange_quotes(doc_out, quotes, section.thickness, quote_clearance)
 
@@ -163,11 +164,11 @@ def write_part_dxf(
     # verde di OuterContour (color 3, la sagoma da tagliare): la vista in
     # sezione è solo riferimento, non va scambiata per la parte vera.
     # Un RoleStyle (topo D37, D128) fa creare/colorare il layer a
-    # topo.to_dxf() stesso — non serve farlo a mano dopo su doc_out.
+    # topo_dxf.to_dxf() stesso — non serve farlo a mano dopo su doc_out.
     role_styles = dict(ROLE_STYLES)
     if section_flat is not None:
         role_styles["SectionView"] = topo.RoleStyle(color=(0, 100, 0))
-    doc_out = topo.to_dxf(result, role_styles=role_styles, layers=LAYERS, allow_invalid=False)
+    doc_out = topo_dxf.to_dxf(result, role_styles=role_styles, layers=LAYERS, allow_invalid=False)
 
     cut_bbox = result.clusters[0].outer.bbox if result.clusters else (0.0, 0.0, 0.0, 0.0)
     x0 = cut_bbox[0]
@@ -226,7 +227,7 @@ def _write_section_view_entities(doc_out, entities: List[Dict[str, Any]], dx: fl
     pieno invece che tratteggiato perché non è un fantasma del foglio ma
     un disegno vero da leggere).
 
-    Il layer (verde scuro) è già creato e colorato da `topo.to_dxf()`
+    Il layer (verde scuro) è già creato e colorato da `topo_dxf.to_dxf()`
     via `role_styles` (vedi `write_part_dxf`) — qui si scrive solo la
     geometria."""
     msp = doc_out.modelspace()

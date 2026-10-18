@@ -17,6 +17,7 @@ import tempfile
 import ezdxf
 
 import topo
+import topo_dxf
 from snapbend.flat import ROLE_STYLES, LAYERS
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
 
@@ -66,7 +67,7 @@ def run_pipeline(
 
     path = load(dxf_name)
 
-    doc = topo.load_dxf(
+    doc = topo_dxf.load_dxf(
         path,
         explode_inserts=True,
         tolerance=tolerance,
@@ -90,7 +91,7 @@ def run_pipeline(
 
     doc_out = None
     if do_write:
-        doc_out = topo.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)
+        doc_out = topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)
 
     output = {
         "doc": doc,
@@ -111,9 +112,9 @@ def run_pipeline(
 
         tmp.close()
 
-        (doc_out or topo.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)).saveas(tmp.name)
+        (doc_out or topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)).saveas(tmp.name)
 
-        reloaded_doc = topo.load_dxf(tmp.name, explode_inserts=True, tolerance=tolerance)
+        reloaded_doc = topo_dxf.load_dxf(tmp.name, explode_inserts=True, tolerance=tolerance)
 
         reloaded_result = topo.heal(
             reloaded_doc,

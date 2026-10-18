@@ -20,10 +20,11 @@ project_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 import topo
+import topo_dxf
 from snapbend.flat import ROLE_STYLES, LAYERS
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
-from topo.adapters.dxf.layers import ALL_LAYERS, TRASH_LAYER
-from topo.adapters.dxf.layers import LAYER_OUTER, role_to_dxf_layer
+from topo_dxf.layers import ALL_LAYERS, TRASH_LAYER
+from topo_dxf.layers import LAYER_OUTER, role_to_dxf_layer
 from snapbend.flat.roles import LAYER_BENDING
 from snapbend.flat.roles import HOLE, THREADED_HOLE, COUNTERSINK
 
@@ -45,7 +46,7 @@ def _run_pipeline(dxf_path: Path) -> tuple:
     layer topo e le entità routate. `source_doc` serve solo a split().
     """
     from snapbend.flat.roles import is_structural
-    source_doc = topo.load_dxf(
+    source_doc = topo_dxf.load_dxf(
         dxf_path, explode_inserts=True, role_rules=topo.name_rules(SPECIAL_LAYERS),
     )
     result = topo.heal(
@@ -56,7 +57,7 @@ def _run_pipeline(dxf_path: Path) -> tuple:
         is_structural=is_structural,
     )
     detect_flat(result, features="all", bending_tolerance=0.2)
-    doc_out = topo.to_dxf(result, source_doc, role_styles=ROLE_STYLES, layers=LAYERS)
+    doc_out = topo_dxf.to_dxf(result, source_doc, role_styles=ROLE_STYLES, layers=LAYERS)
 
     return source_doc, doc_out, result
 
@@ -164,7 +165,9 @@ class TestLayerSplit(unittest.TestCase):
         cls.src_doc, cls.doc, cls.result = _run_pipeline(MULTIFEATURE)
         cls.msp = cls.doc.modelspace()
         cls.output_dir = tempfile.mkdtemp()
-        drawings = topo.split(cls.result, cls.src_doc, role_styles=ROLE_STYLES, layers=LAYERS)
+        # un Result per parte, poi ognuno nel suo DXF (topo D129)
+        drawings = [topo_dxf.to_dxf(part, cls.src_doc, role_styles=ROLE_STYLES, layers=LAYERS)
+                    for part in topo.split(cls.result)]
         cls.generated = []
         for i, drawing in enumerate(drawings):
             path = str(Path(cls.output_dir) / f"child_{i:03d}.dxf")
@@ -229,7 +232,7 @@ class TestLineetteSpurie(unittest.TestCase):
         if not cls.dxf_path.exists():
             raise unittest.SkipTest(f"File non trovato: {cls.dxf_path}")
 
-        src_doc = topo.load_dxf(cls.dxf_path, explode_inserts=True)
+        src_doc = topo_dxf.load_dxf(cls.dxf_path, explode_inserts=True)
         cls.result = topo.heal(
             src_doc,
             tolerance=1,
@@ -237,7 +240,7 @@ class TestLineetteSpurie(unittest.TestCase):
             source_file=cls.dxf_path.name,
         )
         detect_flat(cls.result, features="all")
-        cls.msp = topo.to_dxf(cls.result, src_doc, role_styles=ROLE_STYLES, layers=LAYERS).modelspace()
+        cls.msp = topo_dxf.to_dxf(cls.result, src_doc, role_styles=ROLE_STYLES, layers=LAYERS).modelspace()
 
     def test_un_solo_part(self):
         self.assertEqual(self.result.cluster_count, 1, "Atteso 1 cluster")
@@ -302,9 +305,9 @@ class TestGambaTavoloSplit(unittest.TestCase):
         if not cls.dxf_path.exists():
             raise unittest.SkipTest(f"File non trovato: {cls.dxf_path}")
         
-        src_doc = topo.load_dxf(cls.dxf_path, explode_inserts=True)
+        src_doc = topo_dxf.load_dxf(cls.dxf_path, explode_inserts=True)
         cls.output_dir = tempfile.mkdtemp()
-        cls.result = topo.split_to_files(
+        cls.result = topo_dxf.split_to_files(
             src_doc,
             output_folder=cls.output_dir,
             label=cls.dxf_path.stem,

@@ -2,7 +2,7 @@
 tests/flat/test_writeback.py
 ----------------------------
 (arrivato da topo tests/integration/test_writeback.py, topo MAP.md D88)
-Routing dei layer di processo in `topo.to_dxf` dopo `detect_flat()`: foro,
+Routing dei layer di processo in `topo_dxf.to_dxf` dopo `detect_flat()`: foro,
 svasatura, piega, incisione.
 """
 
@@ -10,6 +10,7 @@ import unittest
 from pathlib import Path
 
 import topo
+import topo_dxf
 from snapbend.flat import ROLE_STYLES, LAYERS
 from snapbend.flat import (
     detect_flat, LAYER_HOLE, LAYER_COUNTERSINK, LAYER_BENDING, LAYER_ENGRAVE,
@@ -20,11 +21,11 @@ EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "data" / "flat"
 
 def _pipeline(name, *, detect=False, name_roles=None):
     """heal (+ detect) → to_dxf. Ritorna (result, msp_out)."""
-    doc = topo.load_dxf(EXAMPLES_DIR / name, role_rules=topo.name_rules(name_roles or {}))
+    doc = topo_dxf.load_dxf(EXAMPLES_DIR / name, role_rules=topo.name_rules(name_roles or {}))
     result = topo.heal(doc)
     if detect:
         detect_flat(result, features="all")
-    doc_out = topo.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)
+    doc_out = topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)
     return result, doc_out.modelspace()
 
 

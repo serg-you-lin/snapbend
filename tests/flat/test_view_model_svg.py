@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import topo
+import topo_dxf
 from snapbend.flat import ROLE_STYLES, heal_and_detect
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "data" / "flat"
@@ -23,7 +24,7 @@ SPECIAL_LM = {"Piega": "bending", "bend": "bending", "MARK": "engrave",
 
 
 def _result(path, name_roles=None):
-    doc = topo.load_dxf(str(path), tolerance=0.5, role_rules=topo.name_rules(name_roles or {}))
+    doc = topo_dxf.load_dxf(str(path), tolerance=0.5, role_rules=topo.name_rules(name_roles or {}))
     return heal_and_detect(doc, features="all")
 
 

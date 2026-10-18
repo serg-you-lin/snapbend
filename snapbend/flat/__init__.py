@@ -6,7 +6,7 @@ topo: fori, svasature, filettati, pieghe, incisioni; il tratteggio delle pieghe.
 installato (il resto di snapbend no). Arrivato da topo, topo MAP.md D88.
 
     from snapbend.flat import heal_and_detect
-    result = heal_and_detect(topo.load_dxf("pezzo.dxf"))
+    result = heal_and_detect(topo_dxf.load_dxf("pezzo.dxf"))
 """
 
 from .roles import (

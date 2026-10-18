@@ -11,6 +11,7 @@ import unittest
 import ezdxf
 
 import topo
+import topo_dxf
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
 
 
@@ -20,7 +21,7 @@ def _square_doc(side: float = 100.0):
     pts = [(0, 0), (side, 0), (side, side), (0, side), (0, 0)]
     for a, b in zip(pts, pts[1:]):
         msp.add_line(a, b)
-    return topo.document_from_msp(msp, tolerance=0.5)
+    return topo_dxf.document_from_msp(msp, tolerance=0.5)
 
 
 class TestPipelineApi(unittest.TestCase):
@@ -55,7 +56,7 @@ class TestPipelineApi(unittest.TestCase):
         msp = d.modelspace()
         for a, b in [((0, 0), (100, 0)), ((100, 0), (100, 100)), ((100, 100), (0, 100))]:
             msp.add_line(a, b)
-        doc = topo.document_from_msp(msp, tolerance=0.5)
+        doc = topo_dxf.document_from_msp(msp, tolerance=0.5)
         r = heal_and_detect(doc)
         self.assertIsInstance(r, topo.Result)
         self.assertFalse(r.is_valid)

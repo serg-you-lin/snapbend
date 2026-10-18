@@ -20,7 +20,8 @@ import json
 from pathlib import Path
 
 import topo
-from topo.adapters.dxf.layers import role_to_dxf_layer
+import topo_dxf
+from topo_dxf.layers import role_to_dxf_layer
 
 from snapbend.flat import LAYERS, detect_flat, describe_features, is_structural
 
@@ -87,7 +88,7 @@ def generate_single(force: bool, only: str = None) -> None:
         config = _config(dxf_path)
         tol = config.get("tolerance", DEFAULT_TOLERANCE)
         roles = {**GLOBAL_NAME_ROLES, **config.get("name_roles", {})}
-        doc = topo.load_dxf(dxf_path, upgrade=True, explode_inserts=True, flatten_z_flag=True,
+        doc = topo_dxf.load_dxf(dxf_path, upgrade=True, explode_inserts=True, flatten_z_flag=True,
                              tolerance=tol, verbose=False, role_rules=topo.name_rules(roles))
         result = topo.heal(doc, tolerance=tol, is_structural=is_structural)
         detect_flat(result, features="all")
@@ -105,7 +106,7 @@ def generate_multipli(force: bool, only: str = None) -> None:
         if only and parent_path.stem != only:
             continue
         tol = _config(parent_path).get("tolerance", DEFAULT_TOLERANCE)
-        result = topo.heal(topo.load_dxf(parent_path, upgrade=True, explode_inserts=True),
+        result = topo.heal(topo_dxf.load_dxf(parent_path, upgrade=True, explode_inserts=True),
                             tolerance=tol)
         if not result.is_valid or not result.clusters:
             print(f"  SKIP (non valido): {parent_path.name}")

@@ -124,7 +124,7 @@ class FlatGeometry:
         show_margin_reference: bool = False,
     ):
         """
-        Scrive lo sviluppo su file DXF via topo.to_dxf() — layer/colori
+        Scrive lo sviluppo su file DXF via topo_dxf.to_dxf() — layer/colori
         coerenti col resto dell'output topo.
 
         annotate:               blocco di testo con i valori di `.meta`,

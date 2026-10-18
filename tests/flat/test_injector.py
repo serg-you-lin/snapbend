@@ -36,6 +36,7 @@ project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
 import topo
+import topo_dxf
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
 from snapbend.flat.roles import LAYER_BENDING, LAYER_ENGRAVE
 from snapbend.flat.detect import describe_features
@@ -54,7 +55,7 @@ def load(name):
 
 def _heal_and_inject(dxf_name, name_roles=None, data_injector=None, interpreter=None):
     from snapbend.flat.roles import is_structural
-    doc = topo.document_from_msp(
+    doc = topo_dxf.document_from_msp(
         load(dxf_name).modelspace(), role_rules=topo.name_rules(name_roles or {})
     )
     result = topo.heal(doc, is_structural=is_structural)
@@ -72,7 +73,7 @@ class TestInjectEmptyResult(unittest.TestCase):
 
     def test_001_no_parts_no_crash(self):
         """inject() su un result vuoto non deve sollevare eccezioni."""
-        doc = topo.document_from_msp(ezdxf.new().modelspace())
+        doc = topo_dxf.document_from_msp(ezdxf.new().modelspace())
         result = topo.heal(doc)
         # non deve esplodere
         topo.inject(result)
@@ -194,7 +195,7 @@ class TestInjectThreadedHoles(unittest.TestCase):
 class TestInjectDataInjector(unittest.TestCase):
 
     def setUp(self):
-        self.doc = topo.document_from_msp(
+        self.doc = topo_dxf.document_from_msp(
             load("rect_with_special_layers.dxf").modelspace(),
             role_rules=topo.name_rules({"BEND": "bending", "MARK": "engrave"}),
         )

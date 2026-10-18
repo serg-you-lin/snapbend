@@ -43,11 +43,12 @@ snapbend = ["data/*.json", "data/calibrations/*.json"]
 # "Layer di snapbend"): il calcolo non sa che topo esiste. model/ delega a io/
 # dentro i metodi to_dxf()/to_topo_result() — l'unica porta verso topo.
 [tool.gen_index.layers]
-core     = ["topo", "io", "human_layer", "flat"]
-model    = ["topo", "human_layer", "flat"]
-rules    = ["topo", "io", "human_layer", "flat"]
-# Dentro topo è interno: solo i nomi pubblici (topo MAP.md D120, D122)
-"*"      = ["topo.core", "topo.adapters"]
+core     = ["topo", "topo_dxf", "io", "human_layer", "flat"]
+model    = ["topo", "topo_dxf", "human_layer", "flat"]
+rules    = ["topo", "topo_dxf", "io", "human_layer", "flat"]
+# Dentro topo è interno: solo i nomi pubblici (topo MAP.md D120, D122);
+# l'adapter DXF è un pacchetto fratello, topo_dxf (topo D129)
+"*"      = ["topo.core"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

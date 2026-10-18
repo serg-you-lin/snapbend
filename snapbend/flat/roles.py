@@ -7,7 +7,7 @@ marcatura (arrivato da topo `tools/manufacturing_role.py`, topo MAP.md D88).
 topo non conosce questi ruoli: `heal(doc, is_structural=...)` riceve
 `is_structural` da qui (lo passa `heal_and_detect()`), e colori e layer di
 output sono due mappe di snapbend, `ROLE_STYLES` e `LAYERS`, che chi
-esporta passa a topo (`topo.to_dxf(result, role_styles=ROLE_STYLES,
+esporta passa a topo (`topo_dxf.to_dxf(result, role_styles=ROLE_STYLES,
 layers=LAYERS)`) — topo non ne tiene nessuna (topo MAP.md D128).
 """
 

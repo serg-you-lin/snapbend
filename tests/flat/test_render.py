@@ -9,6 +9,7 @@ layer del suo ruolo, una volta sola.
 import unittest
 
 import topo
+import topo_dxf
 from snapbend.flat import ROLE_STYLES, LAYERS
 
 from snapbend.flat import detect_flat, LAYER_HOLE, LAYER_COUNTERSINK, LAYER_THREADED_HOLE, LAYER_BENDING
@@ -38,7 +39,7 @@ class TestRender(unittest.TestCase):
         n_holes = len(result.clusters[0].features("holes"))
         self.assertGreater(n_holes, 0)
         # un'entità per foro, sul layer del suo tipo: nessun doppione
-        layers = _layers(topo.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS))
+        layers = _layers(topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS))
         self.assertEqual(
             sum(1 for l in layers if l in (LAYER_HOLE, LAYER_COUNTERSINK, LAYER_THREADED_HOLE)),
             n_holes,
@@ -47,7 +48,7 @@ class TestRender(unittest.TestCase):
     def test_002_la_svasatura_va_sul_suo_layer(self):
         doc, result = _plate()
         detect_flat(result, "holes")
-        layers = _layers(topo.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS))
+        layers = _layers(topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS))
         self.assertEqual(layers.count(LAYER_COUNTERSINK), 1)
         self.assertEqual(layers.count(LAYER_HOLE), 1)
 
@@ -58,7 +59,7 @@ class TestRender(unittest.TestCase):
         ])
         result = topo.heal(doc)
         detect_flat(result, "bending")
-        out = topo.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)
+        out = topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)
         bends = [e for e in out.modelspace() if e.dxf.layer == LAYER_BENDING]
         self.assertEqual([e.dxftype() for e in bends], ["LINE"])
 

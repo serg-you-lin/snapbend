@@ -4,8 +4,9 @@ from pathlib import Path
 import sys
 
 import topo
+import topo_dxf
 from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
-from topo.adapters.dxf.layers import LAYER_INNER
+from topo_dxf.layers import LAYER_INNER
 from snapbend.flat.roles import LAYER_HOLE
 from snapbend.flat.thresholds import HOLE_DIAMETER_THRESHOLD
 from snapbend.flat.model import (
@@ -40,7 +41,7 @@ class TestDetectBase(unittest.TestCase):
         doc = load("rect_with_circle_hole.dxf")
         self.msp = doc.modelspace()
 
-        self.result = topo.heal(topo.document_from_msp(self.msp))
+        self.result = topo.heal(topo_dxf.document_from_msp(self.msp))
         detect_flat(self.result, features="all")
 
     # ---------------------------------------------------------------
@@ -89,7 +90,7 @@ class TestDetectCountersink(unittest.TestCase):
         doc = load("rect_with_countersink.dxf")
         self.msp = doc.modelspace()
 
-        self.result = topo.heal(topo.document_from_msp(self.msp))
+        self.result = topo.heal(topo_dxf.document_from_msp(self.msp))
         detect_flat(self.result, features="all")
         
     def test_001_countersink_detected(self):
@@ -115,7 +116,7 @@ class TestDetectLabelMap(unittest.TestCase):
         }
 
         from snapbend.flat.roles import is_structural
-        self.result = topo.heal(topo.document_from_msp(self.msp, role_rules=topo.name_rules(name_roles)),
+        self.result = topo.heal(topo_dxf.document_from_msp(self.msp, role_rules=topo.name_rules(name_roles)),
                                   is_structural=is_structural)
         detect_flat(self.result, features="all")
 
@@ -136,7 +137,7 @@ class TestDetectThreaded(unittest.TestCase):
         doc = load("rect_with_threaded_holes_geometric.dxf")
         self.msp = doc.modelspace()
 
-        self.result = topo.heal(topo.document_from_msp(self.msp))
+        self.result = topo.heal(topo_dxf.document_from_msp(self.msp))
         detect_flat(self.result, features="all")
 
     def test_001_thread_detected(self):
@@ -155,7 +156,7 @@ class TestFlangeCountersink(unittest.TestCase):
 
     def setUp(self):
         doc = load("flangia semplice.DXF")
-        self.result = topo.heal(topo.document_from_msp(doc.modelspace()))
+        self.result = topo.heal(topo_dxf.document_from_msp(doc.modelspace()))
         detect_flat(self.result, features="all")
 
     def test_concentric_large_hole_is_not_countersink(self):
@@ -186,7 +187,7 @@ class TestDetectParametric(unittest.TestCase):
 
     def _healed(self, name="rect_with_circle_hole.dxf"):
         doc = load(name)
-        return topo.heal(topo.document_from_msp(doc.modelspace()))
+        return topo.heal(topo_dxf.document_from_msp(doc.modelspace()))
 
     def test_bare_detect_promotes_no_holes(self):
         # detect_flat(result) nudo = solo topologia pulita + ruoli assegnati al load.
@@ -220,7 +221,7 @@ class TestDetectParametric(unittest.TestCase):
 
     def test_heal_and_detect_defaults_to_all(self):
         doc = load("rect_with_circle_hole.dxf")
-        result = heal_and_detect(topo.document_from_msp(doc.modelspace()))
+        result = heal_and_detect(topo_dxf.document_from_msp(doc.modelspace()))
         self.assertEqual(sum(len(p.features("holes")) for p in result.clusters), 1)
 
 
@@ -244,7 +245,7 @@ class TestDetectStyleMap(unittest.TestCase):
         msp = self._rect_with_internal_lines(
             {"linetype": "DASHED"}, {},
         )
-        doc = topo.document_from_msp(msp, role_rules=[topo.RoleRule("bending", dashed=True)])
+        doc = topo_dxf.document_from_msp(msp, role_rules=[topo.RoleRule("bending", dashed=True)])
         result = topo.heal(doc)
         detect_flat(result)
 
@@ -256,7 +257,7 @@ class TestDetectStyleMap(unittest.TestCase):
         msp = self._rect_with_internal_lines(
             {}, {"color": 4},  # 4 = cyan ACI
         )
-        doc = topo.document_from_msp(msp, role_rules=[topo.RoleRule("engrave", color="cyan")])
+        doc = topo_dxf.document_from_msp(msp, role_rules=[topo.RoleRule("engrave", color="cyan")])
         result = topo.heal(doc)
         detect_flat(result)
 
@@ -268,7 +269,7 @@ class TestDetectStyleMap(unittest.TestCase):
         # topo legge l'indice ACI 4 come il suo RGB: la regola parla RGB (topo D126)
         for key in ((0, 255, 255), "#00ffff"):
             msp = self._rect_with_internal_lines({}, {"color": 4})
-            doc = topo.document_from_msp(msp, role_rules=[topo.RoleRule("engrave", color=key)])
+            doc = topo_dxf.document_from_msp(msp, role_rules=[topo.RoleRule("engrave", color=key)])
             result = topo.heal(doc)
             detect_flat(result)
             self.assertEqual(len(result.clusters[0].features("engrave_lines")), 1, msg=f"key={key!r}")
@@ -281,7 +282,7 @@ class TestDetectStyleMap(unittest.TestCase):
         msp.add_lwpolyline([(0, 0), (100, 0), (100, 100), (0, 100)], close=True)
         msp.add_line((20, 20), (80, 80), dxfattribs={"layer": "Piega", "color": 4})
 
-        topo_doc = topo.document_from_msp(
+        topo_doc = topo_dxf.document_from_msp(
             msp,
             role_rules=[
                 topo.RoleRule("bending", name="Piega"),

@@ -1463,3 +1463,13 @@ the process goldens are unchanged (`role_to_dxf_layer(role, layers=LAYERS)`
 gives the same names). One golden does change, for another reason: `F6` goes
 from 1 to 2 clusters, the strip being a part of its own after topo D111 (an
 edge case accepted there, never brought over here). Suite all green.
+
+### D68 — follow topo D129: the DXF adapter is `topo_dxf` ✅
+topo no longer reads or writes DXF; its sibling package `topo_dxf` does
+(`g-topo[dxf]`). `io/dxf.py` writes through `topo_dxf.to_dxf`; tests and
+scripts read through `topo_dxf.load_dxf`/`document_from_msp` and take layer
+names from `topo_dxf.layers`. `topo.split` now returns one `Result` per part;
+the one test that wrote parts writes each with `topo_dxf.to_dxf`. The rule:
+`core`, `model`, `rules` forbid `topo_dxf` as they forbid `topo`; `"*"` keeps
+`topo.core` (`topo.adapters` no longer exists). `tests/gen_index.py` is topo's
+new copy (several packages, a rule per package). Suite all green.

@@ -14,6 +14,7 @@ import unittest
 from shapely.geometry import Polygon, LineString
 
 import topo
+import topo_dxf
 from snapbend.flat.roles import HOLE, BEND, ENGRAVE
 from snapbend.flat.detect import describe_features
 from snapbend.flat.model import (
@@ -133,7 +134,7 @@ class TestSummaryMatchesGoldenFixtures(unittest.TestCase):
             lm = {**GLOBAL_NAME_ROLES, **cfg.get("name_roles", {})}
             try:
                 result = heal_and_detect(
-                    topo.load_dxf(str(dxf), explode_inserts=True,
+                    topo_dxf.load_dxf(str(dxf), explode_inserts=True,
                                    flatten_z_flag=True, role_rules=topo.name_rules(lm)),
                     tolerance=tol,
                 )

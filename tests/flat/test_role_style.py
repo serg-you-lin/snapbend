@@ -12,6 +12,7 @@ import unittest
 import ezdxf
 
 import topo
+import topo_dxf
 from snapbend.flat import detect_flat, LAYER_HOLE, LAYERS, ROLE_STYLES
 
 
@@ -32,7 +33,7 @@ def _rect_with_hole_and_frame():
 
     msp.add_line((200, 200), (220, 200), dxfattribs={'layer': 'FRAME'})
 
-    doc_in = topo.document_from_msp(msp, role_rules=topo.name_rules({'FRAME': 'frame'}))
+    doc_in = topo_dxf.document_from_msp(msp, role_rules=topo.name_rules({'FRAME': 'frame'}))
     result = topo.heal(doc_in, tolerance=0.05)
     detect_flat(result, features="all")
     return result, doc_in
@@ -47,7 +48,7 @@ class TestSnapbendMaps(unittest.TestCase):
 
     def setUp(self):
         self.result, self.doc_in = _rect_with_hole_and_frame()
-        self.doc_out = topo.to_dxf(self.result, self.doc_in, role_styles=ROLE_STYLES, layers=LAYERS)
+        self.doc_out = topo_dxf.to_dxf(self.result, self.doc_in, role_styles=ROLE_STYLES, layers=LAYERS)
 
     def test_001_hole_layer_is_magenta(self):
         layer = self.doc_out.layers.get(LAYER_HOLE)
@@ -66,7 +67,7 @@ class TestWithoutMaps(unittest.TestCase):
 
     def test_001_hole_on_slug_layer(self):
         result, doc_in = _rect_with_hole_and_frame()
-        doc_out = topo.to_dxf(result, doc_in)
+        doc_out = topo_dxf.to_dxf(result, doc_in)
         names = [layer.dxf.name for layer in doc_out.layers]   # la tabella DXF ignora le maiuscole
         self.assertIn("hole", names)
         self.assertNotIn(LAYER_HOLE, names)
@@ -78,7 +79,7 @@ class TestRoleStyleColorOverride(unittest.TestCase):
 
     def setUp(self):
         self.result, self.doc_in = _rect_with_hole_and_frame()
-        self.doc_out = topo.to_dxf(
+        self.doc_out = topo_dxf.to_dxf(
             self.result, self.doc_in,
             role_styles={**ROLE_STYLES, "hole": topo.RoleStyle(color=(0, 0, 0))},
             layers=LAYERS,
