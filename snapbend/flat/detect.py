@@ -23,10 +23,6 @@ from .model import (
     HOLE_TYPE_THREADED,
 )
 from .holes import is_threaded_hole
-from topo.core.geometry.measure import (
-    track_points, track_length, track_shape_type, circular_geometry, chord_angle_deg,
-)
-from topo.core.geometry.lines import group_collinear_lines
 from .thresholds import HOLE_DIAMETER_THRESHOLD
 
 # Tolleranza per raggruppare le bending line collineari in un'unica piega
@@ -82,7 +78,7 @@ def _normalize_features(features) -> frozenset:
 
 def _proxy_pts(proxy) -> list:
     """Vertici di un proxy aperto (OpenCurve), derivati dai suoi segmenti nativi."""
-    return track_points(getattr(proxy, "segments", []) or [])
+    return topo.geometry.track_points(getattr(proxy, "segments", []) or [])
 
 _ROLE_TO_HOLE_TYPE = {
     COUNTERSINK:   HOLE_TYPE_COUNTERSINK,
@@ -155,7 +151,7 @@ def describe_features(cluster: topo.Cluster) -> dict:
     htypes = Counter(h.hole_type for h in holes)
 
     bending_groups = (
-        len(group_collinear_lines(
+        len(topo.geometry.group_collinear_lines(
             [bl.geometry for bl in bending_lines],
             tolerance=_BENDING_GROUP_TOLERANCE,
         ))
@@ -304,7 +300,7 @@ def _bending_line(cluster, start, end, length, source="geometric"):
         role=BEND,
         geometry=LineString([start, end]),
         length=length,
-        angle_deg=chord_angle_deg(start, end),
+        angle_deg=topo.geometry.chord_angle_deg(start, end),
         cluster_label=cluster.label,
         source=source,
         confidence=0.9,
@@ -324,9 +320,9 @@ def _detect_bending(result: topo.Result, bending_tolerance: float = 1.0) -> None
 
     for proxy in result.trash_entities:
         pts = _proxy_pts(proxy)
-        if track_shape_type(pts) != "line" or len(pts) < 2:
+        if topo.geometry.track_shape_type(pts) != "line" or len(pts) < 2:
             continue
-        length = track_length(pts)
+        length = topo.geometry.track_length(pts)
         if length < bending_tolerance:
             continue
 
@@ -359,7 +355,7 @@ def _detect_bending(result: topo.Result, bending_tolerance: float = 1.0) -> None
             for proxy in (pieces[j][2] for j in run.members):
                 pts = _proxy_pts(proxy)
                 _ensure_detected(cluster).add("bending_lines", _bending_line(
-                    cluster, pts[0], pts[-1], track_length(pts)))
+                    cluster, pts[0], pts[-1], topo.geometry.track_length(pts)))
                 promoted_ids.add(id(proxy))
 
     # La linea promossa a bending NON deve restare anche in trash: `to_dxf`
@@ -393,13 +389,23 @@ def _detect_holes(result: topo.Result, max_drill_diameter: float = HOLE_DIAMETER
         _promote_geometric_holes(cluster, result, max_drill_diameter)
 
 
+def _circle(contour) -> tuple[Optional[float], Optional[tuple]]:
+    """(diametro, centro) se il contorno è un cerchio per `topo.geometry.contour_shape`,
+    altrimenti (None, None). Misura esatta dalle primitive, non dal bounding box
+    del poligono discretizzato (MAP.md D66)."""
+    shape = topo.geometry.contour_shape(contour)
+    if shape is None or shape.kind != "circle":
+        return None, None
+    return shape.diameter, shape.center
+
+
 def _circular_inners(cluster: topo.Cluster) -> list:
     """(contour, diameter, center) per ogni inner geometricamente circolare."""
     out = []
     for c in cluster.inners:
         if c.role not in (topo.model.ContourRole.UNKNOWN, topo.model.ContourRole.INNER):
             continue
-        dia, ctr = circular_geometry(c.polygon, getattr(c, "segments", []))
+        dia, ctr = _circle(c)
         if dia is not None:
             out.append((c, dia, ctr))
     return out
@@ -486,7 +492,7 @@ def _labeled_hole_from_contour(contour):
     """`Contour` con ruolo foro da role_rules → `Hole(source="labeled")`."""
     from .model import Hole
 
-    dia, ctr = circular_geometry(contour.polygon, getattr(contour, "segments", []))
+    dia, ctr = _circle(contour)
     hole_type = _ROLE_TO_HOLE_TYPE.get(contour.role, HOLE_TYPE_PLAIN)
     return Hole(
         role=contour.role,
@@ -535,7 +541,7 @@ def _engraving_from_open(proxy, cluster_label: str = "",
         role=ENGRAVE,
         segments=list(getattr(proxy, "segments", []) or []),
         styles=list(getattr(proxy, "styles", []) or []),
-        length=round(track_length(pts), 4),
+        length=round(topo.geometry.track_length(pts), 4),
         pts=pts,
         geometry=LineString(pts) if len(pts) >= 2 else None,
         cluster_label=cluster_label,
@@ -691,7 +697,7 @@ def _probe_point(ce: ClassifiedEntity) -> Optional[Point]:
 def _extract_data(proxy: topo.model.OpenCurve, work_type: str) -> dict:
     work_type = work_type.lower()
     pts = _proxy_pts(proxy)
-    length = track_length(pts)
+    length = topo.geometry.track_length(pts)
 
     if len(pts) >= 2:
         rep = (
@@ -701,14 +707,14 @@ def _extract_data(proxy: topo.model.OpenCurve, work_type: str) -> dict:
     else:
         rep = pts[0] if pts else None
 
-    if work_type == "bending" and track_shape_type(pts) == "line" and len(pts) >= 2:
+    if work_type == "bending" and topo.geometry.track_shape_type(pts) == "line" and len(pts) >= 2:
         start = pts[0]
         end   = pts[-1]
         return {
             "start":                start,
             "end":                  end,
             "length":               round(length, 4),
-            "angle_deg":            round(chord_angle_deg(start, end), 4),
+            "angle_deg":            round(topo.geometry.chord_angle_deg(start, end), 4),
             "representative_point": rep,
         }
 

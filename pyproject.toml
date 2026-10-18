@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "snapbend"
-version = "0.4.0"
+version = "0.5.0"
 description = "Motore matematico puro per sviluppi piani di forme sviluppabili (cono, cilindro, profili piegati, ...). Zero dipendenze per il calcolo e per la lettura di un disegno; l'export DXF passa da topo (opzionale, installato a parte) — vedi MAP.md D43."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -46,6 +46,8 @@ snapbend = ["data/*.json", "data/calibrations/*.json"]
 core     = ["topo", "io", "human_layer", "flat"]
 model    = ["topo", "human_layer", "flat"]
 rules    = ["topo", "io", "human_layer", "flat"]
+# Dentro topo è interno: solo i nomi pubblici (topo MAP.md D120, D122)
+"*"      = ["topo.core", "topo.adapters"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

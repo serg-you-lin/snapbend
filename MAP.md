@@ -1417,3 +1417,31 @@ and the DXF layer table (`topo.adapters.dxf.layers`) in the tests. When they
 have one, `[tool.gen_index.layers]` gets `"*" = ["topo.core", "topo.adapters"]`
 and `tests/test_index.py` forbids the way back.
 
+
+### D66 — the second half of topo's public surface; a hole's diameter is the circle's, not its bounding box's ✅
+topo now exports what `flat/detect.py` and the tests still took from inside
+(topo MAP.md D122): `topo.geometry.track_points` / `track_length` /
+`track_shape_type` / `chord_angle_deg` / `group_collinear_lines`.
+`[tool.gen_index.layers]` has `"*" = ["topo.core", "topo.adapters"]`:
+`tests/test_index.py` forbids the way back in the package. The tests still
+take the DXF layer table from `topo.adapters.dxf.layers`: topo keeps it
+internal on purpose (topo D122), the rule does not cover `tests/`.
+
+One name was not moved but replaced: `circular_geometry` (inside topo) read a
+circle's diameter and centre off the bounding box of the *discretized*
+polygon, so a Ø22 hole came out 21.9802 and its centre a few hundredths off.
+"Is this contour a circle, and how big" is already a public fact,
+`topo.geometry.contour_shape` (kind `"circle"`, exact radius and centre from
+the primitives), so detection uses that (`_circle` in `flat/detect.py`, D91:
+no private copy of a geometric fact).
+
+Proved before touching a golden: process goldens generated with the old and
+the new code differ in 25 values only, all hole diameters and centres, each
+moving to the value written in the DXF (21.9802 → 22.0, 17.9901 → 18.0,
+27.4902 → 27.5, 29.6011 → 29.6208, read back from the CIRCLE entities). No
+hole gained or lost on any fixture. Only those 25 values were written into the
+goldens; the rest of each file is untouched.
+
+Behaviour change for a caller: hole diameters and centres are now exact. A
+contour that is a single near-round ellipse is no longer a hole (it is not a
+circle). Version **0.5.0**, needs topo 0.19.0.

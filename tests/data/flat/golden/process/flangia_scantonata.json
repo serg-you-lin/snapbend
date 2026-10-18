@@ -15,7 +15,7 @@
       "holes": [
         {
           "hole_type": "plain",
-          "diameter": 21.9802,
+          "diameter": 22.0,
           "center": [
             106.066,
             106.066
@@ -26,7 +26,7 @@
         },
         {
           "hole_type": "plain",
-          "diameter": 21.9802,
+          "diameter": 22.0,
           "center": [
             106.066,
             -106.066
@@ -37,7 +37,7 @@
         },
         {
           "hole_type": "plain",
-          "diameter": 21.9802,
+          "diameter": 22.0,
           "center": [
             -106.066,
             106.066
@@ -48,7 +48,7 @@
         },
         {
           "hole_type": "plain",
-          "diameter": 21.9802,
+          "diameter": 22.0,
           "center": [
             -106.066,
             -106.066
