@@ -312,7 +312,7 @@ class TestGambaTavoloSplit(unittest.TestCase):
             output_folder=cls.output_dir,
             label=cls.dxf_path.stem,
             source_file=cls.dxf_path.name,
-            include_annotations=True,
+            include_texts=True,
         )
         cls.generated = [str(p) for p in Path(cls.output_dir).glob("*.dxf")]
 
