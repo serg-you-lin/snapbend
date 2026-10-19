@@ -440,7 +440,7 @@ class TestEngraveDegenerateCircle(unittest.TestCase):
         cluster = self.result.clusters[0]
         self.assertEqual(len(cluster.features("engrave_lines")), 1)
         # ed è rimasta come trash, non promossa a nulla
-        roles = [getattr(t, "role", None) for t in self.result.trash_entities]
+        roles = [getattr(t, "role", None) for t in self.result.loose]
         self.assertIn("engrave", [getattr(r, "value", r) for r in roles])
 
 

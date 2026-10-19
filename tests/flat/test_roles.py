@@ -44,17 +44,17 @@ class TestConsumerRolesSurviveDetect(unittest.TestCase):
 
     def test_detect_non_sposta_il_ruolo_custom_fuori_dalla_trash(self):
         result = topo.heal(self._framed_doc())
-        trash_prima = len(result.trash_entities)
-        frame_prima = sum(1 for t in result.trash_entities
+        trash_prima = len(result.loose)
+        frame_prima = sum(1 for t in result.loose
                           if topo.model.role_str(getattr(t, "role", "")) == "frame")
         self.assertGreater(frame_prima, 0)
 
         detect_flat(result, features="all")
 
-        frame_dopo = sum(1 for t in result.trash_entities
+        frame_dopo = sum(1 for t in result.loose
                          if topo.model.role_str(getattr(t, "role", "")) == "frame")
         self.assertEqual(frame_dopo, frame_prima)
-        self.assertEqual(len(result.trash_entities), trash_prima)
+        self.assertEqual(len(result.loose), trash_prima)
         # niente ClassifiedEntity scollegato, niente warning "non contenuta"
         self.assertEqual(result.classified_entities, [])
         self.assertFalse([w for w in result.warnings if "non contenuta" in w])

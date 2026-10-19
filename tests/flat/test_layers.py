@@ -255,12 +255,12 @@ class TestLineetteSpurie(unittest.TestCase):
 
     def test_linee_spurie_in_trash(self):
         """Le LINE non riconosciute come piega non vengono perse: restano nel
-        modello come trash_entities (non più spostate su un layer 'Trash').
+        modello come loose (non più spostate su un layer 'Trash').
         Con 2 sole pieghe reali riconosciute, il resto finisce in trash."""
         self.assertEqual(len(self.result.clusters[0].features("bending_lines")), 2)
         self.assertGreaterEqual(
-            len(self.result.trash_entities), 4,
-            f"trash_entities inatteso: {len(self.result.trash_entities)}",
+            len(self.result.loose), 4,
+            f"loose inatteso: {len(self.result.loose)}",
         )
 
     def test_nessuna_line_spuria_su_bending(self):

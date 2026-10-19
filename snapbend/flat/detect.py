@@ -41,7 +41,7 @@ def _ensure_detected(cluster: topo.Cluster) -> topo.model.DetectedFeatures:
 
 # Ruoli che detect_flat() sa collocare come feature di un cluster. Un proxy con un
 # ruolo deciso ma fuori da qui — frame, title_block, o uno slug di un
-# consumatore — è arredo del disegno: heal() l'ha messo in trash e detect_flat() ce
+# consumatore — è arredo del disegno: heal() l'ha messo in `loose` e detect_flat() ce
 # lo lascia, geometria e ruolo intatti (D27, D30). Prima detect_flat() ne faceva un
 # ClassifiedEntity scollegato che l'exporter non riscriveva → geometria persa.
 _DETECT_KNOWN_ROLES = frozenset({
@@ -114,7 +114,7 @@ def detect_flat(
     parametro di processo: sotto soglia il contorno circolare è un foro da
     punta, sopra resta un contorno interno.
 
-    Muta `result` in-place (parti, trash_entities, classified_entities) e lo
+    Muta `result` in-place (parti, loose, classified_entities) e lo
     ritorna, così la catena resta esplicita: `result = topo.detect_flat(result)`.
     """
     feats = _normalize_features(features)
@@ -181,11 +181,11 @@ def describe_features(cluster: topo.Cluster) -> dict:
 def _detect_labeled(result: topo.Result) -> None:
     classified_ids = set()
 
-    for proxy in result.trash_entities:
+    for proxy in result.loose:
         if proxy.role == topo.model.ContourRole.UNKNOWN:
             continue
         if proxy.role not in _DETECT_KNOWN_ROLES:
-            # Arredo del disegno o ruolo di un consumatore: resta in trash,
+            # Arredo del disegno o ruolo di un consumatore: resta in `loose`,
             # geometria e ruolo intatti, riscritto in output (D27, D30).
             continue
 
@@ -193,7 +193,7 @@ def _detect_labeled(result: topo.Result) -> None:
 
         if proxy.role == ENGRAVE:
             placed = (
-                _handle_engrave_closed_trash(proxy, result) if is_closed
+                _handle_engrave_closed_loose(proxy, result) if is_closed
                 else _handle_engrave_open(proxy, result)
             )
             if placed:
@@ -233,8 +233,8 @@ def _detect_labeled(result: topo.Result) -> None:
         _assign_to_part(ce, result)
         classified_ids.add(id(proxy))
 
-    result.trash_entities = [
-        p for p in result.trash_entities if id(p) not in classified_ids
+    result.loose = [
+        p for p in result.loose if id(p) not in classified_ids
     ]
 
     _LABELED_HOLE_ROLES = (
@@ -315,10 +315,11 @@ def _detect_bending(result: topo.Result, bending_tolerance: float = 1.0) -> None
     piega: la retta che li unisce deve attraversare il pezzo, e sul layer
     vanno i tratti disegnati (snapbend MAP.md D53).
     """
-    promoted_ids: set[int] = set()
     leftovers: dict = {}   # id(cluster) -> [(start, end, proxy)]
 
-    for proxy in result.trash_entities:
+    for proxy in list(result.loose):
+        if proxy.cluster_ref is None:
+            continue
         pts = _proxy_pts(proxy)
         if topo.geometry.track_shape_type(pts) != "line" or len(pts) < 2:
             continue
@@ -326,21 +327,12 @@ def _detect_bending(result: topo.Result, bending_tolerance: float = 1.0) -> None
         if length < bending_tolerance:
             continue
 
-        midpoint = Point(
-            (pts[0][0] + pts[-1][0]) / 2,
-            (pts[0][1] + pts[-1][1]) / 2,
-        )
-        for cluster in result.clusters:
-            outer = cluster.outer.polygon
-            if not outer.contains(midpoint):
-                continue
-            if topo.geometry.splits_polygon(outer, pts[0], pts[-1], reach=_BEND_REACH):
-                _ensure_detected(cluster).add("bending_lines",
-                                              _bending_line(cluster, pts[0], pts[-1], length))
-                promoted_ids.add(id(proxy))
-            else:
-                leftovers.setdefault(id(cluster), []).append((pts[0], pts[-1], proxy))
-            break
+        cluster = result.clusters[proxy.cluster_ref]
+        if topo.geometry.splits_polygon(cluster.outer.polygon, pts[0], pts[-1], reach=_BEND_REACH):
+            topo.promote(result, proxy, cluster, "bending_lines",
+                         _bending_line(cluster, pts[0], pts[-1], length))
+        else:
+            leftovers.setdefault(id(cluster), []).append((pts[0], pts[-1], proxy))
 
     for cluster in result.clusters:
         pieces = leftovers.get(id(cluster))
@@ -354,17 +346,10 @@ def _detect_bending(result: topo.Result, bending_tolerance: float = 1.0) -> None
                 continue
             for proxy in (pieces[j][2] for j in run.members):
                 pts = _proxy_pts(proxy)
-                _ensure_detected(cluster).add("bending_lines", _bending_line(
+                # `promote` toglie la linea da `loose`: to_dxf non la scrive
+                # due volte (una come piega, una come curva sciolta)
+                topo.promote(result, proxy, cluster, "bending_lines", _bending_line(
                     cluster, pts[0], pts[-1], topo.geometry.track_length(pts)))
-                promoted_ids.add(id(proxy))
-
-    # La linea promossa a bending NON deve restare anche in trash: `to_dxf`
-    # la scriverebbe due volte (LINE su Bending + LWPOLYLINE su Trash,
-    # sovrapposte). Stesso pattern di `_detect_labeled`.
-    if promoted_ids:
-        result.trash_entities = [
-            p for p in result.trash_entities if id(p) not in promoted_ids
-        ]
 
 
 # ---------------------------------------------------------------------------
@@ -518,12 +503,12 @@ def _detect_engrave(result: topo.Result, engrave_tolerance: float = 1.0) -> None
     Stesso pattern di `_detect_holes` / `_detect_bending`: le incisioni con
     ruolo esplicito (role_rules) sono già state promosse da `_detect_labeled`
     con `source="labeled"`. Qui si guarda ciò che è rimasto non etichettato —
-    `cluster.inners` con role UNKNOWN e `result.trash_entities` — e si promuove a
+    `cluster.inners` con role UNKNOWN e `result.loose` — e si promuove a
     `Engraving(source="geometric")` quello che geometricamente È un'incisione,
     es.:
       - inner contour costituito da due polilinee ~parallele a distanza
         < engrave_tolerance → traccia di incisione, non un inner/foro
-      - coppie di segmenti aperti ravvicinati e paralleli nella trash
+      - coppie di segmenti aperti ravvicinati e paralleli in `loose`
 
     Finché è un placeholder non muta nulla.
     """
@@ -568,49 +553,35 @@ def _engraving_from_closed(polygon, segments, cluster_label: str = "",
 
 def _handle_engrave_open(proxy: topo.model.OpenCurve, result: topo.Result) -> bool:
     """
-    Smista una traccia engrave aperta per contenimento.
-
-    Dentro un cluster → cluster.engrave_lines (ritorna True).
-    Fuori da ogni cluster → resta trash: è geometria orfana come ogni altra
-    entità che non sta dentro un outer (ritorna False).
+    Una traccia engrave aperta va al cluster che la contiene
+    (`proxy.cluster_ref`, topo D137) → cluster.engrave_lines (ritorna True).
+    Fuori da ogni cluster → resta in `loose`: è geometria orfana come ogni
+    altra entità che non sta dentro un outer (ritorna False).
     """
-    pts = _proxy_pts(proxy)
-    if len(pts) >= 2:
-        rep = (
-            sum(p[0] for p in pts) / len(pts),
-            sum(p[1] for p in pts) / len(pts),
-        )
-    else:
-        rep = pts[0] if pts else None
-
-    probe = Point(rep) if rep else None
-    for cluster in result.clusters:
-        if probe and cluster.outer.polygon.contains(probe):
-            _ensure_detected(cluster).add(
-                "engrave_lines", _engraving_from_open(proxy, cluster_label=cluster.label)
-            )
-            return True
-
-    return False
+    if proxy.cluster_ref is None:
+        return False
+    cluster = result.clusters[proxy.cluster_ref]
+    _ensure_detected(cluster).add(
+        "engrave_lines", _engraving_from_open(proxy, cluster_label=cluster.label)
+    )
+    return True
 
 
-def _handle_engrave_closed_trash(proxy, result: topo.Result) -> bool:
+def _handle_engrave_closed_loose(proxy, result: topo.Result) -> bool:
     """
     Come _handle_engrave_open ma per una traccia engrave già chiusa
-    (CIRCLE / SPLINE chiusa su layer engrave). Contenimento sul
-    representative point del polygon.
+    (CIRCLE / SPLINE chiusa su layer engrave).
     """
-    probe = proxy.polygon.representative_point()
-    for cluster in result.clusters:
-        if cluster.outer.polygon.contains(probe):
-            _ensure_detected(cluster).add("engrave_lines", _engraving_from_closed(
-                proxy.polygon,
-                getattr(proxy, "segments", []),
-                cluster_label=cluster.label,
-                styles=getattr(proxy, "styles", []),
-            ))
-            return True
-    return False
+    if proxy.cluster_ref is None:
+        return False
+    cluster = result.clusters[proxy.cluster_ref]
+    _ensure_detected(cluster).add("engrave_lines", _engraving_from_closed(
+        proxy.polygon,
+        getattr(proxy, "segments", []),
+        cluster_label=cluster.label,
+        styles=getattr(proxy, "styles", []),
+    ))
+    return True
 
 
 def _handle_engrave_closed(inner, cluster: topo.Cluster) -> None:

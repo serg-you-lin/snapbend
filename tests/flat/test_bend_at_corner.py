@@ -27,7 +27,7 @@ class TestBendAtCorner(unittest.TestCase):
         cluster = result.clusters[0]
         self.assertAlmostEqual(cluster.outer.polygon.area, area, places=6)
         self.assertEqual(len(cluster.features("bending_lines")), bends)
-        self.assertEqual(result.trash_entities, [])
+        self.assertEqual(result.loose, [])
 
     def test_vaschetta_quattro_pieghe_su_quattro_spigoli(self):
         # base 200x150, ali da 40: ogni spigolo concavo è l'estremo di due pieghe
