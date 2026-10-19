@@ -4,6 +4,24 @@ Unico posto per il lavoro aperto. Le decisioni e il perché stanno in
 `MAP.md`; qui non si ripetono, si rimanda con "vedi `MAP.md` D...".
 
 
+## Le forme di lamiera le costruisce e le riconosce snapbend (topo D136, 19 ottobre)
+
+`topo.geometry.contour_shape` ha sei kind, elenco chiuso e stabile:
+`circle`, `ellipse`, `stadium`, `rectangle`, `polygon`, `other`. topo non ne
+aggiungerà altri. Ogni forma di lamiera oltre quelle è di snapbend: asola
+raggiata o rettangolo raccordato, foro a D (cerchio con un piatto), asola ad
+arco, foro quadro con gli spigoli raccordati, sede esagonale per un dado.
+
+- **Costruirle**: con le primitive di topo (`LineSeg`, `ArcSeg`, …) passate a
+  `topo.load_segments`, come fanno i builder di `topo.geometry` (D96). Mai
+  chiedere a topo un builder per una forma di lamiera.
+- **Riconoscerle**: in snapbend, partendo da un contorno che topo dà come
+  `other` o `polygon` (i suoi segmenti dopo la ricomposizione). Mai chiedere
+  a topo un kind nuovo.
+- Quando topo darà la firma dei contorni (D121, in 1.x), il riconoscimento
+  passa da lì invece che dalla ricomposizione fatta a mano.
+
+
 ## `snapbend.flat` — arrivato da topo (MAP.md D51-D53, 4 ottobre)
 
 - [x] detection di un pezzo piano spostata da topo, con test e golden di
