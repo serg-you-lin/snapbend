@@ -55,8 +55,7 @@ class TestConsumerRolesSurviveDetect(unittest.TestCase):
                          if topo.model.role_str(getattr(t, "role", "")) == "frame")
         self.assertEqual(frame_dopo, frame_prima)
         self.assertEqual(len(result.loose), trash_prima)
-        # niente ClassifiedEntity scollegato, niente warning "non contenuta"
-        self.assertEqual(result.classified_entities, [])
+        # niente forma scollegata, niente warning "non contenuta"
         self.assertFalse([w for w in result.warnings if "non contenuta" in w])
 
 

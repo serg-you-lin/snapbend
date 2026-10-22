@@ -114,7 +114,7 @@ def detect_flat(
     parametro di processo: sotto soglia il contorno circolare è un foro da
     punta, sopra resta un contorno interno.
 
-    Muta `result` in-place (parti, loose, classified_entities) e lo
+    Muta `result` in-place (parti e loose) e lo
     ritorna, così la catena resta esplicita: `result = topo.detect_flat(result)`.
     """
     feats = _normalize_features(features)
@@ -212,9 +212,8 @@ def _detect_labeled(result: topo.Result) -> None:
                 polygon=proxy.polygon,
                 representative_point=rep,
             )
-            result.classified_entities.append(ce)
-            _assign_to_part(ce, result)
-            classified_ids.add(id(proxy))
+            if _assign_to_part(ce, result):
+                classified_ids.add(id(proxy))
             continue
 
         work_type = topo.model.role_str(proxy.role)
@@ -229,9 +228,8 @@ def _detect_labeled(result: topo.Result) -> None:
             representative_point=rep,
             line=LineString(pts) if len(pts) >= 2 else None,
         )
-        result.classified_entities.append(ce)
-        _assign_to_part(ce, result)
-        classified_ids.add(id(proxy))
+        if _assign_to_part(ce, result):
+            classified_ids.add(id(proxy))
 
     result.loose = [
         p for p in result.loose if id(p) not in classified_ids
@@ -276,8 +274,8 @@ def _detect_labeled(result: topo.Result) -> None:
                 polygon=inner.polygon,
                 representative_point=rep,
             )
-            result.classified_entities.append(ce)
-            _assign_to_part(ce, result)
+            if not _assign_to_part(ce, result):
+                remaining.append(inner)
         cluster.inners = remaining
 
 
@@ -370,8 +368,22 @@ def _detect_holes(result: topo.Result, max_drill_diameter: float = HOLE_DIAMETER
       - contorni circolari con Ø < `max_drill_diameter` → foro (plain / threaded);
       - Ø >= `max_drill_diameter` → restano `Contour` in `cluster.inners`.
     """
+    arcs = _result_arcs(result)
     for cluster in result.clusters:
-        _promote_geometric_holes(cluster, result, max_drill_diameter)
+        _promote_geometric_holes(cluster, arcs, max_drill_diameter)
+
+
+def _result_arcs(result: topo.Result) -> list[topo.primitives.ArcSeg]:
+    """
+    Ogni arco del risultato: ogni curva è contorno di un cluster o sta in
+    `loose` (topo D137), quindi gli archi sono tutti lì. Le creste dei
+    filetti, archi aperti, stanno in `loose`.
+    """
+    curves = [c.outer for c in result.clusters]
+    curves += [i for c in result.clusters for i in c.inners]
+    curves += result.loose
+    return [s for cv in curves for s in cv.segments
+            if isinstance(s, topo.primitives.ArcSeg)]
 
 
 def _circle(contour) -> tuple[Optional[float], Optional[tuple]]:
@@ -396,7 +408,8 @@ def _circular_inners(cluster: topo.Cluster) -> list:
     return out
 
 
-def _promote_geometric_holes(cluster: topo.Cluster, result: topo.Result,
+def _promote_geometric_holes(cluster: topo.Cluster,
+                             arcs: list[topo.primitives.ArcSeg],
                              max_drill_diameter: float) -> None:
     circ = _circular_inners(cluster)
     if not circ:
@@ -432,7 +445,7 @@ def _promote_geometric_holes(cluster: topo.Cluster, result: topo.Result,
         if dia >= max_drill_diameter:
             continue    # sopra la capacità di foratura → resta contorno interno
         threaded = is_threaded_hole(
-            center=ctr, radius=dia / 2, all_arcs=result.all_arcs,
+            center=ctr, radius=dia / 2, all_arcs=arcs,
         )
         promoted[id(c)] = _hole_from_contour(
             c, dia, ctr,
@@ -615,7 +628,12 @@ def _belongs_to_cluster(ce: ClassifiedEntity, cluster: topo.Cluster) -> bool:
     return probe is not None and cluster.outer.polygon.contains(probe)
 
 
-def _assign_to_part(ce: ClassifiedEntity, result: topo.Result) -> None:
+def _assign_to_part(ce: ClassifiedEntity, result: topo.Result) -> bool:
+    """
+    Scrive `ce` nel cluster che la contiene; False se nessuno la contiene:
+    allora la curva da cui viene resta dov'era in `result` (loose o inner),
+    così niente sparisce dal risultato di topo (topo D137).
+    """
     work_type = ce.work_type.lower()
 
     for cluster in result.clusters:
@@ -628,12 +646,13 @@ def _assign_to_part(ce: ClassifiedEntity, result: topo.Result) -> None:
             )
 
         _write_custom(ce, cluster)
-        return
+        return True
 
     result.warnings.append(
         f"detect_flat(): forma {ce.work_type} non contenuta in nessun cluster "
-        f"(source={ce.source}). Registrata in classified_entities."
+        f"(source={ce.source}). Resta in result.loose."
     )
+    return False
 
 
 def _write_custom(ce: ClassifiedEntity, cluster: topo.Cluster) -> None:

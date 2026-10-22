@@ -8,7 +8,7 @@ python tests/gen_index.py
 
 What this is: the lookup table of *what already exists* in the package, down to internal helpers. `docs/API.md` documents the public surface (`snapbend.<name>`) with full cards; this file lists every module-level function and class so nothing gets rewritten because it was not found. Signatures and docstring lines come straight from the source, so they cannot drift.
 
-`28` modules · `93` module-level functions · `21` classes · `4441` lines of code.
+`28` modules · `94` module-level functions · `21` classes · `4461` lines of code.
 
 Sections: [Lookup](#lookup) · [Duplicate names](#duplicate-names) · [Dependency rule](#dependency-rule) · [By module](#by-module) · [Internal dependencies](#internal-dependencies)
 
@@ -21,14 +21,14 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | name | kind | location | what |
 |---|---|---|---|
 | `_arc_point` | func | `snapbend/rules/read_section.py:113` |  |
-| `_assign_to_part` | func | `snapbend/flat/detect.py:618` |  |
-| `_belongs_to_cluster` | func | `snapbend/flat/detect.py:603` | Un'entità aperta (marking/bending) appartiene al cluster se la sua |
+| `_assign_to_part` | func | `snapbend/flat/detect.py:631` | Scrive `ce` nel cluster che la contiene; False se nessuno la contiene: |
+| `_belongs_to_cluster` | func | `snapbend/flat/detect.py:616` | Un'entità aperta (marking/bending) appartiene al cluster se la sua |
 | `Bend` | class | `snapbend/core/bend.py:103` | Una singola piega fra due flange consecutive. |
 | `bend_allowance_din6935` | func | `snapbend/rules/deduction.py:76` | Lunghezza dell'asse neutro dentro la piega, con K stimato DIN 6935. |
 | `bend_deduction` | func | `snapbend/rules/deduction.py:49` | Accorciamento di piega, formula della fibra neutra. |
 | `_bend_lines` | func | `snapbend/io/dxf.py:302` | Una riga per piega nell'header — gli stessi numeri che dice |
-| `_bending_line` | func | `snapbend/flat/detect.py:298` |  |
-| `_bending_line_from_data` | func | `snapbend/flat/detect.py:719` |  |
+| `_bending_line` | func | `snapbend/flat/detect.py:296` |  |
+| `_bending_line_from_data` | func | `snapbend/flat/detect.py:738` |  |
 | `BendingLine` | class | `snapbend/flat/model/bending_line.py:22` |  |
 | `BendResult` | class | `snapbend/core/bend.py:168` | Esito del calcolo di UNA piega dentro `BentProfile.develop()` (o di |
 | `BentProfile` | class | `snapbend/core/bend.py:200` | Profilo piegato: N flange (quote a MEZZERIA) unite da N-1 pieghe. |
@@ -38,9 +38,9 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `centerline_to_external_flange` | func | `snapbend/rules/deduction.py:143` | Inversa di `external_to_centerline_flange`: da mezzeria a esterno-esterno. |
 | `_chain_vertex` | func | `snapbend/rules/read_section.py:474` |  |
 | `_check_orientation` | func | `snapbend/model/geometry.py:40` |  |
-| `_circle` | func | `snapbend/flat/detect.py:377` | (diametro, centro) se il contorno è un cerchio per `topo.geometry.contour_shape`, |
-| `_circular_inners` | func | `snapbend/flat/detect.py:387` | (contour, diameter, center) per ogni inner geometricamente circolare. |
-| `ClassifiedEntity` | class | `snapbend/flat/model/classified.py:13` | Risultato della classificazione di una entità da detect_flat(). |
+| `_circle` | func | `snapbend/flat/detect.py:389` | (diametro, centro) se il contorno è un cerchio per `topo.geometry.contour_shape`, |
+| `_circular_inners` | func | `snapbend/flat/detect.py:399` | (contour, diameter, center) per ogni inner geometricamente circolare. |
+| `ClassifiedEntity` | class | `snapbend/flat/model/classified.py:14` | Risultato della classificazione di una entità da detect_flat(). |
 | `Cone` | class | `snapbend/core/cone.py:140` |  |
 | `Cylinder` | class | `snapbend/core/cylinder.py:79` |  |
 | `DashPattern` | class | `snapbend/flat/trim.py:21` | Misure del tratteggio di una piega: `head` sul primo capo, `tail` |
@@ -48,10 +48,10 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `DeductionInfo` | class | `snapbend/rules/deduction.py:197` | Accorciamento di piega + da dove viene il numero. |
 | `default_radius` | func | `snapbend/rules/deduction.py:102` | Raggio interno quando non c'è né un raggio esplicito né una cava nota: |
 | `describe_features` | func | `snapbend/flat/detect.py:132` | Conteggio ricco per i tipi **noti di topo** — fori per tipo, pieghe |
-| `_detect_bending` | func | `snapbend/flat/detect.py:310` | Una piega attraversa il pezzo (`topo.geometry.splits_polygon`, prolungata di |
-| `_detect_engrave` | func | `snapbend/flat/detect.py:499` | Inferenza geometrica delle incisioni — NON ANCORA IMPLEMENTATA. |
+| `_detect_bending` | func | `snapbend/flat/detect.py:308` | Una piega attraversa il pezzo (`topo.geometry.splits_polygon`, prolungata di |
+| `_detect_engrave` | func | `snapbend/flat/detect.py:512` | Inferenza geometrica delle incisioni — NON ANCORA IMPLEMENTATA. |
 | `detect_flat` | func | `snapbend/flat/detect.py:93` | Classifica le feature dentro le parti già trovate da heal(). |
-| `_detect_holes` | func | `snapbend/flat/detect.py:362` | Lane geometrica: promuove a `Hole` i contorni interni circolari. |
+| `_detect_holes` | func | `snapbend/flat/detect.py:360` | Lane geometrica: promuove a `Hole` i contorni interni circolari. |
 | `_detect_labeled` | func | `snapbend/flat/detect.py:181` |  |
 | `develop_from_external_flanges` | func | `snapbend/human_layer.py:35` | Come `BentProfile.develop()`, ma `external_flanges` sono quote |
 | `_direction` | func | `snapbend/rules/read_section.py:292` |  |
@@ -62,8 +62,8 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_edge_to_entity` | func | `snapbend/model/section.py:420` |  |
 | `_endpoint_counts` | func | `snapbend/rules/read_section.py:431` |  |
 | `Engraving` | class | `snapbend/flat/model/engraving.py:31` |  |
-| `_engraving_from_closed` | func | `snapbend/flat/detect.py:538` |  |
-| `_engraving_from_open` | func | `snapbend/flat/detect.py:522` |  |
+| `_engraving_from_closed` | func | `snapbend/flat/detect.py:551` |  |
+| `_engraving_from_open` | func | `snapbend/flat/detect.py:535` |  |
 | `_ensure_detected` | func | `snapbend/flat/detect.py:35` | `cluster.detected`, creandolo alla prima scrittura. |
 | `_entities_bbox` | func | `snapbend/io/dxf.py:199` | Bbox degli entity grezzi (linee/archi, schema `FlatGeometry.entities`) |
 | `estimate_k_factor` | func | `snapbend/core/bend.py:83` | Stima un K-factor di partenza da materiale + rapporto R/T, secondo la |
@@ -71,8 +71,8 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `external_flanges_to_centerline` | func | `snapbend/rules/deduction.py:157` | Converte l'intero elenco di flange (come lo si passerebbe a |
 | `external_to_centerline_deduction` | func | `snapbend/rules/deduction.py:89` | Converte un accorciamento riferito alle quote esterne (come nei .bnc |
 | `external_to_centerline_flange` | func | `snapbend/rules/deduction.py:122` | Converte la lunghezza ESTERNO-ESTERNO di una flangia (apice virtuale |
-| `_extract_data` | func | `snapbend/flat/detect.py:668` |  |
-| `_extract_data_from_source` | func | `snapbend/flat/detect.py:701` |  |
+| `_extract_data` | func | `snapbend/flat/detect.py:687` |  |
+| `_extract_data_from_source` | func | `snapbend/flat/detect.py:720` |  |
 | `_face_pair_distances` | func | `snapbend/rules/read_section.py:257` | Perpendicular distance between lines that genuinely face each other |
 | `_faceted_sector_outline` | func | `snapbend/core/cone.py:102` | Perimetro del settore sfaccettato fra i vertici dati: N corde esterne, un |
 | `FlangeFace` | class | `snapbend/model/section.py:78` | Per una flangia: la faccia ESTERNA (convessa) se è coerente da un |
@@ -80,17 +80,17 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `FlatGeometry` | class | `snapbend/model/geometry.py:81` | Sviluppo piano di una forma sviluppabile — output di Cone.develop() / |
 | `_fmt` | func | `snapbend/model/section.py:63` |  |
 | `_free_end` | func | `snapbend/rules/read_section.py:445` |  |
-| `_handle_engrave_closed` | func | `snapbend/flat/detect.py:587` |  |
-| `_handle_engrave_closed_loose` | func | `snapbend/flat/detect.py:570` | Come _handle_engrave_open ma per una traccia engrave già chiusa |
-| `_handle_engrave_open` | func | `snapbend/flat/detect.py:554` | Una traccia engrave aperta va al cluster che la contiene |
+| `_handle_engrave_closed` | func | `snapbend/flat/detect.py:600` |  |
+| `_handle_engrave_closed_loose` | func | `snapbend/flat/detect.py:583` | Come _handle_engrave_open ma per una traccia engrave già chiusa |
+| `_handle_engrave_open` | func | `snapbend/flat/detect.py:567` | Una traccia engrave aperta va al cluster che la contiene |
 | `_has_concentric_pair` | func | `snapbend/rules/read_section.py:305` |  |
 | `heal_and_detect` | func | `snapbend/flat/pipeline.py:18` | heal() + detect_flat(). `detect_flat()` viene saltato se heal() non produce |
 | `Hole` | class | `snapbend/flat/model/hole.py:29` |  |
-| `_hole_from_contour` | func | `snapbend/flat/detect.py:458` |  |
+| `_hole_from_contour` | func | `snapbend/flat/detect.py:471` |  |
 | `is_structural` | func | `snapbend/flat/roles.py:69` | Predicato strutturale COMPLETO: outer/inner (motore) + hole/countersink/ |
 | `is_threaded_hole` | func | `snapbend/flat/holes.py:17` | True se attorno al cerchio c'è un arco a ~270° (entro ``angle_tolerance`` |
 | `k_din6935` | func | `snapbend/rules/deduction.py:65` | Stima DIN 6935 del fattore K (in [0, 0.5]), dal SOLO rapporto |
-| `_labeled_hole_from_contour` | func | `snapbend/flat/detect.py:476` | `Contour` con ruolo foro da role_rules → `Hole(source="labeled")`. |
+| `_labeled_hole_from_contour` | func | `snapbend/flat/detect.py:489` | `Contour` con ruolo foro da role_rules → `Hole(source="labeled")`. |
 | `_meta_lines` | func | `snapbend/io/dxf.py:292` |  |
 | `_mid` | func | `snapbend/rules/read_section.py:109` |  |
 | `_mode` | func | `snapbend/rules/read_section.py:317` |  |
@@ -100,9 +100,9 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_order_chain` | func | `snapbend/rules/read_section.py:452` |  |
 | `_perp_distance` | func | `snapbend/rules/read_section.py:297` |  |
 | `polar_point` | func | `snapbend/model/geometry.py:30` | Punto a coordinate polari (angolo in gradi). |
-| `_probe_point` | func | `snapbend/flat/detect.py:660` |  |
+| `_probe_point` | func | `snapbend/flat/detect.py:679` |  |
 | `_projection_overlap` | func | `snapbend/rules/read_section.py:277` |  |
-| `_promote_geometric_holes` | func | `snapbend/flat/detect.py:399` |  |
+| `_promote_geometric_holes` | func | `snapbend/flat/detect.py:411` |  |
 | `_proxy_pts` | func | `snapbend/flat/detect.py:79` | Vertici di un proxy aperto (OpenCurve), derivati dai suoi segmenti nativi. |
 | `radius_from_v_opening` | func | `snapbend/rules/deduction.py:96` | Stima del raggio interno di piega in aria da una cava a V. |
 | `read_section` | func | `snapbend/rules/read_section.py:172` |  |
@@ -111,6 +111,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `RenderContour` | class | `snapbend/flat/model/render.py:20` |  |
 | `resolve_calibration` | func | `snapbend/core/bend.py:339` | Nome stringa -> `Calibration` caricata, oggetto già risolto -> se |
 | `resolve_facet_bend` | func | `snapbend/core/bend.py:350` | Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla |
+| `_result_arcs` | func | `snapbend/flat/detect.py:376` | Ogni arco del risultato: ogni curva è contorno di un cluster o sta in |
 | `Section` | class | `snapbend/model/section.py:110` |  |
 | `SectionReading` | class | `snapbend/rules/read_section.py:88` |  |
 | `_sector_entities` | func | `snapbend/core/cone.py:77` | Settore anulare simmetrico rispetto a X, ampiezza angolare `angle` (gradi). |
@@ -126,7 +127,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `trim_bending_lines` | func | `snapbend/flat/trim.py:34` | Tratteggia ogni `BendingLine` di `result` con `pattern`: le stesse misure |
 | `_turn_deg` | func | `snapbend/model/section.py:67` | Signed rotation relative to going straight (>0 = to the left). |
 | `_unit` | func | `snapbend/model/section.py:72` |  |
-| `_write_custom` | func | `snapbend/flat/detect.py:639` |  |
+| `_write_custom` | func | `snapbend/flat/detect.py:658` |  |
 | `_write_flange_quotes` | func | `snapbend/io/dxf.py:255` |  |
 | `_write_meta_block` | func | `snapbend/io/dxf.py:341` |  |
 | `write_part_dxf` | func | `snapbend/io/dxf.py:129` | Esporta un pezzo su un unico file a LIVELLI impilati in VERTICALE |
@@ -206,7 +207,7 @@ _snapbend/flat/__init__.py_
 
 No module-level function or class.
 
-#### `snapbend/flat/detect.py` — 730 lines
+#### `snapbend/flat/detect.py` — 749 lines
 
 _snapbend/flat/detect.py_
 
@@ -216,27 +217,28 @@ _snapbend/flat/detect.py_
 - `detect_flat(result: topo.Result, features=None, *, max_drill_diameter: float=HOLE_DIAMETER_THRESHOLD, bending_tolerance: float=1.0, engrave_tolerance: float=1.0) -> topo.Result` — L93 — Classifica le feature dentro le parti già trovate da heal().
 - `describe_features(cluster: topo.Cluster) -> dict` — L132 — Conteggio ricco per i tipi **noti di topo** — fori per tipo, pieghe
 - `_detect_labeled(result: topo.Result) -> None` — L181
-- `_bending_line(cluster, start, end, length, source='geometric')` — L298
-- `_detect_bending(result: topo.Result, bending_tolerance: float=1.0) -> None` — L310 — Una piega attraversa il pezzo (`topo.geometry.splits_polygon`, prolungata di
-- `_detect_holes(result: topo.Result, max_drill_diameter: float=HOLE_DIAMETER_THRESHOLD) -> None` — L362 — Lane geometrica: promuove a `Hole` i contorni interni circolari.
-- `_circle(contour) -> tuple[Optional[float], Optional[tuple]]` — L377 — (diametro, centro) se il contorno è un cerchio per `topo.geometry.contour_shape`,
-- `_circular_inners(cluster: topo.Cluster) -> list` — L387 — (contour, diameter, center) per ogni inner geometricamente circolare.
-- `_promote_geometric_holes(cluster: topo.Cluster, result: topo.Result, max_drill_diameter: float) -> None` — L399
-- `_hole_from_contour(contour, diameter, center, *, hole_type, confidence, geometric_hint='', outer_diameter=None)` — L458
-- `_labeled_hole_from_contour(contour)` — L476 — `Contour` con ruolo foro da role_rules → `Hole(source="labeled")`.
-- `_detect_engrave(result: topo.Result, engrave_tolerance: float=1.0) -> None` — L499 — Inferenza geometrica delle incisioni — NON ANCORA IMPLEMENTATA.
-- `_engraving_from_open(proxy, cluster_label: str='', source: str='labeled', confidence: float=1.0) -> Engraving` — L522
-- `_engraving_from_closed(polygon, segments, cluster_label: str='', source: str='labeled', confidence: float=1.0, styles=None) -> Engraving` — L538
-- `_handle_engrave_open(proxy: topo.model.OpenCurve, result: topo.Result) -> bool` — L554 — Una traccia engrave aperta va al cluster che la contiene
-- `_handle_engrave_closed_loose(proxy, result: topo.Result) -> bool` — L570 — Come _handle_engrave_open ma per una traccia engrave già chiusa
-- `_handle_engrave_closed(inner, cluster: topo.Cluster) -> None` — L587
-- `_belongs_to_cluster(ce: ClassifiedEntity, cluster: topo.Cluster) -> bool` — L603 — Un'entità aperta (marking/bending) appartiene al cluster se la sua
-- `_assign_to_part(ce: ClassifiedEntity, result: topo.Result) -> None` — L618
-- `_write_custom(ce: ClassifiedEntity, cluster: topo.Cluster) -> None` — L639
-- `_probe_point(ce: ClassifiedEntity) -> Optional[Point]` — L660
-- `_extract_data(proxy: topo.model.OpenCurve, work_type: str) -> dict` — L668
-- `_extract_data_from_source(work_type: str, polygon=None) -> dict` — L701
-- `_bending_line_from_data(data: dict, cluster_label: str) -> BendingLine` — L719
+- `_bending_line(cluster, start, end, length, source='geometric')` — L296
+- `_detect_bending(result: topo.Result, bending_tolerance: float=1.0) -> None` — L308 — Una piega attraversa il pezzo (`topo.geometry.splits_polygon`, prolungata di
+- `_detect_holes(result: topo.Result, max_drill_diameter: float=HOLE_DIAMETER_THRESHOLD) -> None` — L360 — Lane geometrica: promuove a `Hole` i contorni interni circolari.
+- `_result_arcs(result: topo.Result) -> list[topo.primitives.ArcSeg]` — L376 — Ogni arco del risultato: ogni curva è contorno di un cluster o sta in
+- `_circle(contour) -> tuple[Optional[float], Optional[tuple]]` — L389 — (diametro, centro) se il contorno è un cerchio per `topo.geometry.contour_shape`,
+- `_circular_inners(cluster: topo.Cluster) -> list` — L399 — (contour, diameter, center) per ogni inner geometricamente circolare.
+- `_promote_geometric_holes(cluster: topo.Cluster, arcs: list[topo.primitives.ArcSeg], max_drill_diameter: float) -> None` — L411
+- `_hole_from_contour(contour, diameter, center, *, hole_type, confidence, geometric_hint='', outer_diameter=None)` — L471
+- `_labeled_hole_from_contour(contour)` — L489 — `Contour` con ruolo foro da role_rules → `Hole(source="labeled")`.
+- `_detect_engrave(result: topo.Result, engrave_tolerance: float=1.0) -> None` — L512 — Inferenza geometrica delle incisioni — NON ANCORA IMPLEMENTATA.
+- `_engraving_from_open(proxy, cluster_label: str='', source: str='labeled', confidence: float=1.0) -> Engraving` — L535
+- `_engraving_from_closed(polygon, segments, cluster_label: str='', source: str='labeled', confidence: float=1.0, styles=None) -> Engraving` — L551
+- `_handle_engrave_open(proxy: topo.model.OpenCurve, result: topo.Result) -> bool` — L567 — Una traccia engrave aperta va al cluster che la contiene
+- `_handle_engrave_closed_loose(proxy, result: topo.Result) -> bool` — L583 — Come _handle_engrave_open ma per una traccia engrave già chiusa
+- `_handle_engrave_closed(inner, cluster: topo.Cluster) -> None` — L600
+- `_belongs_to_cluster(ce: ClassifiedEntity, cluster: topo.Cluster) -> bool` — L616 — Un'entità aperta (marking/bending) appartiene al cluster se la sua
+- `_assign_to_part(ce: ClassifiedEntity, result: topo.Result) -> bool` — L631 — Scrive `ce` nel cluster che la contiene; False se nessuno la contiene:
+- `_write_custom(ce: ClassifiedEntity, cluster: topo.Cluster) -> None` — L658
+- `_probe_point(ce: ClassifiedEntity) -> Optional[Point]` — L679
+- `_extract_data(proxy: topo.model.OpenCurve, work_type: str) -> dict` — L687
+- `_extract_data_from_source(work_type: str, polygon=None) -> dict` — L720
+- `_bending_line_from_data(data: dict, cluster_label: str) -> BendingLine` — L738
 
 #### `snapbend/flat/holes.py` — 32 lines
 
@@ -257,11 +259,11 @@ _snapbend/flat/model/bending_line.py_
 - **class** `BendingLine(topo.model.OpenCurve)` — L22
   - methods: `contours`, `to_dict`
 
-#### `snapbend/flat/model/classified.py` — 31 lines
+#### `snapbend/flat/model/classified.py` — 32 lines
 
 _snapbend/flat/model/classified.py_
 
-- **class** `ClassifiedEntity` — L13 — Risultato della classificazione di una entità da detect_flat().
+- **class** `ClassifiedEntity` — L14 — Risultato della classificazione di una entità da detect_flat().
 
 #### `snapbend/flat/model/engraving.py` — 65 lines
 

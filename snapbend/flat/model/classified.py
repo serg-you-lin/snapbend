@@ -2,7 +2,8 @@
 snapbend/flat/model/classified.py
 ---------------------------------
 Una entità classificata da `detect_flat()` senza una classe dedicata
-(marking, work_type custom). Finisce in `result.classified_entities` di topo.
+(marking, work_type custom). Finisce in `cluster.custom` del cluster che la
+contiene; se nessuno la contiene la curva resta in `result.loose`.
 """
 from dataclasses import dataclass
 from dataclasses import field

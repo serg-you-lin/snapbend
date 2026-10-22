@@ -4,6 +4,15 @@ Unico posto per il lavoro aperto. Le decisioni e il perché stanno in
 `MAP.md`; qui non si ripetono, si rimanda con "vedi `MAP.md` D...".
 
 
+## 16 golden di processo rossi (visto il 22 ottobre, già prima di topo D150)
+
+`tests/flat/test_golden_process.py`: 16 test falliscono sulle aree delle parti
+(es. `arc_arc_gap` parte 1: 7851.96 contro 7850.83 nel golden). Erano rossi
+anche sul codice prima di D150 (topo), quindi non c'entra. Ipotesi: topo D145
+(archi e cerchi su una griglia per cerchio, più lati con il raggio) avvicina
+l'area a quella vera. Da provare confrontando con l'area esatta delle
+primitive, poi giudicare: mai rigenerare per far passare.
+
 ## Le forme di lamiera le costruisce e le riconosce snapbend (topo D136, 19 ottobre)
 
 `topo.geometry.contour_shape` ha sei kind, elenco chiuso e stabile:
