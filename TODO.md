@@ -13,6 +13,26 @@ anche sul codice prima di D150 (topo), quindi non c'entra. Ipotesi: topo D145
 l'area a quella vera. Da provare confrontando con l'area esatta delle
 primitive, poi giudicare: mai rigenerare per far passare.
 
+## Sezioni di lamiera in una tavola a viste (MAP.md D69)
+
+- [x] `snapbend.drawing.find_sections(topo.island(doc, max_gap=...))`: quali
+  contorni chiusi (outer, inners, `loose` chiusi) sono lamiera. Uno alla
+  volta: niente tubi (D69).
+- [ ] Provarlo su una tavola vera con le sezioni disegnate (con cornice e
+  quote): le quote/assi che toccano la sezione la tengono nella stessa isola?
+- [ ] Dalla sezione trovata allo sviluppo: `reading.centerline_segments`/
+  `angles` → `BentProfile`, `pure_arc_radius` (sella) → `Cylinder` (vedi "`BentProfile`
+  da un disegno letto" più sotto).
+- [ ] Un pezzo con un ramo dentro la cornice (sezione + quota/asse attaccati)
+  esce da `island()` come `OpenCurve` sciolte, non come contorno chiuso: `find_sections`
+  non lo vede. Provare su una tavola vera.
+- [ ] Sezione a spigolo vivo (raggio non disegnato): spessore letto,
+  mezzeria no, con una nota. Da decidere: raggio di default (D62: raggio =
+  spessore) e la si legge come piegata, o resta così.
+- [ ] Un rettangolo sottile (una cava 20x3 in una vista in pianta) è lamiera
+  non piegata per `read_section`: se dà fastidio, chi chiama filtra su
+  `reading.is_bent`.
+
 ## Le forme di lamiera le costruisce e le riconosce snapbend (topo D136, 19 ottobre)
 
 `topo.geometry.contour_shape` ha sei kind, elenco chiuso e stabile:

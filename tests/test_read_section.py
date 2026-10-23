@@ -13,6 +13,7 @@ up to that reversal (see `_canonical`).
 """
 
 import math
+import random
 import unittest
 
 from snapbend.model.geometry import polar_point
@@ -35,6 +36,10 @@ def _canonical(segments, angles):
     return min(fwd, rev, key=lambda pair: (pair[0], pair[1]))
 
 
+def _polygon(pts):
+    return [{"type": "line", "start": pts[i], "end": pts[(i + 1) % len(pts)]} for i in range(len(pts))]
+
+
 class TestReadSection(unittest.TestCase):
 
     def test_roundtrip_golden_shapes(self):
@@ -55,6 +60,42 @@ class TestReadSection(unittest.TestCase):
                         [round(a) % 360 for a in reading.angles],
                         [round(a) % 360 for a in exp_ang],
                     )
+
+    def test_entity_order_does_not_matter(self):
+        # Un contorno di topo arriva come anello testa-coda, non nell'ordine
+        # di Section: la lettura deve essere la stessa con le entità rimescolate.
+        for shape, (segments, angles) in SHAPES.items():
+            entities = Section.default(shape, segments, angles, 3.0).section().entities
+            expected = read_section(entities)
+            for seed in range(20):
+                shuffled = list(entities)
+                random.Random(seed).shuffle(shuffled)
+                reading = read_section(shuffled)
+                with self.subTest(shape=shape, seed=seed):
+                    self.assertEqual(reading.centerline_segments, expected.centerline_segments)
+                    self.assertEqual(reading.angles, expected.angles)
+                    self.assertEqual(reading.notes, [])
+
+    def test_flat_plate_any_orientation(self):
+        # Piatto senza pieghe, sdraiato e in piedi: i lati lunghi si
+        # fronteggiano per 200, i tappi per 3 — vince lo spessore, non la
+        # lunghezza (prima pareggiavano e decideva l'ordine delle entità).
+        table = SheetThicknessTable(thicknesses_mm=[2.0, 3.0], tolerance_mm=0.05)
+        for pts in ([(0, 0), (200, 0), (200, 3), (0, 3)], [(0, 0), (3, 0), (3, 200), (0, 200)]):
+            reading = read_section(_polygon(pts), table=table)
+            with self.subTest(pts=pts):
+                self.assertTrue(reading.is_sheet_metal, reading.notes)
+                self.assertFalse(reading.is_bent)
+                self.assertAlmostEqual(reading.thickness, 3.0, delta=1e-3)
+                self.assertEqual(reading.centerline_segments, [200.0])
+
+    def test_sharp_corner_is_a_note_not_a_crash(self):
+        # L a spigolo vivo: spessore letto, mezzeria no (raggio non disegnato)
+        table = SheetThicknessTable(thicknesses_mm=[2.0, 3.0], tolerance_mm=0.05)
+        reading = read_section(_polygon([(0, 0), (100, 0), (100, 100), (97, 100), (97, 3), (0, 3)]), table=table)
+        self.assertAlmostEqual(reading.thickness, 3.0, delta=1e-3)
+        self.assertEqual(reading.centerline_segments, [])
+        self.assertTrue(any("sharp corner" in n for n in reading.notes))
 
     def test_flat_blank_is_sheet_but_not_bent(self):
         # a plain rectangle 200 x 3: constant-distance faces, no arcs

@@ -1473,3 +1473,53 @@ the one test that wrote parts writes each with `topo_dxf.to_dxf`. The rule:
 `core`, `model`, `rules` forbid `topo_dxf` as they forbid `topo`; `"*"` keeps
 `topo.core` (`topo.adapters` no longer exists). `tests/gen_index.py` is topo's
 new copy (several packages, a rule per package). Suite all green.
+
+### D69 — sheet sections in a drawing of views: `snapbend.drawing.find_sections` over `topo.island()` ✅ (23 Oct 2026)
+On a drawing of views, a bent part shows up as its section: a closed outline
+with two thickness caps (L, U, Z, omega, sella). `topo.island()` hands these
+out in three places — an island's `outer` (a section drawn on its own), a
+cluster's `inners`, a `ClosedCurve` in `loose` (a section drawn inside
+another view or inside the frame, D162) — and says only their geometric
+shape. Whether a contour is sheet metal is snapbend's meaning, and
+`read_section()` (the triple signal) already answers it; `find_sections(result)`
+is the bridge: it converts each contour's native segments to
+`read_section`'s entity schema and reads it. Shape kind is not a filter: a
+sharp-cornered section is a `polygon`, a rounded one `other`.
+
+One contour at a time, no pairs. A first version also read an outer with its
+direct child as one section (a round tube's top view, outer circle + loose
+circle). Federico, 23 Oct: tubes are not snapbend's — being able to roll a
+big tube is one thing, but reading two nested contours as one section only
+pulls in noise (a hole's chamfer, thread or counterbore is two concentric
+circles too) and needs nesting among loose curves that topo does not give.
+`read_section()` itself still reads two concentric circles (D42, closed);
+`drawing/` just never hands it two contours.
+
+No catalogue of shapes: the criterion is sheet metal (faces at a constant
+thickness, concentric arc pairs, two caps), so any profile that meets it is
+found — six mixed bends, 120/240 or 150 degree bends, different radii per
+bend, all checked in `tests/test_drawing_sections.py`. A sheet with no bend
+(a flat plate in section, 200x3) is found too: `is_sheet_metal`, not
+`is_bent`, one centerline segment = its length (Federico, 23 Oct: wanted).
+
+That exposed a second general bug in `read_section()`: with no arcs the
+thickness was the plain mode of the face distances, and in a 200x3 plate
+3 and 200 tie (two long sides, two caps) — the entity order decided; in a
+sharp-cornered L 100 beat 3. Each distance now weighs as much as the length
+over which the two faces actually face each other. A sharp-cornered section
+(no bend radius drawn) then reads its thickness right but stops at the
+centerline with a note ("sharp corner: no bend radius drawn") instead of an
+`IndexError`: the radius is not on the drawing and is not invented here.
+
+It lives in a new package `drawing/`, not in `flat/`: `detect_flat()`
+assumes a flat part seen from its face and must never run on `island()`
+output (non-negotiable 3). topo now enters snapbend in `io/dxf.py`,
+`flat/` and `drawing/`; `core`, `model`, `rules` still never import it.
+
+Building it exposed a general bug in `read_section()`: it only worked in the
+entity order `Section` writes. A face chain grew only from its first and
+last edge (so a shuffled face split into 3-4 pieces), and the two faces were
+walked from the cap's ends without checking which face touches which end
+(so the fallback could pair them back to front: an L read 81.3 instead of
+114). Both fixed in `rules/read_section.py`; `test_entity_order_does_not_matter`
+fails on the old code and passes now.

@@ -39,7 +39,7 @@ file as topo's `scripts/gen_index.py` — change it in one, copy to the other.
 
 1. **The calculation does not know topo exists.** `core/`, `model/`, `rules/`
    never import topo (checked by `tests/test_index.py`). topo enters only in
-   `io/dxf.py` and `flat/`.
+   `io/dxf.py`, `flat/` and `drawing/` (MAP.md D69).
 2. **Geometry is topo's, meaning is snapbend's.** "Concentric circles", "an
    arc around a circle", a contour's shape come from topo
    (`concentric_groups`, `arcs_around`, `contour_shape`). If a geometric fact

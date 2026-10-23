@@ -627,6 +627,39 @@ if result.is_valid:
 
 ---
 
+## Sezioni in una tavola a viste — `snapbend.drawing` (richiede topo)
+
+### `find_sections`
+
+```python
+snapbend.drawing.find_sections(
+    result: topo.Result,                           # da topo.island()
+    table: SheetThicknessTable | None = None,      # None -> sheet_thicknesses.json
+) -> list[DrawnSection]
+```
+
+Quali contorni chiusi della tavola sono sezioni di lamiera (MAP.md D69).
+Legge con `read_section()` ogni contorno da solo — outer di un'isola, suoi
+`inners`, `ClosedCurve` in `loose` senza ruolo non strutturale. Uno alla
+volta: i profili chiusi (tubi) non si cercano. Torna solo ciò che è
+`is_sheet_metal`; piegata o no lo dice `reading.is_bent`. Non muta `result`,
+non solleva. Contorni con spline o ellissi non si leggono.
+
+`DrawnSection`: `contour` (outer, inner o `ClosedCurve` di `loose`),
+`cluster_ref` (indice dell'isola in `result.clusters`, `None` fuori da
+tutte), `reading` (`SectionReading`).
+
+```python
+import topo, topo_dxf
+from snapbend.drawing import find_sections
+
+result = topo.island(topo_dxf.load_dxf("tavola.dxf"), max_gap=0.5)
+for s in find_sections(result):
+    print(s.cluster_ref, s.reading.thickness, s.reading.centerline_segments, s.reading.angles)
+```
+
+---
+
 ## Il flusso completo, in ordine
 
 ```python

@@ -106,7 +106,7 @@ lista di dict grezzi (`{"type": "line", ...}`) — lo stesso schema che
 `Cone`/`Cylinder`/`BentProfile` producono generando, e che
 `topo.load_geometry()` accetta come "geometria da un generatore"
 (MAP.md D43). `snapbend` non importa topo da nessuna parte tranne
-`io/dxf.py` e `flat/` (la lettura di un pezzo piano, D51), lettura di una
+`io/dxf.py`, `flat/` (la lettura di un pezzo piano, D51) e `drawing/` (D69), lettura di una
 sezione compresa — provato il contrario per una notte
 intera (D43), tornato indietro: non perché non funzionasse (167/167
 verdi anche lì), ma perché decidere QUEL contratto oggi vorrebbe dire
@@ -132,6 +132,8 @@ human_layer  API pubblica di comodo (quote esterne, export a livelli)
 flat/        lettura di processo di un pezzo piano sopra topo (D51):
              fori, svasature, filettati, pieghe, incisioni — richiede topo;
              la importa solo io/dxf.py, per to_topo_result()
+drawing/     tavola a viste sopra topo.island() (D69): quali anelli chiusi
+             sono sezioni di lamiera, letti da rules/read_section
 ```
 
 `core/`, `model/`, `rules/` non sanno che topo esiste, punto — qualunque

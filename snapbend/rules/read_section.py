@@ -234,7 +234,8 @@ def _thickness(edges: List[_Edge]) -> Tuple[Optional[float], List[str]]:
         if len(radii) >= 2:
             arc_diffs.append(round(max(radii) - min(radii), 4))
 
-    face_dists = _face_pair_distances(edges)
+    face_pairs = _face_pair_distances(edges)
+    face_dists = [d for d, _ in face_pairs]
 
     if arc_diffs:
         thickness = _mode(arc_diffs)
@@ -246,7 +247,11 @@ def _thickness(edges: List[_Edge]) -> Tuple[Optional[float], List[str]]:
         return thickness, notes
 
     if face_dists:
-        thickness = _mode(face_dists)
+        # Pesata sul tratto in cui le facce si fronteggiano: le due facce di
+        # una lamiera corrono per tutta la sua lunghezza, un tappo contro il
+        # lato opposto solo per lo spessore. Senza peso, in un piatto 200x3 o
+        # in una L a spigolo vivo, 3 e 200 (o 100) pareggiano.
+        thickness = _mode(face_dists, [w for _, w in face_pairs])
         if any(abs(d - thickness) > 0.05 for d in face_dists):
             notes.append("face distances not constant")
         return thickness, notes
@@ -254,11 +259,11 @@ def _thickness(edges: List[_Edge]) -> Tuple[Optional[float], List[str]]:
     return None, ["no parallel faces or concentric arcs found"]
 
 
-def _face_pair_distances(edges: List[_Edge]) -> List[float]:
-    """Perpendicular distance between lines that genuinely face each other
+def _face_pair_distances(edges: List[_Edge]) -> List[Tuple[float, float]]:
+    """(distance, overlap) for lines that genuinely face each other
     (parallel, apart, and overlapping along their shared direction)."""
     lines = [e for e in edges if e.kind == "line"]
-    out: List[float] = []
+    out: List[Tuple[float, float]] = []
     for i in range(len(lines)):
         for j in range(i + 1, len(lines)):
             a, b = lines[i], lines[j]
@@ -268,9 +273,10 @@ def _face_pair_distances(edges: List[_Edge]) -> List[float]:
             d = _perp_distance(a, b)
             if d <= _TOL:
                 continue
-            if _projection_overlap(a, b) < 0.5 * min(a.length, b.length):
+            overlap = _projection_overlap(a, b)
+            if overlap < 0.5 * min(a.length, b.length):
                 continue
-            out.append(round(d, 4))
+            out.append((round(d, 4), overlap))
     return out
 
 
@@ -314,11 +320,12 @@ def _has_concentric_pair(edges: List[_Edge], thickness: float) -> bool:
     return False
 
 
-def _mode(values: List[float]) -> float:
+def _mode(values: List[float], weights: Optional[List[float]] = None) -> float:
+    """Il valore più frequente (entro 1e-3); con `weights`, quello di peso totale maggiore."""
     counts: dict = {}
-    for v in values:
+    for v, w in zip(values, weights or [1.0] * len(values)):
         hit = next((k for k in counts if abs(k - v) < 1e-3), v)
-        counts[hit] = counts.get(hit, 0) + 1
+        counts[hit] = counts.get(hit, 0) + w
     return max(counts, key=counts.get)
 
 
@@ -346,14 +353,14 @@ def _recover_centerline(
     if len(sides) != 2:
         raise _RecoverError(f"expected 2 face chains, found {len(sides)}")
 
+    # Le due facce si camminano dallo STESSO tappo: ognuna parte dal capo di
+    # caps[0] che tocca. L'ordine delle entità in ingresso non conta (un
+    # contorno di topo arriva come anello testa-coda, non come lo scrive Section).
     cap = caps[0]
-    chain_a = _order_chain(sides[0], cap.start, tol)
-    chain_b = _order_chain(sides[1], cap.end, tol)
-    if chain_a is None or chain_b is None:
-        # caps[0] endpoints may sit on the same side chain start/end;
-        # fall back to ordering each chain from its own free end
-        chain_a = _order_chain(sides[0], _free_end(sides[0], tol), tol)
-        chain_b = _order_chain(sides[1], _free_end(sides[1], tol), tol)
+    chain_a, chain_b = (
+        _order_chain(side, cap.start if any(e.touches(cap.start, tol) for e in side) else cap.end, tol)
+        for side in sides
+    )
     if chain_a is None or chain_b is None or len(chain_a) != len(chain_b):
         raise _RecoverError("face chains do not correspond")
 
@@ -366,7 +373,11 @@ def _recover_centerline(
         if ea.kind != eb.kind:
             raise _RecoverError("face chains out of step")
         if ea.kind == "line":
-            p0 = _mid(_chain_vertex(chain_a, k, tol), _chain_vertex(chain_b, k, tol))
+            if k > 0 and chain_a[k - 1].kind == "line":
+                # due tratti dritti senza arco in mezzo: spigolo vivo, il
+                # raggio di piega non è disegnato — non lo si inventa qui
+                raise _RecoverError("sharp corner: no bend radius drawn")
+            p0 =_mid(_chain_vertex(chain_a, k, tol), _chain_vertex(chain_b, k, tol))
             p1 = _mid(_chain_vertex(chain_a, k + 1, tol), _chain_vertex(chain_b, k + 1, tol))
             cl_lines.append(_dist(p0, p1))
         else:
@@ -418,12 +429,13 @@ def _split_into_sides(edges: List[_Edge], caps: List[_Edge], tol: float):
         grew = True
         while grew:
             grew = False
-            for pt in (chain[0].start, chain[0].end, chain[-1].start, chain[-1].end):
-                for e in list(remaining):
-                    if e.touches(pt, tol):
-                        chain.append(e)
-                        remaining.remove(e)
-                        grew = True
+            # da TUTTI i capi già raccolti, non solo chain[0]/chain[-1]: gli
+            # spigoli si accodano nell'ordine in cui si trovano, non lungo la faccia
+            for e in list(remaining):
+                if any(e.touches(p, tol) for c in chain for p in (c.start, c.end)):
+                    chain.append(e)
+                    remaining.remove(e)
+                    grew = True
         sides.append(chain)
     return sides
 
@@ -440,13 +452,6 @@ def _endpoint_counts(chain: List[_Edge], tol: float):
         else:
             uniq.append([p, 1])
     return uniq
-
-
-def _free_end(chain: List[_Edge], tol: float) -> Point:
-    for p, c in _endpoint_counts(chain, tol):
-        if c == 1:
-            return p
-    return chain[0].start
 
 
 def _order_chain(chain: List[_Edge], start: Point, tol: float):
