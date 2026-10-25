@@ -25,7 +25,7 @@ class TestBendAtCorner(unittest.TestCase):
         self.assertTrue(result.is_valid)
         self.assertEqual(result.cluster_count, 1)
         cluster = result.clusters[0]
-        self.assertAlmostEqual(cluster.outer.polygon.area, area, places=6)
+        self.assertAlmostEqual(cluster.outer.area, area, places=6)
         self.assertEqual(len(cluster.features("bending_lines")), bends)
         self.assertEqual(result.loose, [])
 

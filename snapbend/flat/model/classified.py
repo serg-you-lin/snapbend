@@ -27,6 +27,7 @@ class ClassifiedEntity:
     confidence: float
     source:     str
     data:       dict = field(default_factory=dict)
-    polygon:    Any  = None
     representative_point: Optional[Tuple[float, float]] = None
-    line:       Any  = None  # shapely LineString — geometria intera per un'entita' aperta (v. MAP.md D54)
+    # la curva di topo da cui viene (ClosedCurve o OpenCurve): l'appartenenza
+    # a un cluster si legge sulla sua geometria intera (v. MAP.md D54)
+    curve:      Any  = None

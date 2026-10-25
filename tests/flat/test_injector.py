@@ -271,7 +271,7 @@ class TestInjectMultiPart(unittest.TestCase):
 
     def test_002_data_injector_can_target_each_part(self):
         def add_metric(cluster, testi):
-            return {"marker": cluster.outer.polygon.area}
+            return {"marker": cluster.outer.area}
 
         topo.inject(self.result, data_injector=add_metric)
         areas = [cluster.custom["marker"] for cluster in self.result.clusters]

@@ -6,7 +6,7 @@ Test puri sui tipi di snapbend.flat: Hole, BendingLine.
 """
 import unittest
 
-from shapely.geometry import Point, Polygon, LineString
+import math
 
 import topo
 from snapbend.flat.model import (
@@ -23,10 +23,8 @@ from snapbend.flat.roles import HOLE, BEND
 class TestHole(unittest.TestCase):
 
     def _make_hole(self, diameter=10.0, center=(50.0, 50.0), hole_type=HOLE_TYPE_PLAIN):
-        r = diameter / 2
-        poly = Point(center).buffer(r, resolution=64)
         return Hole(
-            polygon=poly,
+            segments=topo.geometry.circle(diameter / 2, center),
             diameter=diameter,
             center=center,
             hole_type=hole_type,
@@ -36,17 +34,16 @@ class TestHole(unittest.TestCase):
         )
 
     def test_001_area(self):
-        """Area approssima π*r²."""
-        import math
+        """Area è π*r², esatta sui segmenti (topo D165)."""
         hole = self._make_hole(diameter=10.0)
         expected = math.pi * 5.0 ** 2
         print(f"\n[Hole] area={hole.area:.4f} expected≈{expected:.4f}")
-        self.assertAlmostEqual(hole.area, expected, delta=0.01)
+        self.assertAlmostEqual(hole.area, expected, places=9)
 
     def test_002_bbox(self):
         """Bbox centrato sul centro del foro."""
         hole = self._make_hole(diameter=10.0, center=(50.0, 50.0))
-        minx, miny, maxx, maxy = hole.bbox
+        minx, miny, maxx, maxy = hole.bbox   # esatto: l'arco ai suoi veri estremi
         print(f"[Hole] bbox={hole.bbox}")
         self.assertAlmostEqual(minx, 45.0, delta=0.01)
         self.assertAlmostEqual(miny, 45.0, delta=0.01)
@@ -60,9 +57,7 @@ class TestHole(unittest.TestCase):
 
     def test_004_hole_type_default(self):
         """hole_type default è UNKNOWN."""
-        r = 5.0
-        poly = Point((0, 0)).buffer(r, resolution=64)
-        hole = Hole(role=HOLE, polygon=poly, diameter=10.0, center=(0, 0))
+        hole = Hole(role=HOLE, segments=topo.geometry.circle(5.0), diameter=10.0, center=(0, 0))
         self.assertEqual(hole.hole_type, HOLE_TYPE_UNKNOWN)
 
     def test_005_to_dict_keys(self):
@@ -99,16 +94,12 @@ class TestHole(unittest.TestCase):
 
     def test_009_confidence_default(self):
         """confidence default è 0.0."""
-        r = 5.0
-        poly = Point((0, 0)).buffer(r, resolution=64)
-        hole = Hole(role=HOLE, polygon=poly, diameter=10.0, center=(0, 0))
+        hole = Hole(role=HOLE, segments=topo.geometry.circle(5.0), diameter=10.0, center=(0, 0))
         self.assertEqual(hole.confidence, 0.0)
 
     def test_010_source_default(self):
         """source default è stringa vuota."""
-        r = 5.0
-        poly = Point((0, 0)).buffer(r, resolution=64)
-        hole = Hole(role=HOLE, polygon=poly, diameter=10.0, center=(0, 0))
+        hole = Hole(role=HOLE, segments=topo.geometry.circle(5.0), diameter=10.0, center=(0, 0))
         self.assertEqual(hole.source, "")
 
 
@@ -119,15 +110,14 @@ class TestHole(unittest.TestCase):
 class TestBendingLine(unittest.TestCase):
 
     def _make_bl(self, start=(0, 0), end=(100, 0), cluster_label=""):
-        geom = LineString([start, end])
-        import math
         dx = end[0] - start[0]
         dy = end[1] - start[1]
         angle = math.degrees(math.atan2(dy, dx)) % 180.0
         return BendingLine(
             role=BEND,
-            geometry=geom,
-            length=geom.length,
+            start=start,
+            end=end,
+            length=math.dist(start, end),
             angle_deg=angle,
             cluster_label=cluster_label,
         )

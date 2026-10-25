@@ -6,7 +6,6 @@ topo, topo MAP.md D88).
 """
 from dataclasses import dataclass, field
 from typing import Optional, Tuple, Any, List
-from shapely.geometry import Polygon
 
 import topo
 from snapbend.flat.roles import HOLE, COUNTERSINK, THREADED_HOLE
@@ -51,8 +50,7 @@ class Hole(topo.model.ClosedCurve):
         """Disegno per topo: la svasatura e il filettato hanno il loro layer."""
         role = {HOLE_TYPE_COUNTERSINK: COUNTERSINK,
                 HOLE_TYPE_THREADED: THREADED_HOLE}.get(self.hole_type, self.role)
-        return [RenderContour(role=role, segments=self.segments,
-                              styles=self.styles, polygon=self.polygon)]
+        return [RenderContour(role=role, segments=self.segments, styles=self.styles)]
 
     def to_dict(self) -> dict:
         d = {

@@ -50,9 +50,9 @@ def _process(result, source_file: str) -> dict:
         golden["clusters"].append({
             # area e outer per agganciare il pezzo
             "area_mm2":             round(cluster.area, 4),
-            "outer_wkt":            cluster.outer.polygon.wkt,
+            "outer_wkt":            topo.to_shapely(cluster.outer).wkt,
             "holes_count":          len(holes),
-            "holes_wkt":            [h.polygon.wkt for h in holes],
+            "holes_wkt":            [topo.to_shapely(h).wkt for h in holes],
             "holes":                [h.to_dict() for h in holes],
             "bending_lines_count":  len(bends),
             "bending_lines":        [bl.to_dict() for bl in bends],
@@ -64,7 +64,7 @@ def _process(result, source_file: str) -> dict:
                         {**cluster.summary, **describe_features(cluster)}.items() if v},
             # contorni interni rimasti dopo che detect_flat ha preso i fori
             "inners_count":         len(inners),
-            "inners_wkt":           [i.polygon.wkt for i in inners],
+            "inners_wkt":           [topo.to_shapely(i).wkt for i in inners],
             "inners":               [i.to_dict() for i in inners],
         })
     return golden
@@ -121,7 +121,7 @@ def generate_multipli(force: bool, only: str = None) -> None:
                 "part_index":    part_index,
                 # area e outer per agganciare il pezzo
                 "area_mm2":      round(cluster.area, 4),
-                "outer_wkt":     cluster.outer.polygon.wkt,
+                "outer_wkt":     topo.to_shapely(cluster.outer).wkt,
                 # role_to_dxf_layer: un ruolo di processo (es. "hole") ha il
                 # suo layer dalla mappa LAYERS di snapbend (topo D128)
                 "inners_layers": [role_to_dxf_layer(i.role, layers=LAYERS)

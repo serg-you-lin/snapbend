@@ -59,8 +59,7 @@ class TestFindSections(unittest.TestCase):
 
     def _at(self, x, y):
         """La sezione il cui contorno contiene (x, y)."""
-        from shapely.geometry import Point
-        hits = [s for s in self.sections if s.contour.polygon.buffer(1e-6).contains(Point(x, y))]
+        hits = [s for s in self.sections if s.contour.contains((x, y))]
         self.assertEqual(len(hits), 1, f"sections at {(x, y)}: {len(hits)}")
         return hits[0]
 
@@ -81,7 +80,7 @@ class TestFindSections(unittest.TestCase):
         s = self._at(460.0, 50.0)
         self.assertIn(s.contour, self.result.loose)
         frame = self.result.clusters[s.cluster_ref].outer
-        self.assertAlmostEqual(frame.polygon.area, 250.0 * 250.0, delta=1e-6)
+        self.assertAlmostEqual(frame.area, 250.0 * 250.0, delta=1e-6)
         self.assertEqual(s.reading.centerline_segments, [60.0, 110.0, 60.0])
         self.assertEqual(s.reading.angles, [90.0, 90.0])
 

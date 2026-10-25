@@ -2,16 +2,16 @@
 snapbend/flat/model/bending_line.py
 -----------------------------------
 Linea di piega letta da `detect_flat()` (arrivata da topo, topo MAP.md D88).
-`geometry` è sempre l'asse intero; `dashes`, se c'è, è come la piega si
-disegna (`trim_bending_lines`, MAP.md D63).
+`start`/`end` sono sempre i capi dell'asse intero; `dashes`, se c'è, è come
+la piega si disegna (`trim_bending_lines`, MAP.md D63). Un tratto con
+`start`/`end` è quello che le funzioni di topo sulle rette accettano
+(`group_collinear_lines`, `bridged_runs`, topo D168).
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
-
-from shapely.geometry import LineString
+from typing import Tuple
 
 import topo
 from snapbend.flat.roles import BEND
@@ -20,7 +20,8 @@ from .render import RenderContour
 
 @dataclass
 class BendingLine(topo.model.OpenCurve):
-    geometry:   LineString    = field(default=None)
+    start:      Tuple[float, float] = (0.0, 0.0)
+    end:        Tuple[float, float] = (0.0, 0.0)
     length:     float         = 0.0
     angle_deg:  float         = 0.0
     cluster_label: str           = ""
@@ -39,19 +40,14 @@ class BendingLine(topo.model.OpenCurve):
 
     @property
     def contours(self) -> list:
-        """Disegno per topo: una LINE dal primo all'ultimo punto, o una LINE per tratto."""
-        if self.dashes:
-            return [RenderContour(role=self.role, segments=[topo.primitives.LineSeg(a, b)]) for a, b in self.dashes]
-        coords = list(self.geometry.coords) if self.geometry is not None else []
-        if len(coords) < 2:
-            return []
-        return [RenderContour(role=self.role, segments=[topo.primitives.LineSeg(coords[0], coords[-1])])]
+        """Disegno per topo: una LINE da `start` a `end`, o una LINE per tratto."""
+        spans = self.dashes or [(self.start, self.end)]
+        return [RenderContour(role=self.role, segments=[topo.primitives.LineSeg(a, b)]) for a, b in spans]
 
     def to_dict(self) -> dict:
-        coords = list(self.geometry.coords)
         data = {
-            "start":      coords[0],
-            "end":        coords[-1],
+            "start":      self.start,
+            "end":        self.end,
             "length":     round(self.length, 4),
             "angle_deg":  round(self.angle_deg, 4),
             "cluster_label": self.cluster_label,

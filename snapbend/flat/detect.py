@@ -10,8 +10,6 @@ from __future__ import annotations
 
 from typing import Optional
 
-from shapely.geometry import LineString, Point
-
 import topo
 from .roles import HOLE, COUNTERSINK, THREADED_HOLE, BEND, ENGRAVE, MARKING
 from .model import (
@@ -152,7 +150,7 @@ def describe_features(cluster: topo.Cluster) -> dict:
 
     bending_groups = (
         len(topo.geometry.group_collinear_lines(
-            [bl.geometry for bl in bending_lines],
+            bending_lines,
             tolerance=_BENDING_GROUP_TOLERANCE,
         ))
         if bending_lines else 0
@@ -189,7 +187,7 @@ def _detect_labeled(result: topo.Result) -> None:
             # geometria e ruolo intatti, riscritto in output (D27, D30).
             continue
 
-        is_closed = getattr(proxy, "polygon", None) is not None
+        is_closed = isinstance(proxy, topo.model.ClosedCurve)
 
         if proxy.role == ENGRAVE:
             placed = (
@@ -202,15 +200,15 @@ def _detect_labeled(result: topo.Result) -> None:
 
         if is_closed:
             work_type = topo.model.role_str(proxy.role)
-            data = _extract_data_from_source(work_type, polygon=proxy.polygon)
+            data = _extract_data_from_source(work_type, proxy)
             rep  = data.pop("representative_point", None)
             ce = ClassifiedEntity(
                 work_type=work_type,
                 confidence=1.0,
                 source="labeled",
                 data=data,
-                polygon=proxy.polygon,
                 representative_point=rep,
+                curve=proxy,
             )
             if _assign_to_part(ce, result):
                 classified_ids.add(id(proxy))
@@ -219,14 +217,13 @@ def _detect_labeled(result: topo.Result) -> None:
         work_type = topo.model.role_str(proxy.role)
         data = _extract_data(proxy, work_type)
         rep  = data.pop("representative_point", None)
-        pts  = _proxy_pts(proxy)
         ce   = ClassifiedEntity(
             work_type=work_type,
             confidence=1.0,
             source="labeled",
             data=data,
             representative_point=rep,
-            line=LineString(pts) if len(pts) >= 2 else None,
+            curve=proxy if len(_proxy_pts(proxy)) >= 2 else None,
         )
         if _assign_to_part(ce, result):
             classified_ids.add(id(proxy))
@@ -264,15 +261,15 @@ def _detect_labeled(result: topo.Result) -> None:
                 continue
 
             work_type = topo.model.role_str(inner.role)
-            data = _extract_data_from_source(work_type, polygon=inner.polygon)
+            data = _extract_data_from_source(work_type, inner)
             rep  = data.pop("representative_point", None)
             ce = ClassifiedEntity(
                 work_type=work_type,
                 confidence=1.0,
                 source="labeled",
                 data=data,
-                polygon=inner.polygon,
                 representative_point=rep,
+                curve=inner,
             )
             if not _assign_to_part(ce, result):
                 remaining.append(inner)
@@ -296,7 +293,8 @@ _BEND_LINE_OFFSET = 0.1
 def _bending_line(cluster, start, end, length, source="geometric"):
     return BendingLine(
         role=BEND,
-        geometry=LineString([start, end]),
+        start=tuple(start[:2]),
+        end=tuple(end[:2]),
         length=length,
         angle_deg=topo.geometry.chord_angle_deg(start, end),
         cluster_label=cluster.label,
@@ -307,7 +305,7 @@ def _bending_line(cluster, start, end, length, source="geometric"):
 
 def _detect_bending(result: topo.Result, bending_tolerance: float = 1.0) -> None:
     """
-    Una piega attraversa il pezzo (`topo.geometry.splits_polygon`, prolungata di
+    Una piega attraversa il pezzo (`topo.geometry.splits_contour`, prolungata di
     `_BEND_REACH`). Se un vuoto la interrompe,
     i tratti sulla stessa retta separati solo da vuoti valgono come una
     piega: la retta che li unisce deve attraversare il pezzo, e sul layer
@@ -326,7 +324,7 @@ def _detect_bending(result: topo.Result, bending_tolerance: float = 1.0) -> None
             continue
 
         cluster = result.clusters[proxy.cluster_ref]
-        if topo.geometry.splits_polygon(cluster.outer.polygon, pts[0], pts[-1], reach=_BEND_REACH):
+        if topo.geometry.splits_contour(cluster.outer, pts[0], pts[-1], reach=_BEND_REACH):
             topo.promote(result, proxy, cluster, "bending_lines",
                          _bending_line(cluster, pts[0], pts[-1], length))
         else:
@@ -336,11 +334,11 @@ def _detect_bending(result: topo.Result, bending_tolerance: float = 1.0) -> None
         pieces = leftovers.get(id(cluster))
         if not pieces or not cluster.inners:
             continue
-        voids = [i.polygon for i in cluster.inners if i.depth % 2]
+        voids = [i for i in cluster.inners if i.depth % 2]
         runs = topo.geometry.bridged_runs([p[:2] for p in pieces], voids,
                             tolerance=_BEND_LINE_OFFSET, angle_tolerance=_BEND_ANGLE_TOL)
         for run in runs:
-            if not topo.geometry.splits_polygon(cluster.outer.polygon, run.start, run.end, reach=_BEND_REACH):
+            if not topo.geometry.splits_contour(cluster.outer, run.start, run.end, reach=_BEND_REACH):
                 continue
             for proxy in (pieces[j][2] for j in run.members):
                 pts = _proxy_pts(proxy)
@@ -428,7 +426,7 @@ def _promote_geometric_holes(cluster: topo.Cluster,
                 continue
             outer = next((m for m in members[i + 1:]
                           if m[1] > inner_d and id(m[0]) not in swallowed
-                          and m[0].polygon.contains(inner_c.polygon)), None)
+                          and topo.to_shapely(m[0]).contains(topo.to_shapely(inner_c))), None)
             if outer is None:
                 continue
             swallowed.add(id(outer[0]))
@@ -473,7 +471,6 @@ def _hole_from_contour(contour, diameter, center, *, hole_type, confidence,
     from .model import Hole
     return Hole(
         role=HOLE,
-        polygon=contour.polygon,
         segments=list(getattr(contour, "segments", []) or []),
         styles=list(getattr(contour, "styles", []) or []),
         diameter=diameter,
@@ -494,7 +491,6 @@ def _labeled_hole_from_contour(contour):
     hole_type = _ROLE_TO_HOLE_TYPE.get(contour.role, HOLE_TYPE_PLAIN)
     return Hole(
         role=contour.role,
-        polygon=contour.polygon,
         segments=list(getattr(contour, "segments", []) or []),
         styles=list(getattr(contour, "styles", []) or []),
         diameter=dia or 0.0,
@@ -541,23 +537,21 @@ def _engraving_from_open(proxy, cluster_label: str = "",
         styles=list(getattr(proxy, "styles", []) or []),
         length=round(topo.geometry.track_length(pts), 4),
         pts=pts,
-        geometry=LineString(pts) if len(pts) >= 2 else None,
         cluster_label=cluster_label,
         source=source,
         confidence=confidence,
     )
 
 
-def _engraving_from_closed(polygon, segments, cluster_label: str = "",
-                           source: str = "labeled", confidence: float = 1.0,
-                           styles=None) -> Engraving:
+def _engraving_from_closed(curve, cluster_label: str = "",
+                           source: str = "labeled", confidence: float = 1.0) -> Engraving:
     return Engraving(
         role=ENGRAVE,
-        segments=list(segments or []),
-        styles=list(styles or []),
-        length=round(polygon.exterior.length, 4),
-        pts=list(polygon.exterior.coords),
-        polygon=polygon,
+        segments=list(curve.segments or []),
+        styles=list(curve.styles or []),
+        length=round(_perimeter(curve), 4),
+        pts=curve.points(),
+        closed=True,
         cluster_label=cluster_label,
         source=source,
         confidence=confidence,
@@ -589,21 +583,13 @@ def _handle_engrave_closed_loose(proxy, result: topo.Result) -> bool:
         return False
     cluster = result.clusters[proxy.cluster_ref]
     _ensure_detected(cluster).add("engrave_lines", _engraving_from_closed(
-        proxy.polygon,
-        getattr(proxy, "segments", []),
-        cluster_label=cluster.label,
-        styles=getattr(proxy, "styles", []),
-    ))
+        proxy, cluster_label=cluster.label))
     return True
 
 
 def _handle_engrave_closed(inner, cluster: topo.Cluster) -> None:
     _ensure_detected(cluster).add("engrave_lines", _engraving_from_closed(
-        inner.polygon,
-        getattr(inner, "segments", []),
-        cluster_label=cluster.label,
-        styles=getattr(inner, "styles", []),
-    ))
+        inner, cluster_label=cluster.label))
 
 
 # ---------------------------------------------------------------------------
@@ -618,14 +604,14 @@ def _belongs_to_cluster(ce: ClassifiedEntity, cluster: topo.Cluster) -> bool:
     Un'entità aperta (marking/bending) appartiene al cluster se la sua
     geometria INTERA è coperta dal contorno outer — non solo un punto
     rappresentativo: quello fallisce per costruzione su un'entità che giace
-    esattamente sul bordo (shapely `contains` esclude il bordo per
-    definizione), il caso comune di una piega o una marcatura tracciata
-    proprio sul lato del pezzo.
+    esattamente sul bordo, il caso comune di una piega o una marcatura
+    tracciata proprio sul lato del pezzo. Il buffer è una domanda fra due
+    geometrie: passa da `topo.to_shapely` (topo D168).
     """
-    if ce.line is not None:
-        return cluster.outer.polygon.buffer(_LABEL_COVER_EPS).covers(ce.line)
+    if isinstance(ce.curve, topo.model.OpenCurve):
+        return topo.to_shapely(cluster.outer).buffer(_LABEL_COVER_EPS).covers(topo.to_shapely(ce.curve))
     probe = _probe_point(ce)
-    return probe is not None and cluster.outer.polygon.contains(probe)
+    return probe is not None and cluster.outer.contains(probe)
 
 
 def _assign_to_part(ce: ClassifiedEntity, result: topo.Result) -> bool:
@@ -676,12 +662,22 @@ def _write_custom(ce: ClassifiedEntity, cluster: topo.Cluster) -> None:
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _probe_point(ce: ClassifiedEntity) -> Optional[Point]:
+def _probe_point(ce: ClassifiedEntity) -> Optional[tuple]:
     if ce.representative_point is not None:
-        return Point(ce.representative_point)
-    if ce.polygon is not None:
-        return ce.polygon.centroid
-    return None
+        return ce.representative_point
+    return _centroid(ce.curve) if isinstance(ce.curve, topo.model.ClosedCurve) else None
+
+
+def _centroid(curve) -> Optional[tuple]:
+    """Baricentro esatto della curva chiusa; None se non racchiude area."""
+    try:
+        return curve.centroid
+    except ValueError:
+        return None
+
+
+def _perimeter(curve) -> float:
+    return sum(topo.geometry.segment_length(s) for s in curve.segments)
 
 
 def _extract_data(proxy: topo.model.OpenCurve, work_type: str) -> dict:
@@ -717,16 +713,13 @@ def _extract_data(proxy: topo.model.OpenCurve, work_type: str) -> dict:
     return {"representative_point": rep}
 
 
-def _extract_data_from_source(work_type: str, polygon=None) -> dict:
+def _extract_data_from_source(work_type: str, curve) -> dict:
+    """Dati di un'entità chiusa (`ClosedCurve`) letti sui suoi segmenti."""
     work_type = work_type.lower()
-
-    rep = None
-    if polygon is not None:
-        c   = polygon.centroid
-        rep = (c.x, c.y)
+    rep = _centroid(curve)
 
     if work_type == "marking":
-        length = round(polygon.exterior.length, 4) if polygon is not None else None
+        length = round(_perimeter(curve), 4)
         return {
             "length":               length,
             "representative_point": rep,
@@ -740,7 +733,8 @@ def _bending_line_from_data(data: dict, cluster_label: str) -> BendingLine:
     end   = data["end"]
     return BendingLine(
         role=BEND,
-        geometry=LineString([start, end]),
+        start=tuple(start[:2]),
+        end=tuple(end[:2]),
         length=data["length"],
         angle_deg=data["angle_deg"],
         cluster_label=cluster_label,

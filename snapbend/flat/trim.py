@@ -36,7 +36,7 @@ def trim_bending_lines(result: topo.Result,
     """
     Tratteggia ogni `BendingLine` di `result` con `pattern`: le stesse misure
     per tutte, o una regola che le sceglie piega per piega (per esempio dalla
-    lunghezza). Il tratteggio parte sempre dall'asse intero (`geometry`), quindi
+    lunghezza). Il tratteggio parte sempre dall'asse intero (`start`-`end`), quindi
     ripeterlo lo sostituisce, non lo somma. Una piega che i tratti coprono
     tutta, o per cui la regola dà None, resta intera (`dashes` vuoto).
 
@@ -46,8 +46,7 @@ def trim_bending_lines(result: topo.Result,
     for cluster in result.clusters:
         for bl in cluster.features("bending_lines"):
             p = rule(bl)
-            coords = list(bl.geometry.coords)
-            dashes = [] if p is None else topo.geometry.dash_line(coords[0], coords[-1], p.head, p.tail,
+            dashes = [] if p is None else topo.geometry.dash_line(bl.start, bl.end, p.head, p.tail,
                                                     p.middle, p.n_middle)
             bl.dashes = dashes if len(dashes) > 1 else []
     return result

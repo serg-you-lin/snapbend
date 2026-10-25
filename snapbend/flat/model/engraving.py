@@ -6,9 +6,9 @@ Incisione rilevata da detect_flat() (arrivata da topo, topo MAP.md D88).
 Un solo tipo: `Engraving`. Un'incisione è concettualmente una traccia aperta
 (N segmenti su layer engrave). Un contorno chiuso su layer engrave NON viene
 riassemblato in un loop unico — resta N segmenti separati (scelta di progetto).
-`polygon` è valorizzato solo quando la traccia era già degenere in origine
-(CIRCLE, SPLINE chiusa): serve al contenimento, non è un loop strutturale.
-`closed` non è uno stato a sé: è `polygon is not None`, esposto come property.
+`closed` dice che la traccia era già chiusa in origine (CIRCLE, SPLINE
+chiusa): un fatto della sorgente, non un loop strutturale. Nessun tipo
+shapely nel modello (topo D168).
 
 Doppio binario di provenienza, identico a Hole:
     source="labeled"   → ruolo assegnato da role_rules al load   (confidence 1.0)
@@ -18,9 +18,7 @@ Doppio binario di provenienza, identico a Hole:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple
-
-from shapely.geometry import LineString, Polygon
+from typing import List, Tuple
 
 import topo
 from snapbend.flat.roles import ENGRAVE
@@ -32,19 +30,13 @@ class Engraving(topo.model.OpenCurve):
     length:     float                    = 0.0
     cluster_label: str                      = ""
     pts:        List[Tuple[float, float]] = field(default_factory=list)
-    geometry:   Optional[LineString]     = None
-    polygon:    Optional[Polygon]        = None
+    closed:     bool                     = False
     confidence: float                    = 1.0
     source:     str                      = "labeled"
 
     def __post_init__(self):
         if self.role == topo.model.ContourRole.UNKNOWN:
             self.role = ENGRAVE
-
-    @property
-    def closed(self) -> bool:
-        """Traccia già chiusa in origine (CIRCLE / SPLINE chiusa) ⇔ ha un polygon."""
-        return self.polygon is not None
 
     @property
     def contours(self) -> list:

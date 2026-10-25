@@ -11,8 +11,6 @@ refactor/detect-overlay).
 
 import unittest
 
-from shapely.geometry import Polygon, LineString
-
 import topo
 import topo_dxf
 from snapbend.flat.roles import HOLE, BEND, ENGRAVE
@@ -29,7 +27,7 @@ def _part(**detected_kw):
     del refactor, ma passando per `DetectedFeatures.attach()` invece di
     campi fissi sul cluster.
     """
-    outer = topo.Contour(polygon=Polygon([(0, 0), (100, 0), (100, 100), (0, 100)]),
+    outer = topo.Contour(segments=topo.geometry.rectangle(100, 100, center=(50, 50)),
                          role=topo.model.ContourRole.OUTER)
     cluster = topo.Cluster(outer=outer)
     if detected_kw:
@@ -41,7 +39,7 @@ def _part(**detected_kw):
 
 def _hole(t):
     return Hole(role=HOLE,
-                polygon=Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                segments=topo.geometry.rectangle(1, 1, center=(0.5, 0.5)),
                 diameter=1.0, center=(0.5, 0.5), hole_type=t)
 
 
@@ -72,9 +70,9 @@ class TestDescribeFeatures(unittest.TestCase):
     def test_bending_collinear_grouped(self):
         # due segmenti collineari sulla stessa retta → una piega logica
         bl = [
-            BendingLine(role=BEND, geometry=LineString([(0, 50), (40, 50)]), length=40),
-            BendingLine(role=BEND, geometry=LineString([(60, 50), (100, 50)]), length=40),
-            BendingLine(role=BEND, geometry=LineString([(50, 0), (50, 100)]), length=100),
+            BendingLine(role=BEND, start=(0, 50), end=(40, 50), length=40),
+            BendingLine(role=BEND, start=(60, 50), end=(100, 50), length=40),
+            BendingLine(role=BEND, start=(50, 0), end=(50, 100), length=100),
         ]
         cluster = _part(bending_lines=bl)
         self.assertEqual(describe_features(cluster)["bending_lines"], 2)

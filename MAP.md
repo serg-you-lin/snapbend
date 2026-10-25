@@ -1523,3 +1523,42 @@ walked from the cap's ends without checking which face touches which end
 (so the fallback could pair them back to front: an L read 81.3 instead of
 114). Both fixed in `rules/read_section.py`; `test_entity_order_does_not_matter`
 fails on the old code and passes now.
+
+### D70 — follow topo D165-D168: no shapely type in snapbend's flat model ✅ (25 Oct 2026)
+
+topo 0.23.0 takes and returns no shapely type (topo D166, D168): `.polygon`
+is gone from every contour. snapbend applied D168's table row by row and went
+one step further on its own types, for the same reason topo did: shapely is a
+dependency of topo, not a promise, and a contour's facts are on its segments.
+
+- `Hole` is built from `segments` only; `RenderContour` has no `polygon` —
+  topo draws a ring closed when its segments close it (`feature_closed`).
+- `BendingLine.geometry` (a `LineString`) → `start`, `end`: the whole axis.
+  A stroke with `start`/`end` is what `group_collinear_lines` and
+  `bridged_runs` take, so `describe_features` passes the bends as they are.
+- `Engraving.geometry` and `.polygon` removed; `closed` is a plain field.
+  A closed engraving's length is its exact perimeter (`segment_length`).
+- `ClassifiedEntity.polygon` and `.line` → `curve`, the topo curve it was
+  read from. A closed one is placed by its exact centroid and
+  `outer.contains`; an open one must be wholly covered by the outer grown by
+  1e-3 (D54) — a buffer, so it goes through `topo.to_shapely`, as does the
+  countersink's ring-in-ring test. These are the only shapely calls left in
+  `snapbend/`, all on objects `to_shapely` returns.
+- `splits_polygon(outer.polygon, …)` → `splits_contour(outer, …)`;
+  `bridged_runs` takes the void contours themselves.
+
+Goldens (`tests/data/flat/**/process`), never regenerated; three changes,
+each proved before writing (scripts kept out of the repo):
+1. **Areas** (`area_mm2`, inner `area`): exact now (topo D165). Every change
+   within `tol × perimeter` — worst 2 % of the bound; e.g. `arc_arc_gap`
+   7853.9816 = π·50², `example_4_polylines` 9921.4602 = 10000 − π·5². This
+   closes the "16 red goldens" TODO of 22 Oct: they were this.
+2. **Order** of parts: topo's cluster order is deterministic (D166 step 2).
+   Each new part matched one golden (same inner count, area in bound,
+   nearest outer); `example_4_polylines` 1↔2 and `sviluppo_multiparte`
+   10–15 (congruent copies) were reordered, not rewritten.
+3. **WKT** (`outer_wkt`, `holes_wkt`, `inners_wkt`): topo's discretization
+   changed (more vertices on arcs). Same shape: worst Hausdorff 0.068 × tol.
+Every other field kept as it was.
+
+Public fields of `BendingLine`, `Engraving`, `ClassifiedEntity` removed → **0.7.0**.

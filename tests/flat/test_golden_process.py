@@ -75,7 +75,7 @@ def _make_test(path):
             best_idx = None
             best_score = None
             for expected_idx in unmatched:
-                score = actual_shape.polygon.symmetric_difference(
+                score = topo.to_shapely(actual_shape).symmetric_difference(
                     expected_polys[expected_idx]
                 ).area
                 if best_score is None or score < best_score:
@@ -392,7 +392,7 @@ def _make_multipli_test(path):
 
         self.assertAlmostEqual(round(cluster.area, 4), golden["area_mm2"], delta=TOL_AREA,
                                msg=f"{label} area")
-        self.assertLess(cluster.outer.polygon.symmetric_difference(
+        self.assertLess(topo.to_shapely(cluster.outer).symmetric_difference(
             shapely_wkt.loads(golden["outer_wkt"])).area, TOL_SHAPE, msg=f"{label} outer shape")
 
         layers = [role_to_dxf_layer(c.role, layers=LAYERS) for c in cluster.features("holes") + cluster.inners]

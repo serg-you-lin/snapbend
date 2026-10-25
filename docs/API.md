@@ -588,7 +588,11 @@ snapbend.flat.describe_features(cluster) -> dict
   `split`, `to_svg`, `to_view_model`): topo non tiene un registro (topo D128).
 - Tipi: `Hole` (`is_void = True`: topo lo toglie dall'area), `BendingLine`,
   `Engraving`, `ClassifiedEntity`; `contours` dice a topo su che layer
-  disegnarli (una svasatura sul suo layer, una piega come LINE).
+  disegnarli (una svasatura sul suo layer, una piega come LINE). Nessun tipo
+  shapely (D70): un `Hole` si costruisce da `segments`; una `BendingLine` ha
+  `start`/`end` (l'asse intero); un'`Engraving` ha `closed: bool` (traccia già
+  chiusa in origine); un `ClassifiedEntity` porta `curve`, la curva di topo da
+  cui viene.
 
 ### `trim_bending_lines`, `DashPattern`
 
@@ -606,7 +610,7 @@ tutta la piega, la lasciano intera.
 
 **Muta** `result`: scrive `BendingLine.dashes` (lista di `(start, end)`), che
 `contours` disegna come una LINE per tratto e `to_dict()` riporta sotto
-`"dashes"`. `geometry` e `length` restano l'asse intero e la piega resta una:
+`"dashes"`. `start`/`end` e `length` restano l'asse intero e la piega resta una:
 `describe_features` la conta come prima. Ripeterlo sostituisce i tratti.
 
 ```python

@@ -275,10 +275,7 @@ class TestLineetteSpurie(unittest.TestCase):
 
         model_keys = set()
         for bl in cluster.features("bending_lines"):
-            if bl.geometry is None:
-                continue
-            coords = list(bl.geometry.coords)
-            model_keys.add(_key(coords[0], coords[-1]))
+            model_keys.add(_key(bl.start, bl.end))
 
         spurie = []
         for e in self.msp:
