@@ -85,6 +85,21 @@ class SheetThicknessTable:
 # --------------------------------------------------------------------------
 
 @dataclass
+class SectionBend:
+    """Una piega letta da sola, senza camminare il profilo (MAP.md D74): una
+    coppia di archi concentrici i cui raggi differiscono dello spessore.
+
+    angle:        gradi di rotazione da piatto (convenzione di `Bend.angle`) —
+                  l'arco più lungo della coppia: l'altro può essere coperto
+    inner_radius: il raggio minore della coppia
+    center:       il centro comune
+    """
+    angle:        float
+    inner_radius: float
+    center:       Point
+
+
+@dataclass
 class SectionReading:
     is_sheet_metal: bool
     is_bent: bool
@@ -96,6 +111,9 @@ class SectionReading:
     # instead of centerline_segments/angles, which do not fit that shape.
     pure_arc_radius: Optional[float] = None
     pure_arc_angle_deg: Optional[float] = None
+    # ogni piega che si legge da sola, anche quando il profilo non si
+    # ricostruisce (MAP.md D74)
+    bends: List[SectionBend] = field(default_factory=list)
 
 
 # --------------------------------------------------------------------------
@@ -197,13 +215,23 @@ def read_section(
     angles: List[float] = []
     pure_arc_radius: Optional[float] = None
     pure_arc_angle: Optional[float] = None
+    bends: List[SectionBend] = []
     if thickness is not None:
+        bends = _bends(edges, thickness)
         try:
             segments, angles, pure_arc_radius, pure_arc_angle = _recover_centerline(
                 edges, thickness, join_tol
             )
         except _RecoverError as exc:
-            notes.append(f"centerline not recovered: {exc}")
+            # Il contorno ha più della sezione (un moncherino non piegato
+            # disegnato insieme, MAP.md D74): si prova a leggerla da una
+            # faccia sola, quella che corre intera fra due tappi.
+            try:
+                segments, angles = _recover_from_one_face(edges, thickness, join_tol)
+                notes.append(f"profile read from one face; the rest of the outline "
+                             f"is not part of it ({exc})")
+            except _RecoverError as one_face:
+                notes.append(f"centerline not recovered: {exc}; one face: {one_face}")
 
     return SectionReading(
         is_sheet_metal=bool(is_sheet),
@@ -214,6 +242,7 @@ def read_section(
         notes=notes,
         pure_arc_radius=pure_arc_radius,
         pure_arc_angle_deg=pure_arc_angle,
+        bends=bends,
     )
 
 
@@ -395,6 +424,13 @@ def _recover_centerline(
         # length on both sides of every bend) - Cylinder/Cone territory.
         return [], [], cl_radii[0], abs(cl_turns[0])
 
+    segments, angles = _compose(cl_lines, cl_turns, cl_setbacks)
+    return segments, angles, None, None
+
+
+def _compose(cl_lines: List[float], cl_turns: List[float], cl_setbacks: List[float]):
+    """Tratti dritti della mezzeria + archi -> segmenti apice-apice e angoli
+    nello schema di naming, in orientamento canonico."""
     n = len(cl_lines)
     segments: List[float] = []
     for j in range(n):
@@ -406,8 +442,93 @@ def _recover_centerline(
         segments.append(round(seg, 4))
 
     angles = [round(180.0 - t, 4) for t in cl_turns]
-    segments, angles = _canonical(segments, angles)
-    return segments, angles, None, None
+    return _canonical(segments, angles)
+
+
+def _partner(arc: _Edge, edges: List[_Edge], thickness: float) -> Optional[_Edge]:
+    """L'arco concentrico ad `arc` il cui raggio differisce dello spessore."""
+    for e in edges:
+        if (e is not arc and e.kind == "arc" and _dist(e.center, arc.center) <= 1e-3
+                and abs(abs(e.radius - arc.radius) - thickness) < 1e-3):
+            return e
+    return None
+
+
+def _bends(edges: List[_Edge], thickness: float) -> List[SectionBend]:
+    """Ogni coppia di archi concentrici a distanza `thickness` è una piega
+    (MAP.md D74). L'angolo è lo sweep più lungo della coppia: un arco può
+    essere coperto in parte (moncherino disegnato davanti), mai allungato."""
+    out: List[SectionBend] = []
+    used: set = set()
+    for a in edges:
+        if a.kind != "arc" or id(a) in used:
+            continue
+        b = _partner(a, edges, thickness)
+        if b is None or id(b) in used:
+            continue
+        used.update((id(a), id(b)))
+        sweep = max(abs(_sweep_deg(e.a0, e.a1, e.ccw)) for e in (a, b))
+        out.append(SectionBend(angle=round(sweep, 4), inner_radius=min(a.radius, b.radius),
+                               center=a.center))
+    return out
+
+
+def _recover_from_one_face(edges: List[_Edge], thickness: float, tol: float):
+    """Mezzeria da UNA faccia (MAP.md D74), quando il contorno ha più della
+    sezione — tipico: il moncherino non piegato dell'ala, disegnato nello
+    stesso contorno, copre lo spigolo e aggiunge un terzo tappo.
+
+    Una faccia vale se corre intera da un tappo all'altro, retta-arco-retta
+    alternati, ogni arco tangente alle sue rette e col suo compagno
+    concentrico a distanza `thickness` da qualche parte nel contorno (anche
+    coperto in parte). La retta di una faccia è lunga quanto quella della
+    mezzeria (i punti di tangenza stanno sullo stesso raggio); l'arco della
+    mezzeria sta a metà fra l'arco e il suo compagno. Serve esattamente una
+    faccia così: zero o due sono un'ambiguità, non si sceglie."""
+    caps = [e for e in edges if e.kind == "line" and abs(e.length - thickness) < 1e-3]
+    cap_points = [p for c in caps for p in (c.start, c.end)]
+    found = []
+    for side in _split_into_sides(edges, caps, tol):
+        ends = [p for p, count in _endpoint_counts(side, tol) if count == 1]
+        if len(ends) != 2 or not all(any(_dist(p, q) <= tol for q in cap_points) for p in ends):
+            continue
+        chain = _order_chain(side, ends[0], tol)
+        if chain is None or not any(e.kind == "arc" for e in chain):
+            continue
+        if chain[0].kind != "line" or chain[-1].kind != "line":
+            continue
+        if any(a.kind == b.kind for a, b in zip(chain, chain[1:])):
+            continue
+        if any(e.kind == "arc" and (_partner(e, edges, thickness) is None
+                                    or not _tangent(chain[k - 1], e) or not _tangent(chain[k + 1], e))
+               for k, e in enumerate(chain)):
+            continue
+        found.append(chain)
+    if len(found) != 1:
+        raise _RecoverError(f"expected 1 whole face between two caps, found {len(found)}")
+
+    chain = found[0]
+    cl_lines = [e.length for e in chain if e.kind == "line"]
+    cl_turns: List[float] = []
+    cl_setbacks: List[float] = []
+    for e in chain:
+        if e.kind == "arc":
+            r_cl = (e.radius + _partner(e, edges, thickness).radius) / 2.0
+            sweep = _sweep_deg(e.a0, e.a1, e.ccw)
+            cl_turns.append(sweep)
+            cl_setbacks.append(r_cl * math.tan(math.radians(abs(sweep)) / 2.0))
+    return _compose(cl_lines, cl_turns, cl_setbacks)
+
+
+def _tangent(line: _Edge, arc: _Edge) -> bool:
+    """La retta tocca l'arco in un suo capo ed è perpendicolare al raggio lì."""
+    p = next((q for q in (line.start, line.end)
+              if _dist(q, arc.start) <= 1e-3 or _dist(q, arc.end) <= 1e-3), None)
+    if p is None:
+        return False
+    rx, ry = p[0] - arc.center[0], p[1] - arc.center[1]
+    lx, ly = line.end[0] - line.start[0], line.end[1] - line.start[1]
+    return abs(rx * lx + ry * ly) <= 1e-2 * math.hypot(rx, ry) * math.hypot(lx, ly)
 
 
 def _canonical(segments: List[float], angles: List[float]):

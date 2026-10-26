@@ -49,7 +49,7 @@ from .rules.deduction import (
     TIPI_CLIENTE, tipo_cliente_coerente,
 )
 from .model.section import Section, FlangeFace, FlangeQuote
-from .rules.read_section import SectionReading, SheetThicknessTable, read_section
+from .rules.read_section import SectionBend, SectionReading, SheetThicknessTable, read_section
 from .rules.officina import set_officina
 from .human_layer import develop_from_external_flanges, export_part
 
@@ -58,6 +58,6 @@ __all__ = [
     "Bend", "BendResult", "BentProfile", "FlatFlange", "estimate_k_factor", "MATERIAL_K_FACTORS",
     "Calibration", "DeductionInfo", "bend_deduction", "k_din6935", "deduction_din6935",
     "TIPI_CLIENTE", "tipo_cliente_coerente",
-    "Section", "FlangeFace", "FlangeQuote", "read_section", "SectionReading", "SheetThicknessTable", "set_officina",
+    "Section", "FlangeFace", "FlangeQuote", "read_section", "SectionReading", "SectionBend", "SheetThicknessTable", "set_officina",
     "develop_from_external_flanges", "export_part",
 ]

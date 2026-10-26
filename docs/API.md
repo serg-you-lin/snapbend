@@ -547,10 +547,30 @@ flat.bends[0].position            # la linea di piega
 | `angles` | `list[float]` | idem, schema naming |
 | `pure_arc_radius` | `float \| None` | **solo arco puro senza flange** (sella) — `None` altrimenti |
 | `pure_arc_angle_deg` | `float \| None` | idem |
-| `notes` | `list[str]` | perché il riconoscimento non è (del tutto) riuscito |
+| `notes` | `list[str]` | perché il riconoscimento non è (del tutto) riuscito; `"profile read from one face …"` se la mezzeria viene da una faccia sola (MAP.md D74) |
+| `bends` | `list[SectionBend]` | ogni piega che si legge da sola (coppia di archi concentrici a distanza `thickness`), **anche quando la mezzeria non si ricostruisce** (MAP.md D74) |
 
 Mai più di uno fra i due gruppi di misure valorizzato insieme — vedi
 `docs/ARCHITECTURE.md`.
+
+**Un contorno con più della sezione** (MAP.md D74) — tipico: il moncherino
+non piegato di un'ala, disegnato nello stesso contorno, copre lo spigolo e
+aggiunge un terzo tappo. Se le due facce non si camminano insieme, la
+mezzeria si legge da **una** faccia, quella che corre intera da un tappo
+all'altro (retta-arco-retta, archi tangenti, ognuno col compagno
+concentrico a distanza t, anche coperto in parte). Zero o più facce così:
+mezzeria vuota e una nota — non si sceglie. Quale tratto del contorno sia il
+moncherino non lo dice `read_section`: è lettura del foglio.
+
+### `SectionBend` — una riga di `SectionReading.bends`
+
+| campo | tipo | significato |
+|---|---|---|
+| `angle` | `float` | gradi di rotazione da piatto (come `Bend.angle`): lo sweep più lungo della coppia — un arco può essere coperto, mai allungato |
+| `inner_radius` | `float` | il raggio minore della coppia |
+| `center` | `tuple[float, float]` | il centro comune, nelle coordinate del contorno |
+
+Uno spigolo vivo (nessun raggio disegnato) non dà nessuna `SectionBend`.
 
 ### `SheetThicknessTable`
 

@@ -1681,7 +1681,7 @@ legs, but the width, each flange's outline and its holes are in the other
 views, and reading those is snapdraw's. The single "drawing → development"
 call belongs to whoever knows both — pippo, which is what pippo is.
 
-### D74 — pippo request 3, triaged: when the profile cannot be walked, `read_section` still returns each bend it can read on its own ✅ decided, to implement (26 Oct 2026)
+### D74 — pippo request 3, triaged: `read_section` perceives the bent sheet inside an outline that holds more than the section ✅ (26 Oct 2026)
 
 pippo asked (its `TODO.md`, `## Richieste a snapbend`, 3) that
 `read_section` read what is certain and flag the rest. Its case: a section
@@ -1707,3 +1707,33 @@ projected onto one contour, not a section that is wrong.
   snapdraw's, as pippo itself wrote (its request 1 to snapdraw). A sharp
   corner with no radius drawn has no arc pair: no bend is read there, and
   the note says so.
+
+**Reopening D74 (same day, before it was implemented)** — Federico: "you
+should perceive the bent sheet in there, because sometimes it stays
+behind". The outline, looked at edge by edge, showed it can: the inner
+face runs whole from one true cap to the other (flange, inner arc r3 of
+90°, flange); the outer arc shows only 30° before it enters the stub; the
+third cap is the stub's side. So the "no flange lengths" bullet above is
+withdrawn, and what is built is:
+
+- `SectionReading.bends: list[SectionBend]` — as decided above: angle (the
+  longer sweep of the pair: an arc can be covered, never lengthened), inner
+  radius, centre. Filled whenever the thickness is known.
+- **One-face reading.** When the two faces cannot be walked together,
+  `read_section` looks for exactly one face that runs whole between two
+  caps: line-arc-line alternating, every arc tangent to its lines and with
+  its concentric partner at distance t somewhere in the outline (partly
+  covered is fine). A face line is as long as the centerline's (tangent
+  points lie on the same radius); the centerline arc is halfway between the
+  arc and its partner; the rest is the same composition as the two-face
+  walk (`_compose`, shared). Zero or two such faces: centerline empty and a
+  note — never a choice. A note says the profile was read from one face.
+- Still not snapbend's: which part of the outline is the stub. Hidden
+  (dashed) edges of a box section are not read: `read_section` gets the
+  outline only (TODO).
+
+On the drawing that raised it: 23.5 + 33.5 on the centerline (25 × 35
+outside), one bend of 90°, inner radius 3 — what pippo's flat assumed. The
+test is a synthetic outline of the same shape (`_l_with_stub`), never the
+client drawing. `SectionBend` added → **0.9.0**.
+

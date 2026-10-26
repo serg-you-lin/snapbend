@@ -188,5 +188,68 @@ class TestReadSection(unittest.TestCase):
         self.assertAlmostEqual(reading.pure_arc_angle_deg, 2 * half_angle, delta=1e-3)
 
 
+
+def _l_with_stub():
+    """L 25 x 35 esterni, t=3, raggio interno 3, col moncherino non piegato
+    dell'ala da 25 disegnato nello stesso contorno (MAP.md D74): un
+    rettangolo 25 x 3 che copre lo spigolo. L'arco esterno si vede solo per
+    30°, poi entra nel moncherino; il lato sinistro del moncherino è un
+    terzo tappo."""
+    x_cut = 6.0 - 6.0 * math.cos(math.radians(30.0))     # dove l'arco esterno entra nel moncherino
+    return [
+        {"type": "line", "start": (0.0, 0.0), "end": (25.0, 0.0)},
+        {"type": "line", "start": (25.0, 0.0), "end": (25.0, 3.0)},     # tappo, fine ala da 25
+        {"type": "line", "start": (25.0, 3.0), "end": (6.0, 3.0)},
+        {"type": "arc", "center": (6.0, 6.0), "radius": 3.0, "start_angle": 180.0, "end_angle": 270.0},
+        {"type": "line", "start": (3.0, 6.0), "end": (3.0, 35.0)},
+        {"type": "line", "start": (3.0, 35.0), "end": (0.0, 35.0)},     # tappo, fine ala da 35
+        {"type": "line", "start": (0.0, 35.0), "end": (0.0, 6.0)},
+        {"type": "arc", "center": (6.0, 6.0), "radius": 6.0, "start_angle": 180.0, "end_angle": 210.0},
+        {"type": "line", "start": (x_cut, 3.0), "end": (0.0, 3.0)},
+        {"type": "line", "start": (0.0, 3.0), "end": (0.0, 0.0)},       # lato del moncherino
+    ]
+
+
+class TestSectionWithStub(unittest.TestCase):
+    """MAP.md D74: il contorno ha più della sezione; la lamiera piegata si
+    legge dalla faccia che corre intera fra i due tappi veri."""
+
+    def test_profile_read_from_the_whole_face(self):
+        for seed in range(10):
+            entities = _l_with_stub()
+            random.Random(seed).shuffle(entities)
+            reading = read_section(entities)
+            with self.subTest(seed=seed):
+                self.assertTrue(reading.is_bent, reading.notes)
+                self.assertAlmostEqual(reading.thickness, 3.0, delta=1e-3)
+                # mezzeria apice-apice: 25 - 1.5 e 35 - 1.5
+                self.assertEqual(sorted(reading.centerline_segments), [23.5, 33.5])
+                self.assertIn([round(a) % 360 for a in reading.angles], ([90], [270]))
+                self.assertTrue(any("one face" in n for n in reading.notes))
+
+    def test_bend_read_even_if_the_outer_arc_is_covered(self):
+        reading = read_section(_l_with_stub())
+        self.assertEqual(len(reading.bends), 1)
+        bend = reading.bends[0]
+        self.assertAlmostEqual(bend.angle, 90.0, delta=1e-6)
+        self.assertAlmostEqual(bend.inner_radius, 3.0, delta=1e-6)
+
+    def test_bends_also_on_a_clean_section(self):
+        d = Section.default("U", [60.0, 110.0, 60.0], [90.0, 90.0], 3.0)
+        reading = read_section(d.section().entities)
+        self.assertEqual([round(b.angle) for b in reading.bends], [90, 90])
+        self.assertFalse(any("one face" in n for n in reading.notes))
+
+    def test_no_whole_face_is_a_note(self):
+        # senza la faccia interna intera (spigolo vivo dentro) non si sceglie:
+        # nota, mezzeria vuota, la piega letta resta
+        entities = [e for e in _l_with_stub() if not (e["type"] == "arc" and e["radius"] == 3.0)]
+        entities += [{"type": "line", "start": (6.0, 3.0), "end": (3.0, 3.0)},
+                     {"type": "line", "start": (3.0, 3.0), "end": (3.0, 6.0)}]
+        reading = read_section(entities)
+        self.assertEqual(reading.centerline_segments, [])
+        self.assertTrue(any("one face" in n for n in reading.notes))
+        self.assertEqual(reading.bends, [])
+
 if __name__ == "__main__":
     unittest.main()

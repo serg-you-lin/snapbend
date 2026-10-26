@@ -53,15 +53,12 @@ lettura da confermare:
    quelli di snapbend tocca a pippo; il `promote` chiesto a topo per
    questo non serve. Il testo del richiamo non entra in `Hole` (è
    notazione del foglio).
-3. *`read_section` legge il certo e segnala il resto* — **smistata (26
-   ottobre, MAP.md D74), da implementare.** Il terzo tappo è il moncherino
-   rimasto dritto, disegnato nello stesso contorno della L. Entra: ogni
-   coppia di archi concentrici a distanza t è una piega, con angolo e
-   raggio interno, anche quando la mezzeria non si ricostruisce. Non si
-   danno le lunghezze delle ali in quel caso (servono le altre viste).
-   Dire quale tratto è il moncherino è di snapdraw. Test: un contorno
-   sintetico L + moncherino costruito con `Section`/topo, mai il disegno
-   del cliente.
+3. *`read_section` legge il certo e segnala il resto* — **smistata e
+   fatta (26 ottobre, MAP.md D74).** Il terzo tappo è il moncherino
+   rimasto dritto. `read_section` ora legge la lamiera da una faccia sola
+   quando corre intera fra due tappi (lunghezze comprese), e dà sempre
+   `bends` (angolo, raggio interno) per ogni coppia di archi. Quale tratto
+   è il moncherino resta di snapdraw.
 4. *Due pezzi piegati letti come non piegati* — prima un'indagine, poi si vede di chi è.
 
 Aperti dallo smistamento, da fare quando c'è tempo:
@@ -73,6 +70,11 @@ Aperti dallo smistamento, da fare quando c'è tempo:
   punto oltre la linea di piega; la zona dove il foro si deforma (raggio +
   spessore dalla piega, regola di processo) non la giudica nessuno. Con un
   accorciamento misurato il raggio non è noto: va deciso da dove prenderlo.
+- **Spigoli nascosti in sezione** (D74): in uno scatolato la lamiera
+  piegata che sta dietro si vede tratteggiata. `read_section` riceve solo
+  il contorno; leggere anche gli spigoli tratteggiati vuol dire decidere
+  chi glieli passa (snapdraw li etichetta, `find_sections` li dovrebbe
+  raccogliere).
 
 
 ## Sezioni di lamiera in una tavola a viste (MAP.md D69)
