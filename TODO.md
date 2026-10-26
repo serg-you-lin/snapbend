@@ -53,8 +53,15 @@ lettura da confermare:
    quelli di snapbend tocca a pippo; il `promote` chiesto a topo per
    questo non serve. Il testo del richiamo non entra in `Hole` (è
    notazione del foglio).
-3. *`read_section` legge il certo e segnala il resto* — tocca la lettura
-   della sezione, che è di snapbend; il caso di prova è nel TODO di pippo.
+3. *`read_section` legge il certo e segnala il resto* — **smistata (26
+   ottobre, MAP.md D74), da implementare.** Il terzo tappo è il moncherino
+   rimasto dritto, disegnato nello stesso contorno della L. Entra: ogni
+   coppia di archi concentrici a distanza t è una piega, con angolo e
+   raggio interno, anche quando la mezzeria non si ricostruisce. Non si
+   danno le lunghezze delle ali in quel caso (servono le altre viste).
+   Dire quale tratto è il moncherino è di snapdraw. Test: un contorno
+   sintetico L + moncherino costruito con `Section`/topo, mai il disegno
+   del cliente.
 4. *Due pezzi piegati letti come non piegati* — prima un'indagine, poi si vede di chi è.
 
 Aperti dallo smistamento, da fare quando c'è tempo:

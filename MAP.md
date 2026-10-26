@@ -1680,3 +1680,30 @@ included. The "just the drawing" part, no: a section gives thickness and
 legs, but the width, each flange's outline and its holes are in the other
 views, and reading those is snapdraw's. The single "drawing → development"
 call belongs to whoever knows both — pippo, which is what pippo is.
+
+### D74 — pippo request 3, triaged: when the profile cannot be walked, `read_section` still returns each bend it can read on its own ✅ decided, to implement (26 Oct 2026)
+
+pippo asked (its `TODO.md`, `## Richieste a snapbend`, 3) that
+`read_section` read what is certain and flag the rest. Its case: a section
+whose ring has three thickness-long caps instead of two, so the walk stops
+("expected 2 end caps, found 3") and the reading says only "bent, t=3".
+Federico on what the third cap is: the stub of the sheet that stays unbent
+— seen from the section's side it is straight, and it is drawn in the same
+outline as the bent L. So the ring is two depths of the same part
+projected onto one contour, not a section that is wrong.
+
+- **Enters.** Facts that need no walk of the whole ring. Each concentric
+  arc pair whose radii differ by the thickness is one bend: its angle (the
+  arcs' sweep) and inner radius are read there, whatever else the ring
+  holds. `SectionReading` gets them as a list, one entry per pair, filled
+  also when the centerline is not recovered; the note keeps saying why it
+  was not (how many caps, how many face chains). pippo stops assuming 90°
+  from axis-aligned legs.
+- **Not given when the walk fails: flange lengths.** With three caps,
+  which straight run is a flange and which is the stub is not in the ring:
+  it needs the other views. Returning lengths there would be a guess.
+- **No — not snapbend's.** Telling which part of the outline is the stub
+  (and so cleaning the ring until it walks) is labelling the drawing:
+  snapdraw's, as pippo itself wrote (its request 1 to snapdraw). A sharp
+  corner with no radius drawn has no arc pair: no bend is read there, and
+  the note says so.
