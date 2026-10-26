@@ -8,7 +8,7 @@ python tests/gen_index.py
 
 What this is: the lookup table of *what already exists* in the package, down to internal helpers. `docs/API.md` documents the public surface (`snapbend.<name>`) with full cards; this file lists every module-level function and class so nothing gets rewritten because it was not found. Signatures and docstring lines come straight from the source, so they cannot drift.
 
-`30` modules · `99` module-level functions · `22` classes · `4557` lines of code.
+`30` modules · `99` module-level functions · `23` classes · `4632` lines of code.
 
 Sections: [Lookup](#lookup) · [Duplicate names](#duplicate-names) · [Dependency rule](#dependency-rule) · [By module](#by-module) · [Internal dependencies](#internal-dependencies)
 
@@ -23,15 +23,15 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_arc_point` | func | `snapbend/rules/read_section.py:113` |  |
 | `_assign_to_part` | func | `snapbend/flat/detect.py:617` | Scrive `ce` nel cluster che la contiene; False se nessuno la contiene: |
 | `_belongs_to_cluster` | func | `snapbend/flat/detect.py:602` | Un'entità aperta (marking/bending) appartiene al cluster se la sua |
-| `Bend` | class | `snapbend/core/bend.py:103` | Una singola piega fra due flange consecutive. |
+| `Bend` | class | `snapbend/core/bend.py:104` | Una singola piega fra due flange consecutive. |
 | `bend_allowance_din6935` | func | `snapbend/rules/deduction.py:76` | Lunghezza dell'asse neutro dentro la piega, con K stimato DIN 6935. |
 | `bend_deduction` | func | `snapbend/rules/deduction.py:49` | Accorciamento di piega, formula della fibra neutra. |
 | `_bend_lines` | func | `snapbend/io/dxf.py:302` | Una riga per piega nell'header — gli stessi numeri che dice |
 | `_bending_line` | func | `snapbend/flat/detect.py:293` |  |
 | `_bending_line_from_data` | func | `snapbend/flat/detect.py:731` |  |
 | `BendingLine` | class | `snapbend/flat/model/bending_line.py:22` |  |
-| `BendResult` | class | `snapbend/core/bend.py:168` | Esito del calcolo di UNA piega dentro `BentProfile.develop()` (o di |
-| `BentProfile` | class | `snapbend/core/bend.py:200` | Profilo piegato: N flange (quote a MEZZERIA) unite da N-1 pieghe. |
+| `BendResult` | class | `snapbend/core/bend.py:169` | Esito del calcolo di UNA piega dentro `BentProfile.develop()` (o di |
+| `BentProfile` | class | `snapbend/core/bend.py:257` | Profilo piegato: N flange (quote a MEZZERIA) unite da N-1 pieghe. |
 | `Calibration` | class | `snapbend/rules/deduction.py:237` | Una calibrazione = i dati di calcolo di un'officina. |
 | `_canonical` | func | `snapbend/rules/read_section.py:413` | A section reads the same from either end. Pick a deterministic |
 | `_cap` | func | `snapbend/model/section.py:416` |  |
@@ -70,7 +70,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_ensure_detected` | func | `snapbend/flat/detect.py:33` | `cluster.detected`, creandolo alla prima scrittura. |
 | `_entities_bbox` | func | `snapbend/io/dxf.py:199` | Bbox degli entity grezzi (linee/archi, schema `FlatGeometry.entities`) |
 | `_entity` | func | `snapbend/drawing/sections.py:87` | Segmento nativo di topo -> entità dello schema di `read_section()` |
-| `estimate_k_factor` | func | `snapbend/core/bend.py:83` | Stima un K-factor di partenza da materiale + rapporto R/T, secondo la |
+| `estimate_k_factor` | func | `snapbend/core/bend.py:84` | Stima un K-factor di partenza da materiale + rapporto R/T, secondo la |
 | `export_part` | func | `snapbend/human_layer.py:66` | Esporta un pezzo su un UNICO file DXF a livelli (Fase 3, MAP.md D32): |
 | `external_flanges_to_centerline` | func | `snapbend/rules/deduction.py:157` | Converte l'intero elenco di flange (come lo si passerebbe a |
 | `external_to_centerline_deduction` | func | `snapbend/rules/deduction.py:89` | Converte un accorciamento riferito alle quote esterne (come nei .bnc |
@@ -82,6 +82,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `find_sections` | func | `snapbend/drawing/sections.py:44` | Tutti i contorni chiusi di `result` che `read_section()` dice lamiera |
 | `FlangeFace` | class | `snapbend/model/section.py:78` | Per una flangia: la faccia ESTERNA (convessa) se è coerente da un |
 | `FlangeQuote` | class | `snapbend/model/section.py:92` | La quota da disegnare per una flangia nella vista in sezione |
+| `FlatFlange` | class | `snapbend/core/bend.py:202` | Una flangia di `BentProfile` sullo sviluppo (MAP.md D72). |
 | `FlatGeometry` | class | `snapbend/model/geometry.py:81` | Sviluppo piano di una forma sviluppabile — output di Cone.develop() / |
 | `_fmt` | func | `snapbend/model/section.py:63` |  |
 | `_handle_engrave_closed` | func | `snapbend/flat/detect.py:590` |  |
@@ -115,8 +116,8 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_recover_centerline` | func | `snapbend/rules/read_section.py:340` | Returns (segments, angles, pure_arc_radius, pure_arc_angle_deg) - the |
 | `_RecoverError` | class | `snapbend/rules/read_section.py:336` |  |
 | `RenderContour` | class | `snapbend/flat/model/render.py:21` |  |
-| `resolve_calibration` | func | `snapbend/core/bend.py:339` | Nome stringa -> `Calibration` caricata, oggetto già risolto -> se |
-| `resolve_facet_bend` | func | `snapbend/core/bend.py:350` | Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla |
+| `resolve_calibration` | func | `snapbend/core/bend.py:408` | Nome stringa -> `Calibration` caricata, oggetto già risolto -> se |
+| `resolve_facet_bend` | func | `snapbend/core/bend.py:419` | Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla |
 | `_result_arcs` | func | `snapbend/flat/detect.py:374` | Ogni arco del risultato: ogni curva è contorno di un cluster o sta in |
 | `Section` | class | `snapbend/model/section.py:110` |  |
 | `SectionReading` | class | `snapbend/rules/read_section.py:88` |  |
@@ -175,19 +176,21 @@ _snapbend/core_
 
 No module-level function or class.
 
-#### `snapbend/core/bend.py` — 404 lines
+#### `snapbend/core/bend.py` — 473 lines
 
 _snapbend/core/bend.py_
 
-- `estimate_k_factor(material: str, radius: float, thickness: float) -> float` — L83 — Stima un K-factor di partenza da materiale + rapporto R/T, secondo la
-- **class** `Bend` — L103 — Una singola piega fra due flange consecutive.
+- `estimate_k_factor(material: str, radius: float, thickness: float) -> float` — L84 — Stima un K-factor di partenza da materiale + rapporto R/T, secondo la
+- **class** `Bend` — L104 — Una singola piega fra due flange consecutive.
   - methods: `from_included`, `bend_allowance`, `centerline_setback`, `outside_setback`, `inside_setback`
-- **class** `BendResult` — L168 — Esito del calcolo di UNA piega dentro `BentProfile.develop()` (o di
+- **class** `BendResult` — L169 — Esito del calcolo di UNA piega dentro `BentProfile.develop()` (o di
   - methods: `to_dict`
-- **class** `BentProfile` — L200 — Profilo piegato: N flange (quote a MEZZERIA) unite da N-1 pieghe.
+- **class** `FlatFlange` — L202 — Una flangia di `BentProfile` sullo sviluppo (MAP.md D72).
+  - methods: `position`
+- **class** `BentProfile` — L257 — Profilo piegato: N flange (quote a MEZZERIA) unite da N-1 pieghe.
   - methods: `_resolve_calibration`, `develop`
-- `resolve_calibration(calibration)` — L339 — Nome stringa -> `Calibration` caricata, oggetto già risolto -> se
-- `resolve_facet_bend(calibration, thickness: float, angle_deg: float, explicit_radius: Optional[float], explicit_k: Optional[float], material: str)` — L350 — Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla
+- `resolve_calibration(calibration)` — L408 — Nome stringa -> `Calibration` caricata, oggetto già risolto -> se
+- `resolve_facet_bend(calibration, thickness: float, angle_deg: float, explicit_radius: Optional[float], explicit_k: Optional[float], material: str)` — L419 — Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla
 
 #### `snapbend/core/cone.py` — 355 lines
 
@@ -378,7 +381,7 @@ _snapbend/model_
 
 No module-level function or class.
 
-#### `snapbend/model/geometry.py` — 144 lines
+#### `snapbend/model/geometry.py` — 150 lines
 
 _snapbend/model/geometry.py_
 

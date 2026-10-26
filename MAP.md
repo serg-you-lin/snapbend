@@ -1594,3 +1594,47 @@ the risk D140 stopped in topo. It also keeps D69's boundary: snapbend never
 imports snapdraw, so a request that hands snapbend "what snapdraw read" has
 to arrive in snapbend's own terms (positions, diameters, flanges), with the
 consumer doing the translation.
+
+### D72 — pippo request 1, triaged: a flange point onto the development enters; reading views, moving geometry, composing the outline do not ✅ (26 Oct 2026)
+
+pippo asked (its `TODO.md`, `## Richieste a snapbend`, 1) for "features onto
+the development": given a bent section, the face-on views of its flanges
+and the features snapdraw read there, place each feature on its flange and
+carry it onto the flat. Its prototype (`pippo/lab/flat_L.py`) does four
+jobs; D71 sorts them:
+
+- **Enters.** Where a point of a flange, dimensioned on the bent part,
+  lands on the development. That is a sheet-metal fact: on a flange's
+  straight part the part is rigid, so the distance passes unchanged; what
+  changes across a bend is the deduction. A distance taken from the outer
+  face of the neighbouring flange (its outer virtual sharp, the external
+  dimension) pays it; one from the flange's own free edge does not.
+  snapbend computed this but only said it through `flat.entities` dicts,
+  which pippo had to index by hand (`entities[1]["start"][0]`).
+  - `BendResult.position`: the bend line's `u` along the development
+    (`BentProfile` only; `None` for `Cone`/`Cylinder`).
+  - `FlatGeometry.flanges: list[FlatFlange]` — `start`/`end` (the flange's
+    stretch between bend lines), `external`, `origin` (the `u` of the outer
+    virtual sharp on the `start` side: `start − setback − (T/2)·tan(a/2)`,
+    the same radius-free offset as D28).
+  - `FlatFlange.position(distance, measured_from="start"|"end") -> u`;
+    `ValueError` if `u` falls outside `[start, end]`, past the bend line.
+  `u` is the development coordinate, the same for both orientations. The
+  input is numbers (flange, distance, reference), never a snapdraw type:
+  snapbend does not import snapdraw (D71).
+- **No — snapdraw's / pippo's.** Which view shows which flange, on which
+  side the outer face lies, which feature sits on which flange: reading the
+  sheet.
+- **No — topo's** (pippo already asked it). Rigid motion/mirror of
+  segments, clipping the covered part of a flange, contours cancelling on
+  the bend line.
+- **No — stays with pippo.** Composing the development's outline from the
+  views, and what to do with a hole close to a bend: snapbend refuses only
+  a point past the bend line, it does not judge the deformation zone (the
+  radius is unknown when the deduction is measured).
+
+Checked against pippo's case with the officina calibration (outside the
+repo): 54.778 long, bend at u=22.389, the Ø6 at 44.778 (25 from flange a's
+outer face), the Ø9 at 15 — the prototype's numbers. Tests use
+`tests/data/misurata_esempio.json` (external deduction 5 at t=3, 90°), so
+every expected value is checkable by hand. Public names added → **0.8.0**.

@@ -172,7 +172,8 @@ decide l'accorciamento di ogni piega dalla cava (MAP.md D33) —
 `"default"` funziona senza configurare niente.
 
 - **`.develop() -> FlatGeometry`** — con `flat.bends: list[BendResult]`
-  popolato (uno per piega). **Mutates**: niente. **Raises**:
+  (una per piega) e `flat.flanges: list[FlatFlange]` (una per flangia)
+  popolati. **Mutates**: niente. **Raises**:
   `ValueError` — meno di 2 flange, `len(bends) != len(flanges)-1`, una
   flangia ≤0, `thickness`/`width` ≤0, `orientation` non valida, un
   `bend.angle` fuori `(0, 180)`, un `bend.radius` ≤0 se dato, o una
@@ -385,6 +386,7 @@ sec.to_dxf("sezione_L.dxf")
 FlatGeometry(
     entities: list[dict], label: str = "", meta: dict = {},
     reference_entities: list[dict] = [], bends: list["BendResult"] = [],
+    flanges: list["FlatFlange"] = [],
 )
 ```
 
@@ -487,8 +489,41 @@ dict sparsi.
 | `fallback` | `bool` | `True` se c'erano misurati per lo spessore ma non per questa combinazione |
 | `k_factor` | `float \| None` | il K usato (`None` per `misurato`/`inside_sum`) |
 | `bend_allowance` | `float` | materiale AGGIUNTO da questa piega — **`Cone`/`Cylinder` solo**, sempre `0.0` per `BentProfile` (lì la linea di piega è unica all'apice) |
+| `position` | `float \| None` | dove sta la linea di piega lungo lo sviluppo (`u`, vedi `FlatFlange`) — **`BentProfile` solo**, `None` per `Cone`/`Cylinder` (MAP.md D72) |
 
 `.to_dict()` per serializzare (usato da chi scrive metadati DXF).
+
+### `FlatFlange` — una riga di `BentProfile.develop().flanges` (MAP.md D72)
+
+Porta sullo sviluppo un punto di una flangia quotato sul pezzo piegato
+(un foro, un'asola). `u` è la coordinata lungo lo sviluppo: `0` al bordo
+libero della prima flangia, `total_length` a quello dell'ultima — la
+stessa con `orientation="vertical"`, che scambia solo gli assi del
+disegno. La direzione lungo la piega non cambia: la porta il chiamante.
+
+| campo | tipo | significato |
+|---|---|---|
+| `index` | `int` | posizione nella lista delle flange |
+| `start`, `end` | `float` | il tratto di sviluppo di questa flangia, fra le linee di piega adiacenti (o i bordi liberi) |
+| `external` | `float` | quota esterno-esterno (apice virtuale delle facce esterne) |
+| `origin` | `float` | `u` dell'apice esterno dal lato `start` (il bordo libero, se è la prima) |
+
+- **`.position(distance, measured_from="start") -> float`** — `u` del
+  punto a `distance` dalla faccia esterna della flangia precedente
+  (`"start"`) o seguente (`"end"`); dal bordo libero se da quel lato non
+  c'è piega. Una quota presa dalla flangia vicina paga l'accorciamento,
+  una presa dal bordo libero no. **Raises**: `ValueError` — `measured_from`
+  non valido, o il punto cade fuori da `[start, end]` (oltre la linea di
+  piega). Un punto vicino alla piega si deforma: cosa farne lo decide il
+  chiamante.
+
+```python
+flat = develop_from_external_flanges([25, 35], [Bend(angle=90)], thickness=3, width=420)
+a, b = flat.flanges
+b.position(25)                    # foro a 25 dalla faccia esterna di a
+a.position(10, measured_from="end")
+flat.bends[0].position            # la linea di piega
+```
 
 ### `DeductionInfo` — ritorno di `Calibration.deduction_detail()`
 

@@ -2,7 +2,8 @@ import math
 import os
 import unittest
 
-from snapbend import Bend, BentProfile, Calibration, estimate_k_factor, MATERIAL_K_FACTORS
+from snapbend import (Bend, BentProfile, Calibration, develop_from_external_flanges,
+                      estimate_k_factor, MATERIAL_K_FACTORS)
 
 ESEMPIO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
@@ -259,6 +260,62 @@ class TestBentProfileValidation(unittest.TestCase):
         self.assertEqual(b.rule, "din6935")     # default = stima DIN dal r/s
         self.assertIn("raggio 2 = spessore", b.source)
         self.assertIn("nessuna cava nota", b.source)
+
+
+class TestFlatFlange(unittest.TestCase):
+    """MAP.md D72: un punto di un'ala, quotato sul pezzo piegato, portato
+    sullo sviluppo. Calibrazione d'esempio: accorciamento esterno 5 per
+    t=3 a 90°, quindi L di 25+35 = 55, linea di piega a 25 − 1.5 − 1 = 22.5."""
+
+    def setUp(self):
+        cal = Calibration.load("misurata_esempio", folder=ESEMPIO)
+        self.flat = develop_from_external_flanges(
+            [25, 35], [Bend(angle=90)], thickness=3, width=420, calibration=cal)
+        self.a, self.b = self.flat.flanges
+
+    def test_bend_line_and_spans(self):
+        self.assertAlmostEqual(self.flat.meta["total_length"], 55.0, places=9)
+        self.assertAlmostEqual(self.flat.bends[0].position, 22.5, places=9)
+        self.assertEqual((self.a.start, self.b.end), (0.0, self.flat.meta["total_length"]))
+        self.assertAlmostEqual(self.a.end, 22.5, places=9)
+        self.assertAlmostEqual(self.b.start, 22.5, places=9)
+        self.assertEqual((self.a.external, self.b.external), (25.0, 35.0))
+
+    def test_from_free_edge_takes_no_deduction(self):
+        # dal bordo libero la distanza passa uguale, da entrambi i lati
+        self.assertAlmostEqual(self.a.position(10), 10.0, places=9)
+        self.assertAlmostEqual(self.b.position(10, measured_from="end"), 45.0, places=9)
+
+    def test_across_the_bend_takes_the_deduction(self):
+        # dalla faccia esterna dell'ala vicina: si paga l'accorciamento (5)
+        self.assertAlmostEqual(self.b.position(25), 25 + 25 - 5, places=9)
+        self.assertAlmostEqual(self.a.position(10, measured_from="end"), 25 - 10, places=9)
+
+    def test_start_and_end_agree(self):
+        self.assertAlmostEqual(self.b.position(12), self.b.position(35 - 12, measured_from="end"), places=9)
+
+    def test_point_past_the_bend_line_is_refused(self):
+        with self.assertRaises(ValueError):
+            self.a.position(1, measured_from="end")   # u = 24 > 22.5
+        with self.assertRaises(ValueError):
+            self.b.position(1)                        # u = 21 < 22.5
+        with self.assertRaises(ValueError):
+            self.a.position(1, measured_from="outer")
+
+    def test_middle_flange_and_orientation(self):
+        # tre ali: quella in mezzo paga un accorciamento per lato; `vertical`
+        # scambia gli assi del disegno, non la u
+        for orientation in ("horizontal", "vertical"):
+            cal = Calibration.load("misurata_esempio", folder=ESEMPIO)
+            flat = develop_from_external_flanges(
+                [25, 40, 30], [Bend(angle=90), Bend(angle=90)], thickness=3, width=100,
+                calibration=cal, orientation=orientation)
+            middle = flat.flanges[1]
+            self.assertAlmostEqual(middle.position(10), 25 - 5 + 10, places=9)
+            self.assertAlmostEqual(flat.flanges[2].position(0, measured_from="end"),
+                                   flat.meta["total_length"], places=9)
+            self.assertAlmostEqual(flat.meta["total_length"], 25 + 40 + 30 - 10, places=9)
+            self.assertEqual([b.position for b in flat.bends], [middle.start, middle.end])
 
 
 if __name__ == "__main__":

@@ -93,6 +93,10 @@ class FlatGeometry:
     bends:                 una BendResult per piega (solo da
                            BentProfile.develop()); dice per ogni piega
                            l'accorciamento usato e da dove viene
+    flanges:               una FlatFlange per flangia (solo da
+                           BentProfile.develop()): il suo tratto sullo
+                           sviluppo e `position()`, che ci porta un punto
+                           del pezzo piegato (MAP.md D72)
     """
     entities: List[Dict[str, Any]]
     label: str = ""
@@ -101,6 +105,8 @@ class FlatGeometry:
     # una BendResult per piega — popolata solo da BentProfile.develop(),
     # vuota per Cone / Cylinder (vedi snapbend/core/bend.py)
     bends: List[Any] = field(default_factory=list)
+    # una FlatFlange per flangia — come `bends`, solo da BentProfile.develop()
+    flanges: List[Any] = field(default_factory=list)
 
     # ------------------------------------------------------------------
     # Integrazione con topo — deleghe sottili a snapbend/io/dxf.py, che è

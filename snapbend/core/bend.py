@@ -65,6 +65,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 from ..model.geometry import FlatGeometry, swap_xy, _check_orientation
+from ..rules.deduction import centerline_to_external_flange
 
 # Fattori K indicativi per materiale, rapporto raggio/spessore "standard"
 # (R ≈ T) — dalla tabella di riferimento in COME_FUNZIONA.md. Usati SOLO
@@ -182,6 +183,7 @@ class BendResult:
     fallback:       bool            = False  # True se c'erano misurati per lo spessore ma non per questa combinazione
     k_factor:       Optional[float]  = None  # il fattore K usato (None per "misurato" / "inside_sum")
     bend_allowance: float           = 0.0    # BentProfile: sempre 0 (linea di piega unica all'apice). Cone/Cylinder sfaccettati: il materiale AGGIUNTO da questa faccetta
+    position:       Optional[float]  = None  # BentProfile: dove sta la linea di piega lungo lo sviluppo (u, da 0 al bordo libero della prima flangia). None per Cone/Cylinder
 
     def to_dict(self) -> dict:
         return {
@@ -194,6 +196,61 @@ class BendResult:
             "fallback": self.fallback,
             "k_factor": self.k_factor,
         }
+
+
+@dataclass
+class FlatFlange:
+    """Una flangia di `BentProfile` sullo sviluppo (MAP.md D72).
+
+    `u` è la coordinata lungo lo sviluppo: 0 al bordo libero della prima
+    flangia, `total_length` a quello dell'ultima — indipendente da
+    `orientation`, che scambia solo gli assi del disegno.
+
+    start/end: il tratto dello sviluppo che appartiene a questa flangia,
+               fra le linee di piega adiacenti (o i bordi liberi)
+    external:  la sua quota esterno-esterno (apice virtuale delle facce
+               esterne, come la dà un disegno)
+    origin:    la u dell'apice virtuale esterno dal lato `start` (il bordo
+               libero, se è la prima flangia): il punto da cui `position()`
+               misura
+    """
+    index:    int
+    start:    float
+    end:      float
+    external: float
+    origin:   float
+
+    def position(self, distance: float, measured_from: str = "start") -> float:
+        """Dove cade sullo sviluppo un punto di questa flangia (pezzo
+        piegato) che sta a `distance` da un suo riferimento.
+
+        measured_from: "start" — dalla faccia esterna della flangia
+                       precedente (dal bordo libero, se è la prima);
+                       "end" — dalla faccia esterna della flangia seguente
+                       (dal bordo libero, se è l'ultima).
+
+        Sulla parte dritta della flangia il pezzo è rigido: la distanza
+        passa uguale. Quello che cambia attraversando una piega è
+        l'accorciamento, già dentro `origin` — una quota presa dalla
+        flangia vicina lo paga, una presa dal bordo libero no.
+
+        Raises ValueError se il punto cade fuori dal tratto della flangia
+        (oltre la linea di piega: sta sull'altra flangia o nella piega).
+        Vicino alla piega il foro si deforma: decidere cosa farne è del
+        chiamante.
+        """
+        if measured_from == "start":
+            u = self.origin + distance
+        elif measured_from == "end":
+            u = self.origin + self.external - distance
+        else:
+            raise ValueError(f"measured_from deve essere 'start' o 'end', non {measured_from!r}.")
+        if not (self.start - 1e-9 <= u <= self.end + 1e-9):
+            raise ValueError(
+                f"flangia {self.index}: {distance:g} da '{measured_from}' cade a u={u:.3f}, "
+                f"fuori dal suo tratto [{self.start:.3f}, {self.end:.3f}] — oltre la linea di piega."
+            )
+        return u
 
 
 @dataclass
@@ -290,6 +347,7 @@ class BentProfile:
 
         cum = 0.0
         bend_positions: List[float] = []
+        flat_flanges: List[FlatFlange] = []
         for i, length in enumerate(self.flanges):
             setback_before = results[i - 1].setback if i > 0 else 0.0
             setback_after = results[i].setback if i < len(self.bends) else 0.0
@@ -299,9 +357,20 @@ class BentProfile:
                     f"flanges[{i}] ({length}) troppo corta per i raggi/angoli "
                     f"delle pieghe adiacenti."
                 )
+            # l'apice esterno sta (T/2)·tan(a/2) prima di quello a mezzeria,
+            # che sta `setback_before` prima dell'inizio del tratto (MAP.md D72)
+            angle_before = results[i - 1].angle if i > 0 else None
+            angle_after = results[i].angle if i < len(self.bends) else None
+            outer_shift = centerline_to_external_flange(0.0, self.thickness, angle_before, None)
+            flat_flanges.append(FlatFlange(
+                index=i, start=cum, end=cum + flat,
+                external=centerline_to_external_flange(length, self.thickness, angle_before, angle_after),
+                origin=cum - setback_before - outer_shift,
+            ))
             cum += flat
             if i < len(self.bends):
                 bend_positions.append(cum + results[i].bend_allowance / 2.0)
+                results[i].position = bend_positions[-1]
                 cum += results[i].bend_allowance
 
         total_length = cum
@@ -333,7 +402,7 @@ class BentProfile:
         }
 
         return FlatGeometry(entities=entities, label=self.label, meta=meta,
-                            bends=results)
+                            bends=results, flanges=flat_flanges)
 
 
 def resolve_calibration(calibration):

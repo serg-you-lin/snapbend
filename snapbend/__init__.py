@@ -43,7 +43,7 @@ except PackageNotFoundError:
 from .model.geometry import FlatGeometry, polar_point
 from .core.cone import Cone
 from .core.cylinder import Cylinder
-from .core.bend import Bend, BendResult, BentProfile, estimate_k_factor, MATERIAL_K_FACTORS
+from .core.bend import Bend, BendResult, BentProfile, FlatFlange, estimate_k_factor, MATERIAL_K_FACTORS
 from .rules.deduction import (
     Calibration, DeductionInfo, bend_deduction, k_din6935, deduction_din6935,
     TIPI_CLIENTE, tipo_cliente_coerente,
@@ -55,7 +55,7 @@ from .human_layer import develop_from_external_flanges, export_part
 
 __all__ = [
     "Cone", "Cylinder", "FlatGeometry", "polar_point",
-    "Bend", "BendResult", "BentProfile", "estimate_k_factor", "MATERIAL_K_FACTORS",
+    "Bend", "BendResult", "BentProfile", "FlatFlange", "estimate_k_factor", "MATERIAL_K_FACTORS",
     "Calibration", "DeductionInfo", "bend_deduction", "k_din6935", "deduction_din6935",
     "TIPI_CLIENTE", "tipo_cliente_coerente",
     "Section", "FlangeFace", "FlangeQuote", "read_section", "SectionReading", "SheetThicknessTable", "set_officina",

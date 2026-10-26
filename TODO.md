@@ -22,13 +22,29 @@ Ognuna si smista, mai in automatico:
 Chiedere non basta per entrare. Un "no, resta nel consumer" si scrive qui
 sotto col perché, così il consumer lo trova e non la richiede.
 
-In attesa (26 ottobre): pippo, 4 richieste (`../pippo/TODO.md`, sezione
-`## Richieste a snapbend`), non ancora smistate. Prima lettura, da
-confermare quando si smistano:
-1. *Feature sullo sviluppo* — portare un foro dalla faccia di un'ala allo
-   sviluppo con la calibrazione è processo: probabilmente entra, ma
-   l'ingresso va dato in termini di snapbend (ala, posizione, diametro,
-   riferimento), non come lettura di snapdraw.
+pippo, 4 richieste (`../pippo/TODO.md`, sezione
+`## Richieste a snapbend`); la 1 smistata, le altre con una prima
+lettura da confermare:
+1. *Feature sullo sviluppo* — **smistata e fatta (26 ottobre, MAP.md
+   D72): entra solo il riporto, il resto no.** Il riporto è
+   `flat.flanges[i].position(...)` e `flat.bends[i].position`. Il
+   prototipo (`../pippo/lab/flat_L.py`) fa quattro mestieri:
+   - **entra in snapbend**: dove cade sullo sviluppo un punto di un'ala,
+     dato come distanza da un riferimento del pezzo piegato (bordo libero
+     dell'ala, o faccia esterna dell'ala vicina = apice virtuale, quota
+     esterno-esterno) — è lì che si prende o no l'accorciamento. Oggi
+     snapbend lo sa ma non lo dice: pippo ricava lunghezza e linea di piega
+     da `flat.entities[0]["points"]` e `flat.entities[1]["start"]`
+     (dizionari sciolti). Serve: ogni piega con la sua posizione sullo
+     sviluppo, ogni ala col suo tratto piano, un riporto ala+distanza → u
+     che rifiuta un punto oltre la linea di piega. Input in numeri, non in
+     tipi di snapdraw (D71).
+   - **no, è di snapdraw/pippo**: quale vista mostra quale ala, da che lato
+     sta la faccia esterna, quale feature sta su quale ala.
+   - **no, è di topo** (già chiesto da pippo): moto rigido/specchio dei
+     segmenti, ritaglio dell'ala coperta, contorni che si annullano.
+   - **no, resta a pippo**: comporre il contorno dello sviluppo dalle viste
+     e scegliere cosa fare di un foro in zona di piega.
 2. *Lo sviluppo torna con i fori nell'overlay* — segue la 1; il layer
    `InnerContour` dipende da topo (`promote` di un contorno interno, già
    chiesto da pippo a topo).
