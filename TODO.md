@@ -3,6 +3,39 @@
 Unico posto per il lavoro aperto. Le decisioni e il perché stanno in
 `MAP.md`; qui non si ripetono, si rimanda con "vedi `MAP.md` D...".
 
+## Richieste dai consumer (MAP.md D71)
+
+I consumer (pippo, …) non scrivono qui: mettono le richieste nel loro
+`TODO.md`, sezione `## Richieste a snapbend` (cosa, perché, chi la usa, caso
+di prova). Raccoglierle: `grep -n -A40 "## Richieste a snapbend" ../*/TODO.md`.
+Ognuna si smista, mai in automatico:
+
+- **significato di processo della lamiera** (sviluppo, piega, deduzione,
+  sezione, foro da forare, svasatura) → nome pubblico con scheda in
+  `docs/API.md`, test e un D##;
+- **fatto geometrico** (vero anche senza lamiera) → `## Richieste a topo`;
+- **lettura del foglio** (viste, quote, notazione) → è di snapdraw, e
+  snapbend non lo importa: il consumer traduce in termini di snapbend;
+- **scelta del chiamante** (quale pezzo, per chi, colori/layer del suo file
+  di taglio) → resta nel consumer.
+
+Chiedere non basta per entrare. Un "no, resta nel consumer" si scrive qui
+sotto col perché, così il consumer lo trova e non la richiede.
+
+In attesa (26 ottobre): pippo, 4 richieste (`../pippo/TODO.md`, sezione
+`## Richieste a snapbend`), non ancora smistate. Prima lettura, da
+confermare quando si smistano:
+1. *Feature sullo sviluppo* — portare un foro dalla faccia di un'ala allo
+   sviluppo con la calibrazione è processo: probabilmente entra, ma
+   l'ingresso va dato in termini di snapbend (ala, posizione, diametro,
+   riferimento), non come lettura di snapdraw.
+2. *Lo sviluppo torna con i fori nell'overlay* — segue la 1; il layer
+   `InnerContour` dipende da topo (`promote` di un contorno interno, già
+   chiesto da pippo a topo).
+3. *`read_section` legge il certo e segnala il resto* — tocca la lettura
+   della sezione, che è di snapbend; il caso di prova è nel TODO di pippo.
+4. *Due pezzi piegati letti come non piegati* — prima un'indagine, poi si vede di chi è.
+
 
 ## Sezioni di lamiera in una tavola a viste (MAP.md D69)
 

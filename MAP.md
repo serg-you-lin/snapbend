@@ -1562,3 +1562,35 @@ each proved before writing (scripts kept out of the repo):
 Every other field kept as it was.
 
 Public fields of `BendingLine`, `Engraving`, `ClassifiedEntity` removed → **0.7.0**.
+
+### D71 — a consumer uses snapbend as it uses topo: read-only, and what is missing arrives as a request ✅ (26 Oct 2026)
+
+Federico, 26 October: "hai presente topo che accoglie le richieste di un
+consumer? voglio che puoi farlo anche tu". pippo had already written 4
+requests under `## Richieste a snapbend` in its `TODO.md`, with no way for
+snapbend to collect them. Same rule as topo D140 and snapdraw D42:
+
+1. From a session opened in a consumer, snapbend is **read-only**. The global
+   hook `~/.claude/hooks/library_guard.py` (outside the repo) now lists it
+   next to topo and snapdraw: it refuses Edit/Write/shell writes into this
+   repo from any other project, and at session start puts `docs/API.md`,
+   `docs/INDEX.md` and the titles of these decisions in the consumer's
+   context.
+2. The consumer adapts to the public surface: `snapbend.__all__`,
+   `snapbend.flat`, `snapbend.drawing` — what `docs/API.md` has a card for.
+   What is missing is a line in **its** `TODO.md`, section
+   `## Richieste a snapbend` (what, why, who uses it, test case); meanwhile
+   it writes it at home.
+3. A session opened here triages them (`TODO.md`, "Richieste dai consumer"):
+   a sheet-metal process meaning (development, bend, deduction, section,
+   hole to drill) enters with a test and a D##; a geometric fact goes to
+   topo (`## Richieste a topo`); a reading of the drawing sheet goes to
+   snapdraw; a production choice of the caller stays with the caller.
+   Asking is not enough to enter, and a "no" is written with its why.
+
+**Why.** snapbend is a library itself: if a consumer could write into it,
+every need of that consumer would become a snapbend name shaped like it —
+the risk D140 stopped in topo. It also keeps D69's boundary: snapbend never
+imports snapdraw, so a request that hands snapbend "what snapdraw read" has
+to arrive in snapbend's own terms (positions, diameters, flanges), with the
+consumer doing the translation.
