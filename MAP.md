@@ -1638,3 +1638,45 @@ repo): 54.778 long, bend at u=22.389, the Ø6 at 44.778 (25 from flange a's
 outer face), the Ø9 at 15 — the prototype's numbers. Tests use
 `tests/data/misurata_esempio.json` (external deduction 5 at t=3, 90°), so
 every expected value is checkable by hand. Public names added → **0.8.0**.
+
+### D73 — pippo request 2, triaged: the development's overlay already comes from snapbend's roles; no new API ✅ (26 Oct 2026)
+
+pippo asked (its `TODO.md`, `## Richieste a snapbend`, 2) that the
+development come back as a `Result` whose holes are snapbend `Hole`s in
+`cluster.detected` and whose bend is a `BendingLine`, built from snapdraw's
+reading without running `detect_flat` again — "it would lose callouts and
+hole types". Its prototype got the holes on `InnerContour`.
+
+Tried, outside the repo: a flat loaded with `topo.load_segments(...,
+role=...)` using **snapbend's** roles (`snapbend.flat.roles.HOLE`,
+`THREADED_HOLE`, `COUNTERSINK`, `BEND`) and passed to
+`snapbend.flat.heal_and_detect` comes back with one `Hole` per circle, each
+with its type and `source="labeled"`, a labelled `BendingLine`, and with
+`topo_dxf.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS)` on the
+layers `Hole`, `ThreadHole`, `Countersink`, `Bending`. The labelled lane
+(`_detect_labeled`) runs before the geometric one and the geometric one
+looks only at what is still unlabelled, so a type stated by the caller is
+never re-guessed. A circle with a role snapbend does not know (a snapdraw
+role string) is not structural: it stays in `loose` with its own role and
+layer — that is what the prototype saw.
+
+- **No new API.** The way in is the one D30/D67 already give every caller:
+  state the role with snapbend's vocabulary at load, run `heal_and_detect`.
+  Translating snapdraw's reading into snapbend's roles is pippo's: snapbend
+  does not import snapdraw (D71). pippo's request to topo to `promote` an
+  inner contour is not needed for this.
+- **No — not snapbend's.** A callout's text is notation on the sheet
+  (snapdraw's); `Hole` carries type and diameter, which is what the cut
+  needs.
+- **Gap found, enters later.** A countersink drawn as two concentric
+  circles both labelled `COUNTERSINK` comes back as two `Hole`s, with no
+  `outer_diameter`: the labelled lane does not pair concentric rings as
+  the geometric lane does. Tracked in `TODO.md`.
+
+Federico's question with it: could the development come out of snapbend by
+passing it just the drawing? The layers part, yes, already: whatever goes
+through snapbend's roles comes out on snapbend's layers, bend lines
+included. The "just the drawing" part, no: a section gives thickness and
+legs, but the width, each flange's outline and its holes are in the other
+views, and reading those is snapdraw's. The single "drawing → development"
+call belongs to whoever knows both — pippo, which is what pippo is.

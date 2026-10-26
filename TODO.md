@@ -45,12 +45,27 @@ lettura da confermare:
      segmenti, ritaglio dell'ala coperta, contorni che si annullano.
    - **no, resta a pippo**: comporre il contorno dello sviluppo dalle viste
      e scegliere cosa fare di un foro in zona di piega.
-2. *Lo sviluppo torna con i fori nell'overlay* — segue la 1; il layer
-   `InnerContour` dipende da topo (`promote` di un contorno interno, già
-   chiesto da pippo a topo).
+2. *Lo sviluppo torna con i fori nell'overlay* — **smistata (26 ottobre,
+   MAP.md D73): c'è già, nessuna API nuova.** Fori e piega caricati coi
+   ruoli di snapbend (`snapbend.flat.roles`) e passati a
+   `heal_and_detect` tornano `Hole` col loro tipo (`source="labeled"`) e
+   `BendingLine`, sui layer di snapbend. Tradurre i ruoli di snapdraw in
+   quelli di snapbend tocca a pippo; il `promote` chiesto a topo per
+   questo non serve. Il testo del richiamo non entra in `Hole` (è
+   notazione del foglio).
 3. *`read_section` legge il certo e segnala il resto* — tocca la lettura
    della sezione, che è di snapbend; il caso di prova è nel TODO di pippo.
 4. *Due pezzi piegati letti come non piegati* — prima un'indagine, poi si vede di chi è.
+
+Aperti dallo smistamento, da fare quando c'è tempo:
+- **Svasatura etichettata su due cerchi** (D73): due cerchi concentrici
+  entrambi `COUNTERSINK` tornano due `Hole` senza `outer_diameter`; la
+  lane etichettata deve accoppiarli come fa quella geometrica
+  (`_promote_geometric_holes`).
+- **Foro vicino alla piega** (D72): `FlatFlange.position` rifiuta solo un
+  punto oltre la linea di piega; la zona dove il foro si deforma (raggio +
+  spessore dalla piega, regola di processo) non la giudica nessuno. Con un
+  accorciamento misurato il raggio non è noto: va deciso da dove prenderlo.
 
 
 ## Sezioni di lamiera in una tavola a viste (MAP.md D69)
