@@ -1737,3 +1737,31 @@ outside), one bend of 90°, inner radius 3 — what pippo's flat assumed. The
 test is a synthetic outline of the same shape (`_l_with_stub`), never the
 client drawing. `SectionBend` added → **0.9.0**.
 
+
+### D75 — pippo request 4, triaged: a second part fused into the section's outline; separating parts is not snapbend's, reading the L that is left is ✅ decided, to implement (26 Oct 2026)
+
+pippo's request 4: two bent parts whose section is read as "not bent".
+Looked at edge by edge (the two drawings are mirror images): the end view
+holds an L, t=4, 110 × 78 outside (outer face 102, outer arc r8, 70; a
+4-long cap at each end) — consistent with the CAM development of 180.1 —
+**and a second part sitting in the corner, fused into the same outline**.
+It covers the L's inner face and the whole inner arc r4, which do not
+appear at all. Federico: "this may not be snapbend's: snapdraw's, or an
+assembly reader's". Split:
+
+- **Not snapbend's.** Telling that one outline holds two parts, and which
+  one is the sheet, is reading an assembly drawing — snapdraw or a future
+  assembly reader. pippo forwards it there.
+- **snapbend's, to implement — same pattern as D74** (an outline holding
+  more than the section, here another part instead of a stub):
+  1. *Thickness.* Face distances are weighted by how long the faces face
+     each other; here the block's top against the L's outer face (67.5,
+     overlapping 62) outweighs the two flanges (4, 40 + 10.5). A sheet's
+     thickness is one of the sheet table's: among candidates, the heaviest
+     **in the table** wins, the others go to a note.
+  2. *One-face reading with the partner arc wholly hidden.* The outer face
+     runs whole between two caps, but its arc has no partner. Which side
+     the sheet is on is known from the caps (each cap goes from the face
+     to the other face), so the centerline radius is `r ∓ t/2` without
+     seeing the partner. Expected here: centerline 108 + 76, angle 90,
+     outer radius 8.
