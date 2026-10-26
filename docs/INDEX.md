@@ -8,7 +8,7 @@ python tests/gen_index.py
 
 What this is: the lookup table of *what already exists* in the package, down to internal helpers. `docs/API.md` documents the public surface (`snapbend.<name>`) with full cards; this file lists every module-level function and class so nothing gets rewritten because it was not found. Signatures and docstring lines come straight from the source, so they cannot drift.
 
-`30` modules · `104` module-level functions · `24` classes · `4753` lines of code.
+`30` modules · `107` module-level functions · `24` classes · `4801` lines of code.
 
 Sections: [Lookup](#lookup) · [Duplicate names](#duplicate-names) · [Dependency rule](#dependency-rule) · [By module](#by-module) · [Internal dependencies](#internal-dependencies)
 
@@ -31,19 +31,20 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_bending_line_from_data` | func | `snapbend/flat/detect.py:731` |  |
 | `BendingLine` | class | `snapbend/flat/model/bending_line.py:22` |  |
 | `BendResult` | class | `snapbend/core/bend.py:169` | Esito del calcolo di UNA piega dentro `BentProfile.develop()` (o di |
-| `_bends` | func | `snapbend/rules/read_section.py:457` | Ogni coppia di archi concentrici a distanza `thickness` è una piega |
+| `_bends` | func | `snapbend/rules/read_section.py:485` | Ogni coppia di archi concentrici a distanza `thickness` è una piega |
 | `BentProfile` | class | `snapbend/core/bend.py:257` | Profilo piegato: N flange (quote a MEZZERIA) unite da N-1 pieghe. |
 | `Calibration` | class | `snapbend/rules/deduction.py:237` | Una calibrazione = i dati di calcolo di un'officina. |
-| `_canonical` | func | `snapbend/rules/read_section.py:534` | A section reads the same from either end. Pick a deterministic |
+| `_canonical` | func | `snapbend/rules/read_section.py:582` | A section reads the same from either end. Pick a deterministic |
 | `_cap` | func | `snapbend/model/section.py:416` |  |
+| `_cap_count` | func | `snapbend/rules/read_section.py:369` | Quante rette lunghe esattamente `thickness`: le testate di una lamiera. |
 | `centerline_to_external_flange` | func | `snapbend/rules/deduction.py:143` | Inversa di `external_to_centerline_flange`: da mezzeria a esterno-esterno. |
 | `_centroid` | func | `snapbend/flat/detect.py:671` | Baricentro esatto della curva chiusa; None se non racchiude area. |
-| `_chain_vertex` | func | `snapbend/rules/read_section.py:600` |  |
+| `_chain_vertex` | func | `snapbend/rules/read_section.py:648` |  |
 | `_check_orientation` | func | `snapbend/model/geometry.py:40` |  |
 | `_circle` | func | `snapbend/flat/detect.py:387` | (diametro, centro) se il contorno è un cerchio per `topo.geometry.contour_shape`, |
 | `_circular_inners` | func | `snapbend/flat/detect.py:397` | (contour, diameter, center) per ogni inner geometricamente circolare. |
 | `ClassifiedEntity` | class | `snapbend/flat/model/classified.py:14` | Risultato della classificazione di una entità da detect_flat(). |
-| `_compose` | func | `snapbend/rules/read_section.py:431` | Tratti dritti della mezzeria + archi -> segmenti apice-apice e angoli |
+| `_compose` | func | `snapbend/rules/read_section.py:459` | Tratti dritti della mezzeria + archi -> segmenti apice-apice e angoli |
 | `Cone` | class | `snapbend/core/cone.py:140` |  |
 | `_contours` | func | `snapbend/drawing/sections.py:59` | (contorno, cluster_ref) per ogni outer, inner e curva chiusa in loose. |
 | `Cylinder` | class | `snapbend/core/cylinder.py:79` |  |
@@ -58,14 +59,14 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_detect_holes` | func | `snapbend/flat/detect.py:358` | Lane geometrica: promuove a `Hole` i contorni interni circolari. |
 | `_detect_labeled` | func | `snapbend/flat/detect.py:179` |  |
 | `develop_from_external_flanges` | func | `snapbend/human_layer.py:35` | Come `BentProfile.develop()`, ma `external_flanges` sono quote |
-| `_direction` | func | `snapbend/rules/read_section.py:327` |  |
+| `_direction` | func | `snapbend/rules/read_section.py:344` |  |
 | `_dist` | func | `snapbend/rules/read_section.py:123` |  |
 | `DrawnSection` | class | `snapbend/drawing/sections.py:31` | Una sezione di lamiera trovata nella tavola. |
 | `_Edge` | class | `snapbend/rules/read_section.py:146` |  |
 | `_edge_end` | func | `snapbend/model/section.py:408` |  |
 | `_edge_start` | func | `snapbend/model/section.py:400` |  |
 | `_edge_to_entity` | func | `snapbend/model/section.py:420` |  |
-| `_endpoint_counts` | func | `snapbend/rules/read_section.py:564` |  |
+| `_endpoint_counts` | func | `snapbend/rules/read_section.py:612` |  |
 | `Engraving` | class | `snapbend/flat/model/engraving.py:29` |  |
 | `_engraving_from_closed` | func | `snapbend/flat/detect.py:546` |  |
 | `_engraving_from_open` | func | `snapbend/flat/detect.py:531` |  |
@@ -79,7 +80,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `external_to_centerline_flange` | func | `snapbend/rules/deduction.py:122` | Converte la lunghezza ESTERNO-ESTERNO di una flangia (apice virtuale |
 | `_extract_data` | func | `snapbend/flat/detect.py:683` |  |
 | `_extract_data_from_source` | func | `snapbend/flat/detect.py:716` | Dati di un'entità chiusa (`ClosedCurve`) letti sui suoi segmenti. |
-| `_face_pair_distances` | func | `snapbend/rules/read_section.py:291` | (distance, overlap) for lines that genuinely face each other |
+| `_face_pair_distances` | func | `snapbend/rules/read_section.py:308` | (distance, overlap) for lines that genuinely face each other |
 | `_faceted_sector_outline` | func | `snapbend/core/cone.py:102` | Perimetro del settore sfaccettato fra i vertici dati: N corde esterne, un |
 | `find_sections` | func | `snapbend/drawing/sections.py:44` | Tutti i contorni chiusi di `result` che `read_section()` dice lamiera |
 | `FlangeFace` | class | `snapbend/model/section.py:78` | Per una flangia: la faccia ESTERNA (convessa) se è coerente da un |
@@ -90,7 +91,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_handle_engrave_closed` | func | `snapbend/flat/detect.py:590` |  |
 | `_handle_engrave_closed_loose` | func | `snapbend/flat/detect.py:577` | Come _handle_engrave_open ma per una traccia engrave già chiusa |
 | `_handle_engrave_open` | func | `snapbend/flat/detect.py:561` | Una traccia engrave aperta va al cluster che la contiene |
-| `_has_concentric_pair` | func | `snapbend/rules/read_section.py:340` |  |
+| `_has_concentric_pair` | func | `snapbend/rules/read_section.py:357` |  |
 | `heal_and_detect` | func | `snapbend/flat/pipeline.py:18` | heal() + detect_flat(). `detect_flat()` viene saltato se heal() non produce |
 | `Hole` | class | `snapbend/flat/model/hole.py:28` |  |
 | `_hole_from_contour` | func | `snapbend/flat/detect.py:469` |  |
@@ -100,25 +101,25 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_labeled_hole_from_contour` | func | `snapbend/flat/detect.py:486` | `Contour` con ruolo foro da role_rules → `Hole(source="labeled")`. |
 | `_meta_lines` | func | `snapbend/io/dxf.py:292` |  |
 | `_mid` | func | `snapbend/rules/read_section.py:127` |  |
-| `_mode` | func | `snapbend/rules/read_section.py:352` | Il valore più frequente (entro 1e-3); con `weights`, quello di peso totale maggiore. |
+| `_mode` | func | `snapbend/rules/read_section.py:374` | Il valore più frequente (entro 1e-3); con `weights`, quello di peso totale maggiore. |
 | `_normalize_features` | func | `snapbend/flat/detect.py:60` | Normalizza l'argomento `features` di detect_flat() in un set di stringhe. |
 | `officina_file` | func | `snapbend/rules/officina.py:36` | Un file dentro la cartella officina, se c'è una cartella officina e il file esiste. |
 | `officina_folder` | func | `snapbend/rules/officina.py:27` | La cartella officina scelta con `set_officina`; None se nessuna. |
-| `_order_chain` | func | `snapbend/rules/read_section.py:578` |  |
-| `_partner` | func | `snapbend/rules/read_section.py:448` | L'arco concentrico ad `arc` il cui raggio differisce dello spessore. |
+| `_order_chain` | func | `snapbend/rules/read_section.py:626` |  |
+| `_partner` | func | `snapbend/rules/read_section.py:476` | L'arco concentrico ad `arc` il cui raggio differisce dello spessore. |
 | `_perimeter` | func | `snapbend/flat/detect.py:679` |  |
-| `_perp_distance` | func | `snapbend/rules/read_section.py:332` |  |
+| `_perp_distance` | func | `snapbend/rules/read_section.py:349` |  |
 | `polar_point` | func | `snapbend/model/geometry.py:30` | Punto a coordinate polari (angolo in gradi). |
 | `_probe_point` | func | `snapbend/flat/detect.py:665` |  |
-| `_projection_overlap` | func | `snapbend/rules/read_section.py:312` |  |
+| `_projection_overlap` | func | `snapbend/rules/read_section.py:329` |  |
 | `_promote_geometric_holes` | func | `snapbend/flat/detect.py:409` |  |
 | `_proxy_pts` | func | `snapbend/flat/detect.py:77` | Vertici di un proxy aperto (OpenCurve), derivati dai suoi segmenti nativi. |
 | `radius_from_v_opening` | func | `snapbend/rules/deduction.py:96` | Stima del raggio interno di piega in aria da una cava a V. |
 | `_read` | func | `snapbend/drawing/sections.py:75` | `read_section()` sugli spigoli del contorno; `None` se ha spigoli che |
 | `read_section` | func | `snapbend/rules/read_section.py:190` |  |
-| `_recover_centerline` | func | `snapbend/rules/read_section.py:369` | Returns (segments, angles, pure_arc_radius, pure_arc_angle_deg) - the |
-| `_recover_from_one_face` | func | `snapbend/rules/read_section.py:476` | Mezzeria da UNA faccia (MAP.md D74), quando il contorno ha più della |
-| `_RecoverError` | class | `snapbend/rules/read_section.py:365` |  |
+| `_recover_centerline` | func | `snapbend/rules/read_section.py:397` | Returns (segments, angles, pure_arc_radius, pure_arc_angle_deg) - the |
+| `_recover_from_one_face` | func | `snapbend/rules/read_section.py:504` | Mezzeria da UNA faccia (MAP.md D74), quando il contorno ha più della |
+| `_RecoverError` | class | `snapbend/rules/read_section.py:393` |  |
 | `RenderContour` | class | `snapbend/flat/model/render.py:21` |  |
 | `resolve_calibration` | func | `snapbend/core/bend.py:408` | Nome stringa -> `Calibration` caricata, oggetto già risolto -> se |
 | `resolve_facet_bend` | func | `snapbend/core/bend.py:419` | Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla |
@@ -129,17 +130,19 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_sector_entities` | func | `snapbend/core/cone.py:77` | Settore anulare simmetrico rispetto a X, ampiezza angolare `angle` (gradi). |
 | `set_officina` | func | `snapbend/rules/officina.py:21` | Sceglie la cartella officina per questo programma; None la toglie. |
 | `SheetThicknessTable` | class | `snapbend/rules/read_section.py:64` |  |
-| `_split_into_sides` | func | `snapbend/rules/read_section.py:544` |  |
+| `_side` | func | `snapbend/rules/read_section.py:564` | +1 se `p` sta a sinistra della retta percorsa da start a end, -1 a destra. |
+| `_split_into_sides` | func | `snapbend/rules/read_section.py:592` |  |
 | `swap_xy` | func | `snapbend/model/geometry.py:47` | Riflette la geometria lungo la diagonale y=x (scambia gli assi X/Y) — il |
 | `_sweep_deg` | func | `snapbend/rules/read_section.py:136` | Signed sweep from a0 to a1 in (-360, 360), positive when ccw. |
-| `_tangent` | func | `snapbend/rules/read_section.py:523` | La retta tocca l'arco in un suo capo ed è perpendicolare al raggio lì. |
-| `_thickness` | func | `snapbend/rules/read_section.py:253` |  |
+| `_tangent` | func | `snapbend/rules/read_section.py:571` | La retta tocca l'arco in un suo capo ed è perpendicolare al raggio lì. |
+| `_thickness` | func | `snapbend/rules/read_section.py:255` |  |
 | `tipo_cliente_coerente` | func | `snapbend/rules/deduction.py:428` | Controlla che una calibrazione mantenga la promessa del suo |
 | `to_dxf` | func | `snapbend/io/dxf.py:54` | Scrive `flat` su file DXF via topo_dxf.to_dxf() — layer/colori coerenti |
 | `to_topo_result` | func | `snapbend/io/dxf.py:26` | Traduce `flat` in un Result passando da topo.load_geometry() + |
 | `trim_bending_lines` | func | `snapbend/flat/trim.py:34` | Tratteggia ogni `BendingLine` di `result` con `pattern`: le stesse misure |
 | `_turn_deg` | func | `snapbend/model/section.py:67` | Signed rotation relative to going straight (>0 = to the left). |
 | `_unit` | func | `snapbend/model/section.py:72` |  |
+| `_weights` | func | `snapbend/rules/read_section.py:380` | valore -> peso totale (o conteggio), i valori entro 1e-3 contano come uno. |
 | `_write_custom` | func | `snapbend/flat/detect.py:644` |  |
 | `_write_flange_quotes` | func | `snapbend/io/dxf.py:255` |  |
 | `_write_meta_block` | func | `snapbend/io/dxf.py:341` |  |
@@ -448,7 +451,7 @@ _snapbend/rules/officina.py_
 - `officina_folder() -> Optional[Path]` — L27 — La cartella officina scelta con `set_officina`; None se nessuna.
 - `officina_file(*parts: str) -> Optional[Path]` — L36 — Un file dentro la cartella officina, se c'è una cartella officina e il file esiste.
 
-#### `snapbend/rules/read_section.py` — 603 lines
+#### `snapbend/rules/read_section.py` — 651 lines
 
 _snapbend/rules/read_section.py_
 
@@ -463,25 +466,28 @@ _snapbend/rules/read_section.py_
 - **class** `_Edge` — L146
   - methods: `__init__`, `other`, `touches`
 - `read_section(entities: List[dict], table: Optional[SheetThicknessTable]=None, join_tol: float=0.0001) -> SectionReading` — L190
-- `_thickness(edges: List[_Edge]) -> Tuple[Optional[float], List[str]]` — L253
-- `_face_pair_distances(edges: List[_Edge]) -> List[Tuple[float, float]]` — L291 — (distance, overlap) for lines that genuinely face each other
-- `_projection_overlap(a: _Edge, b: _Edge) -> float` — L312
-- `_direction(line: _Edge) -> float` — L327
-- `_perp_distance(a: _Edge, b: _Edge) -> float` — L332
-- `_has_concentric_pair(edges: List[_Edge], thickness: float) -> bool` — L340
-- `_mode(values: List[float], weights: Optional[List[float]]=None) -> float` — L352 — Il valore più frequente (entro 1e-3); con `weights`, quello di peso totale maggiore.
-- **class** `_RecoverError(RuntimeError)` — L365
-- `_recover_centerline(edges: List[_Edge], thickness: float, tol: float)` — L369 — Returns (segments, angles, pure_arc_radius, pure_arc_angle_deg) - the
-- `_compose(cl_lines: List[float], cl_turns: List[float], cl_setbacks: List[float])` — L431 — Tratti dritti della mezzeria + archi -> segmenti apice-apice e angoli
-- `_partner(arc: _Edge, edges: List[_Edge], thickness: float) -> Optional[_Edge]` — L448 — L'arco concentrico ad `arc` il cui raggio differisce dello spessore.
-- `_bends(edges: List[_Edge], thickness: float) -> List[SectionBend]` — L457 — Ogni coppia di archi concentrici a distanza `thickness` è una piega
-- `_recover_from_one_face(edges: List[_Edge], thickness: float, tol: float)` — L476 — Mezzeria da UNA faccia (MAP.md D74), quando il contorno ha più della
-- `_tangent(line: _Edge, arc: _Edge) -> bool` — L523 — La retta tocca l'arco in un suo capo ed è perpendicolare al raggio lì.
-- `_canonical(segments: List[float], angles: List[float])` — L534 — A section reads the same from either end. Pick a deterministic
-- `_split_into_sides(edges: List[_Edge], caps: List[_Edge], tol: float)` — L544
-- `_endpoint_counts(chain: List[_Edge], tol: float)` — L564
-- `_order_chain(chain: List[_Edge], start: Point, tol: float)` — L578
-- `_chain_vertex(chain: List[_Edge], k: int, tol: float) -> Point` — L600
+- `_thickness(edges: List[_Edge], table: SheetThicknessTable) -> Tuple[Optional[float], List[str]]` — L255
+- `_face_pair_distances(edges: List[_Edge]) -> List[Tuple[float, float]]` — L308 — (distance, overlap) for lines that genuinely face each other
+- `_projection_overlap(a: _Edge, b: _Edge) -> float` — L329
+- `_direction(line: _Edge) -> float` — L344
+- `_perp_distance(a: _Edge, b: _Edge) -> float` — L349
+- `_has_concentric_pair(edges: List[_Edge], thickness: float) -> bool` — L357
+- `_cap_count(edges: List[_Edge], thickness: float) -> int` — L369 — Quante rette lunghe esattamente `thickness`: le testate di una lamiera.
+- `_mode(values: List[float], weights: Optional[List[float]]=None) -> float` — L374 — Il valore più frequente (entro 1e-3); con `weights`, quello di peso totale maggiore.
+- `_weights(values: List[float], weights: Optional[List[float]]=None) -> dict` — L380 — valore -> peso totale (o conteggio), i valori entro 1e-3 contano come uno.
+- **class** `_RecoverError(RuntimeError)` — L393
+- `_recover_centerline(edges: List[_Edge], thickness: float, tol: float)` — L397 — Returns (segments, angles, pure_arc_radius, pure_arc_angle_deg) - the
+- `_compose(cl_lines: List[float], cl_turns: List[float], cl_setbacks: List[float])` — L459 — Tratti dritti della mezzeria + archi -> segmenti apice-apice e angoli
+- `_partner(arc: _Edge, edges: List[_Edge], thickness: float) -> Optional[_Edge]` — L476 — L'arco concentrico ad `arc` il cui raggio differisce dello spessore.
+- `_bends(edges: List[_Edge], thickness: float) -> List[SectionBend]` — L485 — Ogni coppia di archi concentrici a distanza `thickness` è una piega
+- `_recover_from_one_face(edges: List[_Edge], thickness: float, tol: float)` — L504 — Mezzeria da UNA faccia (MAP.md D74), quando il contorno ha più della
+- `_side(line: _Edge, p: Point) -> int` — L564 — +1 se `p` sta a sinistra della retta percorsa da start a end, -1 a destra.
+- `_tangent(line: _Edge, arc: _Edge) -> bool` — L571 — La retta tocca l'arco in un suo capo ed è perpendicolare al raggio lì.
+- `_canonical(segments: List[float], angles: List[float])` — L582 — A section reads the same from either end. Pick a deterministic
+- `_split_into_sides(edges: List[_Edge], caps: List[_Edge], tol: float)` — L592
+- `_endpoint_counts(chain: List[_Edge], tol: float)` — L612
+- `_order_chain(chain: List[_Edge], start: Point, tol: float)` — L626
+- `_chain_vertex(chain: List[_Edge], k: int, tol: float) -> Point` — L648
 
 ## Internal dependencies
 

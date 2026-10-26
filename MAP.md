@@ -1738,7 +1738,7 @@ test is a synthetic outline of the same shape (`_l_with_stub`), never the
 client drawing. `SectionBend` added → **0.9.0**.
 
 
-### D75 — pippo request 4, triaged: a second part fused into the section's outline; separating parts is not snapbend's, reading the L that is left is ✅ decided, to implement (26 Oct 2026)
+### D75 — pippo request 4, triaged: a second part fused into the section's outline; separating parts is not snapbend's, reading the L that is left is ✅ (26 Oct 2026)
 
 pippo's request 4: two bent parts whose section is read as "not bent".
 Looked at edge by edge (the two drawings are mirror images): the end view
@@ -1765,3 +1765,19 @@ assembly reader's". Split:
      to the other face), so the centerline radius is `r ∓ t/2` without
      seeing the partner. Expected here: centerline 108 + 76, angle 90,
      outer radius 8.
+
+Built the same day, with one correction found on the way. "The heaviest
+candidate in the table wins" alone was too weak: on the request-3 drawing it
+turned a 420 × 35 face view into a flat sheet t=3 (a 3-mm step 60 long). A
+sheet has its two end caps: a lighter table thickness beats a heavier
+non-table one **only if two lines of exactly that length exist**. With
+that, the face view stays out, and the two request-4 drawings read t=4,
+bent, centerline 108 + 76 (110 × 78 outside). One contour on the request-3
+drawing is now read as flat t=3 where before it was not a sheet (two caps,
+a 0.223 sliver heavier): pippo keeps only bent sections, so nothing changes
+for it. Test: synthetic L + block (`TestSectionWithAPartInTheCorner`).
+→ **0.10.0**.
+
+Naming, for the record: Federico prefers **snapweld** for the future
+assembly reader.
+

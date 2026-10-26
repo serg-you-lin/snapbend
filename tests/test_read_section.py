@@ -251,5 +251,34 @@ class TestSectionWithStub(unittest.TestCase):
         self.assertTrue(any("one face" in n for n in reading.notes))
         self.assertEqual(reading.bends, [])
 
+
+class TestSectionWithAPartInTheCorner(unittest.TestCase):
+    """MAP.md D75: L 110 x 78 esterni, t=4, raggio esterno 8, con un altro
+    pezzo (un blocco) fuso nell'angolo: copre faccia e arco interni, che non
+    compaiono. Il blocco fronteggia la faccia esterna più a lungo delle due
+    facce della lamiera (67.5 contro 4)."""
+
+    ENTITIES = [
+        {"type": "line", "start": (0.0, 0.0), "end": (102.0, 0.0)},
+        {"type": "arc", "center": (102.0, 8.0), "radius": 8.0, "start_angle": 270.0, "end_angle": 360.0},
+        {"type": "line", "start": (110.0, 8.0), "end": (110.0, 78.0)},
+        {"type": "line", "start": (110.0, 78.0), "end": (106.0, 78.0)},    # testata
+        {"type": "line", "start": (106.0, 78.0), "end": (106.0, 67.5)},
+        {"type": "line", "start": (106.0, 67.5), "end": (40.0, 67.5)},     # il blocco
+        {"type": "line", "start": (40.0, 67.5), "end": (40.0, 4.0)},
+        {"type": "line", "start": (40.0, 4.0), "end": (0.0, 4.0)},
+        {"type": "line", "start": (0.0, 4.0), "end": (0.0, 0.0)},          # testata
+    ]
+
+    def test_l_read_from_its_outer_face(self):
+        reading = read_section(self.ENTITIES)
+        self.assertTrue(reading.is_sheet_metal, reading.notes)
+        self.assertTrue(reading.is_bent, reading.notes)
+        self.assertAlmostEqual(reading.thickness, 4.0, delta=1e-3)
+        # mezzeria: 102 + (8 - 2) e 70 + 6
+        self.assertEqual(sorted(reading.centerline_segments), [76.0, 108.0])
+        self.assertIn([round(a) % 360 for a in reading.angles], ([90], [270]))
+        self.assertTrue(any("not a sheet thickness" in n for n in reading.notes))
+
 if __name__ == "__main__":
     unittest.main()

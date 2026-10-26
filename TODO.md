@@ -62,10 +62,10 @@ lettura da confermare:
 4. *Due pezzi piegati letti come non piegati* — **smistata (26 ottobre,
    MAP.md D75), divisa.** Nella vista di testa c'è la L (t=4, 110 × 78) più
    un secondo pezzo nell'angolo, fuso nello stesso contorno, che copre
-   faccia e arco interni. Separare i pezzi non è di snapbend (snapdraw o un
-   lettore di assiemi: pippo la gira lì). Di snapbend, da fare: spessore
-   scelto fra i candidati che stanno in tabella; lettura da una faccia anche
-   quando l'arco compagno è nascosto del tutto (il lato lo dicono i tappi).
+   faccia e arco interni. Separare i pezzi non è di snapbend (snapdraw o il
+   futuro lettore di assiemi, snapweld: pippo la gira lì). **Fatto** per la
+   parte di snapbend: spessore di tabella con le sue due testate; lettura
+   da una faccia anche con l'arco compagno nascosto del tutto.
 
 Aperti dallo smistamento, da fare quando c'è tempo:
 - **Svasatura etichettata su due cerchi** (D73): due cerchi concentrici

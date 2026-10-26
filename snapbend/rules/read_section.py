@@ -201,12 +201,12 @@ def read_section(
         return SectionReading(False, False, None,
                               notes=["too few edges for a section outline"])
 
-    thickness, t_notes = _thickness(edges)
+    table = table or SheetThicknessTable.load()
+    thickness, t_notes = _thickness(edges, table)
     notes += t_notes
 
     is_bent = thickness is not None and _has_concentric_pair(edges, thickness)
 
-    table = table or SheetThicknessTable.load()
     is_sheet = thickness is not None and table.contains(thickness)
     if thickness is not None and not is_sheet:
         notes.append(f"thickness {thickness:.3f} not in sheet-thickness table")
@@ -228,6 +228,8 @@ def read_section(
             # faccia sola, quella che corre intera fra due tappi.
             try:
                 segments, angles = _recover_from_one_face(edges, thickness, join_tol)
+                # una piega letta dalla faccia col compagno nascosto (D75)
+                is_bent = is_bent or bool(angles)
                 notes.append(f"profile read from one face; the rest of the outline "
                              f"is not part of it ({exc})")
             except _RecoverError as one_face:
@@ -250,7 +252,7 @@ def read_section(
 # signal 1 + 2: thickness from parallel faces / concentric arcs (or circles)
 # --------------------------------------------------------------------------
 
-def _thickness(edges: List[_Edge]) -> Tuple[Optional[float], List[str]]:
+def _thickness(edges: List[_Edge], table: SheetThicknessTable) -> Tuple[Optional[float], List[str]]:
     notes: List[str] = []
 
     arc_diffs: List[float] = []
@@ -280,7 +282,22 @@ def _thickness(edges: List[_Edge]) -> Tuple[Optional[float], List[str]]:
         # una lamiera corrono per tutta la sua lunghezza, un tappo contro il
         # lato opposto solo per lo spessore. Senza peso, in un piatto 200x3 o
         # in una L a spigolo vivo, 3 e 200 (o 100) pareggiano.
-        thickness = _mode(face_dists, [w for _, w in face_pairs])
+        #
+        # Un pezzo diverso fuso nello stesso contorno può fronteggiare la
+        # lamiera più a lungo delle sue due facce (un blocco nell'angolo di
+        # una L, MAP.md D75). Allora vince un candidato più leggero solo se è
+        # uno spessore di tabella E la lamiera ha le sue due testate di
+        # quella misura: un gradino di 3 in una vista di faccia non basta.
+        counts = _weights(face_dists, [w for _, w in face_pairs])
+        thickness = max(counts, key=counts.get)
+        if not table.contains(thickness):
+            sheets = {d: w for d, w in counts.items()
+                      if table.contains(d) and _cap_count(edges, d) >= 2}
+            if sheets:
+                heavier = thickness
+                thickness = max(sheets, key=sheets.get)
+                notes.append(f"faces {heavier:.3f} apart face each other longer, but that "
+                             f"is not a sheet thickness; {thickness:.3f} has its two end caps")
         if any(abs(d - thickness) > 0.05 for d in face_dists):
             notes.append("face distances not constant")
         return thickness, notes
@@ -349,13 +366,24 @@ def _has_concentric_pair(edges: List[_Edge], thickness: float) -> bool:
     return False
 
 
+def _cap_count(edges: List[_Edge], thickness: float) -> int:
+    """Quante rette lunghe esattamente `thickness`: le testate di una lamiera."""
+    return sum(1 for e in edges if e.kind == "line" and abs(e.length - thickness) < 1e-3)
+
+
 def _mode(values: List[float], weights: Optional[List[float]] = None) -> float:
     """Il valore più frequente (entro 1e-3); con `weights`, quello di peso totale maggiore."""
+    counts = _weights(values, weights)
+    return max(counts, key=counts.get)
+
+
+def _weights(values: List[float], weights: Optional[List[float]] = None) -> dict:
+    """valore -> peso totale (o conteggio), i valori entro 1e-3 contano come uno."""
     counts: dict = {}
     for v, w in zip(values, weights or [1.0] * len(values)):
         hit = next((k for k in counts if abs(k - v) < 1e-3), v)
         counts[hit] = counts.get(hit, 0) + w
-    return max(counts, key=counts.get)
+    return counts
 
 
 # --------------------------------------------------------------------------
@@ -479,12 +507,14 @@ def _recover_from_one_face(edges: List[_Edge], thickness: float, tol: float):
     stesso contorno, copre lo spigolo e aggiunge un terzo tappo.
 
     Una faccia vale se corre intera da un tappo all'altro, retta-arco-retta
-    alternati, ogni arco tangente alle sue rette e col suo compagno
-    concentrico a distanza `thickness` da qualche parte nel contorno (anche
-    coperto in parte). La retta di una faccia è lunga quanto quella della
-    mezzeria (i punti di tangenza stanno sullo stesso raggio); l'arco della
-    mezzeria sta a metà fra l'arco e il suo compagno. Serve esattamente una
-    faccia così: zero o due sono un'ambiguità, non si sceglie."""
+    alternati, ogni arco tangente alle sue rette. La retta di una faccia è
+    lunga quanto quella della mezzeria (i punti di tangenza stanno sullo
+    stesso raggio); l'arco della mezzeria sta a t/2 dall'arco, verso la
+    lamiera. Da che parte sta la lamiera lo dice il compagno concentrico, se
+    c'è anche solo in parte; se è coperto del tutto (un altro pezzo fuso
+    nell'angolo, MAP.md D75) lo dice il tappo da cui la faccia parte: va da
+    questa faccia all'altra. Serve esattamente una faccia così: zero o due
+    sono un'ambiguità, non si sceglie."""
     caps = [e for e in edges if e.kind == "line" and abs(e.length - thickness) < 1e-3]
     cap_points = [p for c in caps for p in (c.start, c.end)]
     found = []
@@ -499,8 +529,7 @@ def _recover_from_one_face(edges: List[_Edge], thickness: float, tol: float):
             continue
         if any(a.kind == b.kind for a, b in zip(chain, chain[1:])):
             continue
-        if any(e.kind == "arc" and (_partner(e, edges, thickness) is None
-                                    or not _tangent(chain[k - 1], e) or not _tangent(chain[k + 1], e))
+        if any(e.kind == "arc" and (not _tangent(chain[k - 1], e) or not _tangent(chain[k + 1], e))
                for k, e in enumerate(chain)):
             continue
         found.append(chain)
@@ -508,16 +537,35 @@ def _recover_from_one_face(edges: List[_Edge], thickness: float, tol: float):
         raise _RecoverError(f"expected 1 whole face between two caps, found {len(found)}")
 
     chain = found[0]
+    # la lamiera sta dal lato dell'altro capo del tappo da cui parte la faccia
+    first = chain[0]
+    cap = next(c for c in caps if c.touches(first.start, tol))
+    sheet_side = _side(first, cap.other(first.start))
     cl_lines = [e.length for e in chain if e.kind == "line"]
     cl_turns: List[float] = []
     cl_setbacks: List[float] = []
-    for e in chain:
+    for k, e in enumerate(chain):
         if e.kind == "arc":
-            r_cl = (e.radius + _partner(e, edges, thickness).radius) / 2.0
+            partner = _partner(e, edges, thickness)
+            if partner is not None:
+                r_cl = (e.radius + partner.radius) / 2.0
+            elif _side(chain[k - 1], e.center) == sheet_side:
+                r_cl = e.radius - thickness / 2.0      # faccia esterna: il centro sta dal lato della lamiera
+            else:
+                r_cl = e.radius + thickness / 2.0      # faccia interna
+            if r_cl <= 0:
+                raise _RecoverError("arc smaller than half the thickness on the sheet side")
             sweep = _sweep_deg(e.a0, e.a1, e.ccw)
             cl_turns.append(sweep)
             cl_setbacks.append(r_cl * math.tan(math.radians(abs(sweep)) / 2.0))
     return _compose(cl_lines, cl_turns, cl_setbacks)
+
+
+def _side(line: _Edge, p: Point) -> int:
+    """+1 se `p` sta a sinistra della retta percorsa da start a end, -1 a destra."""
+    cross = ((line.end[0] - line.start[0]) * (p[1] - line.start[1])
+             - (line.end[1] - line.start[1]) * (p[0] - line.start[0]))
+    return 1 if cross > 0 else -1
 
 
 def _tangent(line: _Edge, arc: _Edge) -> bool:
