@@ -19,6 +19,7 @@ scrive già (`area`, `bbox`, `outer_perimeter`, `inner_perimeter`, `inner_count`
 
 from __future__ import annotations
 
+import warnings
 from typing import Any, Callable, Optional, Union
 
 import topo
@@ -50,7 +51,8 @@ def part_fields(
     lamiera di ogni pezzo.
 
     Dal chiamante (snapbend non ne propone nessuno: materiale e spessore sono
-    una sua scelta; se non li dà il campo vale "N/D", un campo `None` non
+    una sua scelta; se non li dà il campo vale "N/D" (e c'è un
+    `UserWarning`, una volta per campo e per export), un campo `None` non
     viene scritto):
       `material`, `thickness_mm`, `quantity` (default 1) — un valore, o una
       funzione `cluster -> valore` se cambiano da pezzo a pezzo.
@@ -62,6 +64,8 @@ def part_fields(
       linee collineari contano una piega, come in `describe_features`),
       `engrave_length_mm`, `marking_length_mm`, `total_perimeter_mm`.
     """
+    avvisati: set = set()
+
     def fields(cluster: topo.Cluster) -> dict:
         features = describe_features(cluster)
         facts = cluster.to_dict()
@@ -69,6 +73,10 @@ def part_fields(
         for name, value in (("material", material), ("thickness_mm", thickness_mm),
                             ("quantity", quantity)):
             value = _value(value, cluster)
+            if value == NOT_AVAILABLE and name not in avvisati:
+                avvisati.add(name)
+                warnings.warn(f"part_fields: {name} non dato, scritto come \"{NOT_AVAILABLE}\" nel JSON",
+                              UserWarning, stacklevel=2)
             if value is not None:
                 out[name] = value
         plain, sink, thread = (features["plain_holes_count"], features["countersink_count"],

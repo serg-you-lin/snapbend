@@ -653,7 +653,7 @@ snapbend.flat.part_fields(*, material=None, thickness_mm=None, quantity=1, extra
   `extra(cluster) -> dict` per `topo.to_json`/`save_json`
   (`topo.save_json(result, "p.json", extra=part_fields(material="S275JR", thickness_mm=3.0))`).
   Dal chiamante: `material`, `thickness_mm`, `quantity` (default 1), un valore o
-  `cluster -> valore`; se manca, `material` e `thickness_mm` valgono "N/D" (snapbend non
+  `cluster -> valore`; se manca, `material` e `thickness_mm` valgono "N/D" con un `UserWarning` (snapbend non
   propone materiale né spessore); un `None` esplicito non viene scritto; `extra`: altri campi suoi. Dal pezzo:
   `plain_holes_count`, `countersink_count`, `threaded_holes_count`, `holes_count`,
   `bend_count` (colpi di piega, non tratti), `engrave_length_mm`,

@@ -1862,3 +1862,4 @@ and `label` are topo's and are not repeated (a name topo writes raises
 rule "collinear strokes with material between stay separate" is not in yet.
 
 → **0.12.0** (D79: `part_fields`, the sheet-metal data for the ERP/CAM JSON).
+→ **0.12.1** (D79: `UserWarning` when material or thickness are written as "N/D").

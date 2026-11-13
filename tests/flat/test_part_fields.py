@@ -53,6 +53,20 @@ class TestPartFields(unittest.TestCase):
         self.assertEqual((cluster["material"], cluster["thickness_mm"]), ("N/D", "N/D"))
         self.assertEqual(cluster["quantity"], 1)
 
+    def test_avviso_se_materiale_e_spessore_mancano(self):
+        with self.assertWarns(UserWarning) as w:
+            self._json()
+        testi = [str(x.message) for x in w.warnings]
+        self.assertEqual(sum("material" in t for t in testi), 1)
+        self.assertEqual(sum("thickness_mm" in t for t in testi), 1)
+
+    def test_nessun_avviso_se_dati(self):
+        import warnings
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            self._json(material="S275JR", thickness_mm=3.0)
+        self.assertEqual([x for x in w if "part_fields" in str(x.message)], [])
+
     def test_valore_per_pezzo_e_campi_extra(self):
         data, _ = self._json(material=lambda c: "INOX", extra={"ordine": "A-1"})
         cluster = data["clusters"][0]
