@@ -83,6 +83,22 @@ Aperti dallo smistamento, da fare quando c'è tempo:
   raccogliere).
 
 
+## Adeguamento a topo 0.21 — comportamenti cambiati, cause misurate (MAP.md D76, 13 novembre)
+
+Suite verde (432). Non erano nomi rinominati ma comportamenti di topo cambiati:
+
+- [x] **vaschetta** — `detect_flat` libera da `inners` un anello senza ruolo che
+  tocca l'outer (`gap`, MAP.md D76); la richiesta a topo (l'anello non deve
+  entrare in gerarchia) resta fatta nella sua sessione.
+- [ ] **limite inner–outer** (es. nessun inner a meno di 2 mm dall'outer): soglia
+  di processo in `flat/thresholds.py`, misura `topo.geometry.gap`; "tocca" ne è
+  il caso 0. Non fatta.
+- [x] **`F6`** — un solo cluster è la lettura giusta (Federico, a occhio, 13
+  novembre); golden rigenerato, solo quello (MAP.md D76).
+- [ ] `13_ARC_splitter_injected_fuzzy_new.py` (non tracciato, dati cliente)
+  usa ancora `topo.inject`, `cluster.custom`, `flatten_z_flag`: va riscritto
+  su `Overlay`/`Network`, vedi lo split già fatto in `test_layers.py`.
+
 ## Sezioni di lamiera in una tavola a viste (MAP.md D69)
 
 - [x] `snapbend.drawing.find_sections(topo.island(doc, max_gap=...))`: quali

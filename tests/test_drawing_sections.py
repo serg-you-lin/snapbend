@@ -1,7 +1,7 @@
 """
 tests/test_drawing_sections.py
 ------------------------------
-`find_sections()` su una tavola a viste letta da `topo.island()` (MAP.md D69):
+`find_sections()` su una tavola a viste letta da `topo.heal().outlines()` (MAP.md D69):
 una sezione sta nell'outer di un'isola, in un `loose` chiuso dentro un'altra
 isola, o in due anelli annidati (un tubo: outer + cerchio in `loose`).
 Fixture costruite con `Section` e `topo.load_geometry`, mai con ezdxf.
@@ -47,7 +47,7 @@ def _sheet():
     entities += _rectangle(0, 300, 200, 400)
     entities += [{"type": "circle", "center": (550.0, 150.0), "radius": 6.0},
                  {"type": "circle", "center": (550.0, 150.0), "radius": 5.0}]
-    return topo.island(topo.load_geometry(entities), max_gap=0.5)
+    return topo.heal(topo.load_geometry(entities), max_gap=0.5).outlines()
 
 
 class TestFindSections(unittest.TestCase):
@@ -103,7 +103,7 @@ class TestCustomProfiles(unittest.TestCase):
         for name, (segments, angles, thickness, inner_radius) in CUSTOM.items():
             entities = _shift(Section("x", segments, angles, thickness,
                                       inner_radius=inner_radius).section().entities, 0, 0)
-            found = find_sections(topo.island(topo.load_geometry(entities), max_gap=0.5), table=TABLE)
+            found = find_sections(topo.heal(topo.load_geometry(entities), max_gap=0.5).outlines(), table=TABLE)
             with self.subTest(profile=name):
                 self.assertEqual(len(found), 1)
                 reading = found[0].reading
@@ -115,7 +115,7 @@ class TestCustomProfiles(unittest.TestCase):
     def test_flat_plate_is_found_not_bent(self):
         # lamiera senza pieghe: un piatto 200x3 da solo e uno 3x150 dentro un riquadro
         entities = _rectangle(0, 0, 200, 3) + _rectangle(300, 0, 303, 150) + _rectangle(250, -50, 400, 200)
-        result = topo.island(topo.load_geometry(entities), max_gap=0.5)
+        result = topo.heal(topo.load_geometry(entities), max_gap=0.5).outlines()
         found = sorted(find_sections(result, table=TABLE), key=lambda s: s.reading.centerline_segments)
         self.assertEqual(len(found), 2)
         self.assertEqual([s.reading.centerline_segments for s in found], [[150.0], [200.0]])
@@ -128,7 +128,7 @@ class TestCustomProfiles(unittest.TestCase):
         # tappi) ma spessore 2.5: non è nella tabella, quindi non è lamiera
         entities = _shift(Section("x", [60.0, 80.0, 60.0], [90.0, 270.0], 2.5,
                                   inner_radius=2.0).section().entities, 0, 0)
-        result = topo.island(topo.load_geometry(entities), max_gap=0.5)
+        result = topo.heal(topo.load_geometry(entities), max_gap=0.5).outlines()
         self.assertEqual(find_sections(result, table=TABLE), [])
         reading = read_section([_entity(s) for s in result.clusters[0].outer.segments], table=TABLE)
         self.assertAlmostEqual(reading.thickness, 2.5, delta=1e-3)

@@ -24,16 +24,16 @@ def _part(**detected_kw):
     """
     Cluster con `detected` popolato dai kwargs (`holes=[...]`,
     `bending_lines=[...]`, `engrave_lines=[...]`) — stessa comodità di prima
-    del refactor, ma passando per `DetectedFeatures.attach()` invece di
+    del refactor, ma passando per `Overlay.attach()` invece di
     campi fissi sul cluster.
     """
     outer = topo.Contour(segments=topo.geometry.rectangle(100, 100, center=(50, 50)),
                          role=topo.model.ContourRole.OUTER)
     cluster = topo.Cluster(outer=outer)
     if detected_kw:
-        cluster.detected = topo.model.DetectedFeatures()
+        cluster.overlay = topo.Overlay()
         for name, items in detected_kw.items():
-            cluster.detected.attach(name, items)
+            cluster.overlay.attach(name, items)
     return cluster
 
 
@@ -77,9 +77,10 @@ class TestDescribeFeatures(unittest.TestCase):
         cluster = _part(bending_lines=bl)
         self.assertEqual(describe_features(cluster)["bending_lines"], 2)
 
-    def test_marking_length_from_custom_entities(self):
+    def test_marking_length_from_overlay_entities(self):
         p = _part()
-        p.custom["marking_entities"] = [{"length": 3.0}, {"length": 4.0}]
+        p.overlay = topo.Overlay()
+        p.overlay.attach("marking_entities", [{"length": 3.0}, {"length": 4.0}])
         self.assertEqual(describe_features(p)["total_marking_length"], 7.0)
 
 
@@ -95,8 +96,8 @@ class TestClusterSummaryGeneric(unittest.TestCase):
 
     def test_works_for_any_custom_name(self):
         cluster = _part()
-        cluster.detected = topo.model.DetectedFeatures()
-        cluster.detected.attach("flange_view_hint", [object(), object(), object()])
+        cluster.overlay = topo.Overlay()
+        cluster.overlay.attach("flange_view_hint", [object(), object(), object()])
         self.assertEqual(cluster.summary, {"flange_view_hint_count": 3})
 
 
@@ -133,7 +134,7 @@ class TestSummaryMatchesGoldenFixtures(unittest.TestCase):
             try:
                 result = heal_and_detect(
                     topo_dxf.load_dxf(str(dxf), explode_inserts=True,
-                                   flatten_z_flag=True, role_rules=topo.name_rules(lm)),
+                                   flatten_z=True, role_rules=topo.name_rules(lm)),
                     tolerance=tol,
                 )
             except Exception:

@@ -24,7 +24,7 @@ class TestHole(unittest.TestCase):
 
     def _make_hole(self, diameter=10.0, center=(50.0, 50.0), hole_type=HOLE_TYPE_PLAIN):
         return Hole(
-            segments=topo.geometry.circle(diameter / 2, center),
+            segments=topo.geometry.circle(diameter / 2, center=center),
             diameter=diameter,
             center=center,
             hole_type=hole_type,

@@ -4,7 +4,7 @@ tests/flat/test_pipeline_api.py
 (arrivato da topo tests/unit/test_pipeline_api.py, topo MAP.md D88)
 Copre la superficie API introdotta in Fase 3 (MAP.md D2, D3):
   - heal_and_detect(doc) -> Result
-  - detect_flat(result) e topo.inject(result) ritornano il Result
+  - detect_flat(result) ritorna il Result
 """
 
 import unittest
@@ -35,7 +35,7 @@ class TestPipelineApi(unittest.TestCase):
     def test_heal_and_detect_equivalent_to_separate_calls(self):
         doc_a, doc_b = _square_doc(), _square_doc()
         combined = heal_and_detect(doc_a)
-        step = detect_flat(topo.heal(doc_b), features="all")
+        step = detect_flat(topo.heal(doc_b).faces(), features="all")
         self.assertEqual(combined.cluster_count, step.cluster_count)
         self.assertEqual(
             [h.hole_type for p in combined.clusters for h in p.features("holes")],
@@ -43,12 +43,8 @@ class TestPipelineApi(unittest.TestCase):
         )
 
     def test_detect_returns_same_result_object(self):
-        result = topo.heal(_square_doc())
+        result = topo.heal(_square_doc()).faces()
         self.assertIs(detect_flat(result), result)
-
-    def test_inject_returns_same_result_object(self):
-        result = detect_flat(topo.heal(_square_doc()))
-        self.assertIs(topo.inject(result), result)
 
     def test_heal_and_detect_invalid_still_returns_result(self):
         # 3 lati di un quadrato: nessun contorno chiuso -> non valido

@@ -3,7 +3,7 @@ snapbend/flat/model/render.py
 -----------------------------
 Come un elemento di processo si fa disegnare dai renderer di topo.
 
-topo disegna un elemento di `cluster.detected` dal suo `role` e dalla sua
+topo disegna un elemento di `cluster.overlay` dal suo `role` e dalla sua
 geometria (topo D90): se ha `contours`, ognuno con `role`, `segments`,
 `styles`. Segmenti che chiudono un giro, o elemento che è un vuoto
 (`is_void`) → contorno chiuso; altrimenti una entità per primitiva

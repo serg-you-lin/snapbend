@@ -42,23 +42,19 @@ def _run_pipeline(
     msp,
     special_layers,
     tolerance=0.05,
-    inject=False,
 ):
     doc = topo_dxf.document_from_msp(msp, role_rules=topo.name_rules(special_layers))
 
     result = topo.heal(
         doc,
         tolerance=tolerance,
-    )
+    ).faces()
 
     detect_flat(
         result, features="all",
     )
 
     doc_out = topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)
-
-    if inject:
-        topo.inject(result)
 
     return result, doc_out
 
@@ -220,7 +216,6 @@ class TestSpecialLayerNotTrash(unittest.TestCase):
         self.result, self.doc_out = _run_pipeline(
             msp=self.msp,
             special_layers={'MARK': 'engrave'},
-            inject=True,
         )
 
     def test_001_mark_not_in_trash(self):
@@ -307,13 +302,12 @@ class TestEngraveLength(unittest.TestCase):
         self.result, self.doc_out = _run_pipeline(
             msp=msp,
             special_layers=special_layers,
-            inject=True,
         )
 
-    def test_001_has_custom(self):
+    def test_001_has_overlay(self):
 
         self.assertIsNotNone(
-            self.result.clusters[0].custom,
+            self.result.clusters[0].overlay,
         )
 
     def test_002_engrave_length_present(self):
@@ -358,13 +352,12 @@ class TestBendingLines(unittest.TestCase):
         self.result, self.doc_out = _run_pipeline(
             msp=msp,
             special_layers=special_layers,
-            inject=True,
         )
 
-    def test_001_has_custom(self):
+    def test_001_has_overlay(self):
 
         self.assertIsNotNone(
-            self.result.clusters[0].custom,
+            self.result.clusters[0].overlay,
         )
 
     def test_002_bending_lines_present(self):
@@ -530,7 +523,6 @@ class TestMixedSpecialLayers(unittest.TestCase):
                 'MARK': 'engrave',
                 'MARCATURA': 'bending',
             },
-            inject=True,
         )
 
     def test_001_one_part(self):

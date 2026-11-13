@@ -31,7 +31,7 @@ def _result(path, name_roles=None):
 class TestViewModel(unittest.TestCase):
 
     def test_hole_carries_circle_metadata(self):
-        vm = topo.to_view_model(_result(MULTI_PART), role_styles=ROLE_STYLES)
+        vm = topo.experimental.to_view_model(_result(MULTI_PART), role_styles=ROLE_STYLES)
         holes = [h for p in vm["clusters"] for h in p["features"]["holes"]]
         self.assertTrue(holes)
         h = holes[0]
@@ -40,10 +40,10 @@ class TestViewModel(unittest.TestCase):
         self.assertEqual(len(h["center"]), 2)
 
     def test_holes_render_as_circles(self):
-        self.assertIn("<circle", topo.to_svg(_result(MULTI_PART), role_styles=ROLE_STYLES))
+        self.assertIn("<circle", topo.experimental.to_svg(_result(MULTI_PART), role_styles=ROLE_STYLES))
 
     def test_bending_and_engrave_geometry(self):
-        vm = topo.to_view_model(_result(SPECIAL, SPECIAL_LM), role_styles=ROLE_STYLES)
+        vm = topo.experimental.to_view_model(_result(SPECIAL, SPECIAL_LM), role_styles=ROLE_STYLES)
         cluster = vm["clusters"][0]
         self.assertTrue(cluster["features"]["bending_lines"])
         self.assertTrue(cluster["features"]["engrave_lines"])
@@ -61,11 +61,11 @@ class TestRichExample(unittest.TestCase):
         lm = {"Filettati": "threaded_hole", "Svasati": "countersink",
               "Piega": "bending", "MARK": "engrave"}
         result = _result(MULTIFEATURE, lm)
-        svg = topo.to_svg(result, role_styles=ROLE_STYLES)
+        svg = topo.experimental.to_svg(result, role_styles=ROLE_STYLES)
         ET.fromstring(svg)
         self.assertIn("#00ff00", svg)                       # outer
         self.assertTrue("#0000ff" in svg or "#00ffff" in svg)  # foro tipato
-        vm = topo.to_view_model(result, role_styles=ROLE_STYLES)
+        vm = topo.experimental.to_view_model(result, role_styles=ROLE_STYLES)
         p = vm["clusters"][0]
         self.assertTrue(p["features"]["holes"] and p["features"]["bending_lines"] and p["features"]["engrave_lines"])
 

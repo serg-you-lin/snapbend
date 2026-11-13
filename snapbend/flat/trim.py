@@ -47,6 +47,6 @@ def trim_bending_lines(result: topo.Result,
         for bl in cluster.features("bending_lines"):
             p = rule(bl)
             dashes = [] if p is None else topo.geometry.dash_line(bl.start, bl.end, p.head, p.tail,
-                                                    p.middle, p.n_middle)
+                                                    middle=p.middle, n_middle=p.n_middle)
             bl.dashes = dashes if len(dashes) > 1 else []
     return result

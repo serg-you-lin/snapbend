@@ -2,7 +2,7 @@
 tests/flat/test_render.py
 -------------------------
 Come topo disegna la lettura di snapbend (topo MAP.md D90): fori, svasature
-e pieghe arrivano in `to_dxf` solo attraverso `cluster.detected`, ognuno sul
+e pieghe arrivano in `to_dxf` solo attraverso `cluster.overlay`, ognuno sul
 layer del suo ruolo, una volta sola.
 """
 
@@ -23,7 +23,7 @@ def _plate():
         {"type": "circle", "center": (20, 25), "radius": 6},
         {"type": "circle", "center": (70, 25), "radius": 4},
     ])
-    return doc, topo.heal(doc)
+    return doc, topo.heal(doc).faces()
 
 
 def _layers(out):
@@ -57,7 +57,7 @@ class TestRender(unittest.TestCase):
             {"type": "polygon", "points": [(0, 0), (100, 0), (100, 50), (0, 50)]},
             {"type": "line", "start": (50, 0), "end": (50, 50)},
         ])
-        result = topo.heal(doc)
+        result = topo.heal(doc).faces()
         detect_flat(result, "bending")
         out = topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)
         bends = [e for e in out.modelspace() if e.dxf.layer == LAYER_BENDING]
@@ -83,7 +83,7 @@ class TestBendingRule(unittest.TestCase):
         entities = [{"type": "polygon",
                      "points": [(0, 0), (100, 0), (100, 50), (0, 50)]}]
         entities += [{"type": "line", "start": a, "end": b} for a, b in lines]
-        result = topo.heal(topo.load_geometry(entities))
+        result = topo.heal(topo.load_geometry(entities)).faces()
         detect_flat(result, "bending")
         return result.clusters[0].features("bending_lines")
 
@@ -107,7 +107,7 @@ class TestBendingRule(unittest.TestCase):
         if window:
             entities.append({"type": "polygon",
                              "points": [(40, 10), (60, 10), (60, 40), (40, 40)]})
-        result = topo.heal(topo.load_geometry(entities))
+        result = topo.heal(topo.load_geometry(entities)).faces()
         detect_flat(result, "bending")
         return result.clusters[0].features("bending_lines")
 

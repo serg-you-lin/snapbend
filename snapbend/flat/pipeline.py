@@ -15,7 +15,7 @@ from .roles import is_structural
 from .thresholds import HOLE_DIAMETER_THRESHOLD
 
 
-def heal_and_detect(doc: topo.Document, tolerance=None, label="", source_file="",
+def heal_and_detect(doc: topo.Document, *, tolerance=None, max_gap=None, label="", source_file="",
                     features="all",
                     max_drill_diameter: float = HOLE_DIAMETER_THRESHOLD,
                     bending_tolerance: float = 1.0,
@@ -24,8 +24,8 @@ def heal_and_detect(doc: topo.Document, tolerance=None, label="", source_file=""
     heal() + detect_flat(). `detect_flat()` viene saltato se heal() non produce
     cluster validi (il result torna comunque, con `is_valid=False`).
     """
-    result = topo.heal(doc, tolerance=tolerance, label=label, source_file=source_file,
-                        is_structural=is_structural)
+    result = topo.heal(doc, tolerance=tolerance, max_gap=max_gap, label=label,
+                       source_file=source_file, is_structural=is_structural).faces()
     if result.is_valid and result.clusters:
         detect_flat(result,
                     features=features,

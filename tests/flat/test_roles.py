@@ -43,7 +43,7 @@ class TestConsumerRolesSurviveDetect(unittest.TestCase):
         ])
 
     def test_detect_non_sposta_il_ruolo_custom_fuori_dalla_trash(self):
-        result = topo.heal(self._framed_doc())
+        result = topo.heal(self._framed_doc()).faces()
         trash_prima = len(result.loose)
         frame_prima = sum(1 for t in result.loose
                           if topo.model.role_str(getattr(t, "role", "")) == "frame")

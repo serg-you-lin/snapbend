@@ -55,7 +55,7 @@ def _run_pipeline(dxf_path: Path) -> tuple:
         label=dxf_path.stem,
         source_file=dxf_path.name,
         is_structural=is_structural,
-    )
+    ).faces()
     detect_flat(result, features="all", bending_tolerance=0.2)
     doc_out = topo_dxf.to_dxf(result, source_doc, role_styles=ROLE_STYLES, layers=LAYERS)
 
@@ -238,7 +238,7 @@ class TestLineetteSpurie(unittest.TestCase):
             tolerance=1,
             label=cls.dxf_path.stem,
             source_file=cls.dxf_path.name,
-        )
+        ).faces()
         detect_flat(cls.result, features="all")
         cls.msp = topo_dxf.to_dxf(cls.result, src_doc, role_styles=ROLE_STYLES, layers=LAYERS).modelspace()
 
@@ -293,7 +293,7 @@ class TestLineetteSpurie(unittest.TestCase):
 class TestGambaTavoloSplit(unittest.TestCase):
     """
     gamba_tavolo.dxf
-    Dopo split_to_files() tutti i figli devono avere l'outer su OuterContour.
+    Dopo heal → split → to_dxf tutti i figli devono avere l'outer su OuterContour.
     """
 
     @classmethod
@@ -304,13 +304,12 @@ class TestGambaTavoloSplit(unittest.TestCase):
         
         src_doc = topo_dxf.load_dxf(cls.dxf_path, explode_inserts=True)
         cls.output_dir = tempfile.mkdtemp()
-        cls.result = topo_dxf.split_to_files(
-            src_doc,
-            output_folder=cls.output_dir,
-            label=cls.dxf_path.stem,
-            source_file=cls.dxf_path.name,
-            include_texts=True,
-        )
+        cls.result = topo.heal(
+            src_doc, label=cls.dxf_path.stem, source_file=cls.dxf_path.name,
+        ).faces()
+        for part in topo.split(cls.result):
+            topo_dxf.to_dxf(part, src_doc).saveas(
+                Path(cls.output_dir) / f"{part.clusters[0].label}.dxf")
         cls.generated = [str(p) for p in Path(cls.output_dir).glob("*.dxf")]
 
     def test_quattro_figli_generati(self):

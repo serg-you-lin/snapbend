@@ -110,13 +110,13 @@ def _make_test(path):
                 str(dxf_path),
                 upgrade=True,
                 explode_inserts=True,
-                flatten_z_flag=True,
+                flatten_z=True,
                 tolerance=config.get("tolerance", DEFAULT_TOLERANCE),
                 role_rules=topo.name_rules(name_roles),
             ),
             tolerance=config.get("tolerance", DEFAULT_TOLERANCE),
             is_structural=is_structural,
-        )
+        ).faces()
 
         detect_flat(result, features="all")
 
@@ -369,7 +369,7 @@ MULTIPLI_PROC_DIR = MULTIPLI_DIR / "process"
 @lru_cache(maxsize=None)
 def _multipli_clusters(parent_path: Path, tolerance: float):
     result = topo.heal(topo_dxf.load_dxf(parent_path, explode_inserts=True, tolerance=tolerance),
-                        tolerance=tolerance)
+                        tolerance=tolerance).faces()
     if result.is_valid and result.clusters:
         detect_flat(result, features="all")
     return result.clusters if result.is_valid else []

@@ -30,11 +30,11 @@ from .thresholds import HOLE_DIAMETER_THRESHOLD
 _BENDING_GROUP_TOLERANCE = 0.1
 
 
-def _ensure_detected(cluster: topo.Cluster) -> topo.model.DetectedFeatures:
-    """`cluster.detected`, creandolo alla prima scrittura."""
-    if cluster.detected is None:
-        cluster.detected = topo.model.DetectedFeatures()
-    return cluster.detected
+def _ensure_overlay(cluster: topo.Cluster) -> topo.Overlay:
+    """`cluster.overlay`, creandolo alla prima scrittura."""
+    if cluster.overlay is None:
+        cluster.overlay = topo.Overlay()
+    return cluster.overlay
 
 
 # Ruoli che detect_flat() sa collocare come feature di un cluster. Un proxy con un
@@ -84,6 +84,43 @@ _ROLE_TO_HOLE_TYPE = {
 }
 
 
+_TOUCH_EPS = 1e-6   # mm — rumore di `topo.geometry.gap`: "tocca" è distanza <= questo, mai == 0
+
+
+def _release_touching_rings(result: topo.Result) -> None:
+    """
+    Un `inner` senza ruolo che tocca l'outer non è un contorno interno del
+    pezzo: un vuoto non può avere bordo in comune con l'esterno. È un anello
+    di tratti non-contorno che topo ha chiuso da sé (vaschetta: le quattro
+    pieghe attorno alla base). Si toglie da `cluster.inners` e i suoi lati
+    tornano in `result.loose`, una `OpenCurve` per lato: ci arrivano le lane
+    come per ogni altra curva sciolta, senza un secondo percorso con gli
+    stessi criteri. I discendenti salgono di un livello (la parità della
+    profondità decide l'area, D89 di topo). Un inner con un ruolo deciso (un
+    foro etichettato) non si tocca.
+    """
+    for index, cluster in enumerate(result.clusters):
+        for ring in list(cluster.inners):
+            if ring.depth != 1 or ring.role != topo.model.ContourRole.INNER:
+                continue
+            if topo.geometry.gap(ring, cluster.outer).distance > _TOUCH_EPS:
+                continue
+            cluster.inners.remove(ring)
+            for inner in cluster.inners:
+                node = inner
+                while node is not None and node is not ring:
+                    node = node.parent
+                if node is ring:
+                    inner.depth -= 1
+                    if inner.parent is ring:
+                        inner.parent = ring.parent
+            result.loose += [
+                topo.model.OpenCurve(role=topo.model.ContourRole.UNKNOWN,
+                                     segments=[seg], cluster_ref=index)
+                for seg in ring.segments
+            ]
+
+
 # ---------------------------------------------------------------------------
 # API pubblica
 # ---------------------------------------------------------------------------
@@ -117,6 +154,7 @@ def detect_flat(
     """
     feats = _normalize_features(features)
 
+    _release_touching_rings(result)
     _detect_labeled(result)
     if "bending" in feats:
         _detect_bending(result, bending_tolerance=bending_tolerance)
@@ -138,7 +176,7 @@ def describe_features(cluster: topo.Cluster) -> dict:
     Non sostituisce `cluster.summary` (property, generica, sempre
     disponibile anche con solo `heal()`): è un livello in più sopra, per chi
     vuole il dettaglio dei tipi che solo topo sa riconoscere. Un tool
-    esterno che attacca un suo nome custom a `cluster.detected` non compare
+    esterno che attacca un suo nome custom a `cluster.overlay` non compare
     qui — compare già in `cluster.summary` come conteggio grezzo.
     """
     holes         = cluster.features("holes")
@@ -156,7 +194,7 @@ def describe_features(cluster: topo.Cluster) -> dict:
         if bending_lines else 0
     )
 
-    marking = cluster.custom.get("marking_entities", []) or []
+    marking = cluster.features("marking_entities")
 
     return {
         "plain_holes_count":    htypes.get(HOLE_TYPE_PLAIN, 0),
@@ -243,7 +281,7 @@ def _detect_labeled(result: topo.Result) -> None:
             # assegnato da role_rules diventa un Hole a prescindere dai
             # `features` richiesti (D15).
             if inner.role in _LABELED_HOLE_ROLES:
-                _ensure_detected(cluster).add("holes", _labeled_hole_from_contour(inner))
+                _ensure_overlay(cluster).add("holes", _labeled_hole_from_contour(inner))
                 continue
 
             if inner.role == topo.model.ContourRole.UNKNOWN or topo.model.is_structural_role(inner.role):
@@ -317,7 +355,7 @@ def _detect_bending(result: topo.Result, bending_tolerance: float = 1.0) -> None
         if proxy.cluster_ref is None:
             continue
         pts = _proxy_pts(proxy)
-        if topo.geometry.track_shape_type(pts) != "line" or len(pts) < 2:
+        if len(pts) != 2:   # una retta ha due punti (topo D176)
             continue
         length = topo.geometry.track_length(pts)
         if length < bending_tolerance:
@@ -325,8 +363,8 @@ def _detect_bending(result: topo.Result, bending_tolerance: float = 1.0) -> None
 
         cluster = result.clusters[proxy.cluster_ref]
         if topo.geometry.splits_contour(cluster.outer, pts[0], pts[-1], reach=_BEND_REACH):
-            topo.promote(result, proxy, cluster, "bending_lines",
-                         _bending_line(cluster, pts[0], pts[-1], length))
+            result.promote(proxy, cluster, "bending_lines",
+                           item=_bending_line(cluster, pts[0], pts[-1], length))
         else:
             leftovers.setdefault(id(cluster), []).append((pts[0], pts[-1], proxy))
 
@@ -344,7 +382,7 @@ def _detect_bending(result: topo.Result, bending_tolerance: float = 1.0) -> None
                 pts = _proxy_pts(proxy)
                 # `promote` toglie la linea da `loose`: to_dxf non la scrive
                 # due volte (una come piega, una come curva sciolta)
-                topo.promote(result, proxy, cluster, "bending_lines", _bending_line(
+                result.promote(proxy, cluster, "bending_lines", item=_bending_line(
                     cluster, pts[0], pts[-1], topo.geometry.track_length(pts)))
 
 
@@ -460,7 +498,7 @@ def _promote_geometric_holes(cluster: topo.Cluster,
             continue
         hole = promoted.get(id(c))
         if hole is not None:
-            _ensure_detected(cluster).add("holes", hole)
+            _ensure_overlay(cluster).add("holes", hole)
         else:
             new_inners.append(c)
     cluster.inners = new_inners
@@ -568,7 +606,7 @@ def _handle_engrave_open(proxy: topo.model.OpenCurve, result: topo.Result) -> bo
     if proxy.cluster_ref is None:
         return False
     cluster = result.clusters[proxy.cluster_ref]
-    _ensure_detected(cluster).add(
+    _ensure_overlay(cluster).add(
         "engrave_lines", _engraving_from_open(proxy, cluster_label=cluster.label)
     )
     return True
@@ -582,13 +620,13 @@ def _handle_engrave_closed_loose(proxy, result: topo.Result) -> bool:
     if proxy.cluster_ref is None:
         return False
     cluster = result.clusters[proxy.cluster_ref]
-    _ensure_detected(cluster).add("engrave_lines", _engraving_from_closed(
+    _ensure_overlay(cluster).add("engrave_lines", _engraving_from_closed(
         proxy, cluster_label=cluster.label))
     return True
 
 
 def _handle_engrave_closed(inner, cluster: topo.Cluster) -> None:
-    _ensure_detected(cluster).add("engrave_lines", _engraving_from_closed(
+    _ensure_overlay(cluster).add("engrave_lines", _engraving_from_closed(
         inner, cluster_label=cluster.label))
 
 
@@ -627,31 +665,31 @@ def _assign_to_part(ce: ClassifiedEntity, result: topo.Result) -> bool:
             continue
 
         if work_type == "bending":
-            _ensure_detected(cluster).add(
+            _ensure_overlay(cluster).add(
                 "bending_lines", _bending_line_from_data(ce.data, cluster.label)
             )
 
-        _write_custom(ce, cluster)
+        _write_entity(ce, cluster)
         return True
 
-    result.warnings.append(
-        f"detect_flat(): forma {ce.work_type} non contenuta in nessun cluster "
-        f"(source={ce.source}). Resta in result.loose."
-    )
+    result.warnings.append(topo.Diagnostic(
+        "shape-outside-clusters",
+        f"{ce.work_type} shape (source={ce.source}) is in no cluster, left in result.loose",
+        points=[ce.representative_point] if ce.representative_point else (),
+    ))
     return False
 
 
-def _write_custom(ce: ClassifiedEntity, cluster: topo.Cluster) -> None:
-    key_map = {
-        "bending": "bending_lines",
-        "marking": "marking_entities",
-    }
-    key = key_map.get(ce.work_type.lower(), f"{ce.work_type.lower()}_entities")
-
-    if key not in cluster.custom:
-        cluster.custom[key] = []
-
-    cluster.custom[key].append({
+def _write_entity(ce: ClassifiedEntity, cluster: topo.Cluster) -> None:
+    """
+    I dati dell'entità nell'overlay, sotto `<tipo>_entities`. La piega no: è
+    già un `BendingLine` in `bending_lines` (scritto da `_assign_to_part`).
+    `Cluster.custom` non esiste più in topo: l'overlay è il posto.
+    """
+    work_type = ce.work_type.lower()
+    if work_type == "bending":
+        return
+    _ensure_overlay(cluster).add(f"{work_type}_entities", {
         **ce.data,
         "confidence": ce.confidence,
         "source":     ce.source,
@@ -693,7 +731,7 @@ def _extract_data(proxy: topo.model.OpenCurve, work_type: str) -> dict:
     else:
         rep = pts[0] if pts else None
 
-    if work_type == "bending" and topo.geometry.track_shape_type(pts) == "line" and len(pts) >= 2:
+    if work_type == "bending" and len(pts) == 2:
         start = pts[0]
         end   = pts[-1]
         return {

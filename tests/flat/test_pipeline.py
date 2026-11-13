@@ -46,7 +46,6 @@ class TestPipelineBendingRoundtrip(unittest.TestCase):
         self.pipeline = run_pipeline(
             ex("rect_with_special_layers.dxf"),
             do_detect=True,
-            do_inject=True,
             do_write=True,
             reload_after_write=True,
             special_layers={
@@ -83,7 +82,6 @@ class TestPipelineCountersinkPersistence(unittest.TestCase):
         self.pipeline = run_pipeline(
             ex("rect_with_countersink.dxf"),
             do_detect=True,
-            do_inject=True,
             do_write=True,
             reload_after_write=True,
             special_layers={
@@ -118,7 +116,6 @@ class TestPipelineThreadedHolePersistence(unittest.TestCase):
         self.pipeline = run_pipeline(
             ex("rect_with_threaded_holes_geometric.dxf"),
             do_detect=True,
-            do_inject=True,
             do_write=True,
             reload_after_write=True,
         )
@@ -202,7 +199,6 @@ class TestSpecialLayersEngrave(unittest.TestCase):
         self.pipeline = run_pipeline(
             ex("la_104.dxf"),
             do_detect=True,
-            do_inject=True,
             do_write=True,
             special_layers={"MARK": "engrave"},
         )

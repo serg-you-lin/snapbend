@@ -1781,3 +1781,35 @@ for it. Test: synthetic L + block (`TestSectionWithAPartInTheCorner`).
 Naming, for the record: Federico prefers **snapweld** for the future
 assembly reader.
 
+
+### D76 — follow topo 0.21 (the 1.0 API): `heal()` → `Network`, `Overlay`, `Result.promote` ✅ (13 Nov 2026, in part)
+snapbend's calls move to topo's public surface (topo D148-D248, D175/D176 the
+promise): `topo.heal(...)` returns a `Network`, read with `.faces()` (flat
+cutting files; `heal_and_detect` does it) or `.outlines()` (drawings of views,
+replaces `topo.island()`); `cluster.detected`/`DetectedFeatures` →
+`cluster.overlay`/`topo.Overlay`; `topo.promote(result, …)` →
+`result.promote(curve, cluster, name, item=…)`; `track_shape_type(pts)` →
+`len(pts) == 2`; options keyword-only (`heal_and_detect(doc, *, tolerance=…)`,
+now with `max_gap`, `dash_line(…, middle=…, n_middle=…)`, `circle(r, center=…)`);
+`flatten_z_flag` → `flatten_z`; `to_svg`/`to_view_model` → `topo.experimental`;
+`split_to_files` → `heal` → `split` → `to_dxf(part).saveas()`; warnings are
+`topo.Diagnostic`.
+`Cluster.custom` and `topo.inject` are gone: counts are derived from the
+overlay (`describe_features`), the marking entities live in
+`overlay["marking_entities"]`, a bend is already a `BendingLine` in
+`bending_lines`. `tests/flat/test_injector.py` tested only the removed hook and
+is deleted (clean break, no alias).
+`F6` goes back from 2 to 1 cluster (reopening the golden of D67): the file is
+built faulty on purpose; at tolerance 0.5 its two parts are joined by two
+drawn lines, so one outer is the right reading (Federico, by eye, 13 Nov);
+the two lines are two bends, only one lies on a usable line and is read, the
+other stays in `loose`. Only `F6.json` regenerated, no other golden moved.
+The tray (four bends closing a ring, test `vaschetta`): topo's `faces()` turns
+a ring of non-contour edges into an inner (D162/D189 + `build_hierarchy` keeps
+every closed curve); asked to topo, and meanwhile `detect_flat` releases any
+unlabeled depth-1 inner that touches the outer (`topo.geometry.gap(...)
+.distance <= 1e-6`, topo D251): a void cannot share border with the outside.
+Its sides go back to `loose` as one `OpenCurve` each, so every lane reads them
+through the one path; descendants rise one level. It runs in every call, not
+only with the bending lane. The "no inner closer than N mm" limit is another
+thing (a process threshold) and is not done.

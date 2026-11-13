@@ -22,7 +22,7 @@ EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "data" / "flat"
 def _pipeline(name, *, detect=False, name_roles=None):
     """heal (+ detect) → to_dxf. Ritorna (result, msp_out)."""
     doc = topo_dxf.load_dxf(EXAMPLES_DIR / name, role_rules=topo.name_rules(name_roles or {}))
-    result = topo.heal(doc)
+    result = topo.heal(doc).faces()
     if detect:
         detect_flat(result, features="all")
     doc_out = topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)

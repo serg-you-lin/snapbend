@@ -16,7 +16,7 @@ from snapbend.flat import detect_flat
 def _read(outline, bends, extra=()):
     segments = topo.geometry.polygon(outline) + list(extra)
     segments += [topo.primitives.LineSeg(start=a, end=b) for a, b in bends]
-    return detect_flat(topo.heal(topo.load_segments(segments)), "bending")
+    return detect_flat(topo.heal(topo.load_segments(segments)).faces(), "bending")
 
 
 class TestBendAtCorner(unittest.TestCase):

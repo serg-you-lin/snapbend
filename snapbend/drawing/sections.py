@@ -1,7 +1,7 @@
 """
 snapbend/drawing/sections.py
 ----------------------------
-Sezioni di lamiera in una tavola a viste letta da `topo.island()` (MAP.md D69).
+Sezioni di lamiera in una tavola a viste letta con `topo.heal(doc, max_gap=...).outlines()` (MAP.md D69).
 
 topo dà i contorni chiusi (outer di ogni isola, i suoi inners, le curve
 chiuse in `loose`) e dice solo la loro forma geometrica; qui si chiede a

@@ -38,7 +38,6 @@ def run_pipeline(
     *,
     tolerance=0.2,
     do_detect=False,
-    do_inject=False,
     do_write=False,
     reload_after_write=False,
     special_layers=None,
@@ -50,7 +49,6 @@ def run_pipeline(
     Pipeline disponibile:
         heal
         detect
-        inject
         write
         reload
 
@@ -79,15 +77,12 @@ def run_pipeline(
         tolerance=tolerance,
         label=Path(dxf_name).stem,
         source_file=dxf_name,
-    )
+    ).faces()
 
     if do_detect:
         detect_flat(
             result, features="all"
         )
-
-    if do_inject:
-        topo.inject(result)
 
     doc_out = None
     if do_write:
@@ -121,7 +116,7 @@ def run_pipeline(
             tolerance=tolerance,
             label=f"{Path(dxf_name).stem}_reloaded",
             source_file=tmp.name,
-        )
+        ).faces()
 
         output["reloaded_doc"]    = reloaded_doc
         output["reloaded_msp"]    = None
@@ -154,8 +149,7 @@ def get_custom(result, key, default=None):
 
     Tre livelli (MAP.md D8, D44): il conteggio grezzo di `cluster.summary`,
     il dettaglio ricco di `describe_features()` (fori per tipo, pieghe
-    raggruppate...), i dati aggiunti da un data_injector esterno in
-    `cluster.custom`. Si guardano tutti e tre, dal più generico al più
+    raggruppate...), il `default`. Si guardano i due livelli, dal più generico al più
     specifico.
     """
 
@@ -163,4 +157,4 @@ def get_custom(result, key, default=None):
     merged = {**cluster.summary, **describe_features(cluster)}
     if key in merged:
         return merged[key]
-    return cluster.custom.get(key, default)
+    return default

@@ -88,9 +88,9 @@ def generate_single(force: bool, only: str = None) -> None:
         config = _config(dxf_path)
         tol = config.get("tolerance", DEFAULT_TOLERANCE)
         roles = {**GLOBAL_NAME_ROLES, **config.get("name_roles", {})}
-        doc = topo_dxf.load_dxf(dxf_path, upgrade=True, explode_inserts=True, flatten_z_flag=True,
+        doc = topo_dxf.load_dxf(dxf_path, upgrade=True, explode_inserts=True, flatten_z=True,
                              tolerance=tol, verbose=False, role_rules=topo.name_rules(roles))
-        result = topo.heal(doc, tolerance=tol, is_structural=is_structural)
+        result = topo.heal(doc, tolerance=tol, is_structural=is_structural).faces()
         detect_flat(result, features="all")
         if not result.is_valid:
             print(f"  SKIP (non valido): {dxf_path.name}")
@@ -107,7 +107,7 @@ def generate_multipli(force: bool, only: str = None) -> None:
             continue
         tol = _config(parent_path).get("tolerance", DEFAULT_TOLERANCE)
         result = topo.heal(topo_dxf.load_dxf(parent_path, upgrade=True, explode_inserts=True),
-                            tolerance=tol)
+                            tolerance=tol).faces()
         if not result.is_valid or not result.clusters:
             print(f"  SKIP (non valido): {parent_path.name}")
             continue
