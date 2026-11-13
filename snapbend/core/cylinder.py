@@ -4,8 +4,9 @@ snapbend/core/cylinder.py
 Sviluppo piano del cilindro (rettangolo). Stessa matematica di `cono.py`
 (dxf-forge), riscritta come motore parametrico puro.
 
-Convenzione: il diametro è ESTERNO. Lo sviluppo è calcolato sulla fibra
-media (D_medio = D_esterno - thickness), come nello script originale.
+Convenzione: il diametro si dà ESTERNO (`outer_diameter`) oppure INTERNO
+(`inner_diameter`), uno solo dei due (MAP.md D81). Lo sviluppo è calcolato
+sulla fibra media (D_medio = D_esterno - thickness = D_interno + thickness).
 
 Orientamento canonico interno: X = circonferenza (o sviluppo sfaccettato),
 Y = lunghezza assiale del cilindro. orientation="vertical" (default) tiene
@@ -71,14 +72,15 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 
-from ..model.geometry import FlatGeometry, swap_xy, _check_orientation
+from ..model.geometry import FlatGeometry, swap_xy, _check_orientation, resolve_outer_diameter
 from .bend import resolve_calibration, resolve_facet_bend
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Cylinder:
-    diameter: float
     height: float
+    outer_diameter: Optional[float] = None      # uno solo fra outer_diameter e inner_diameter (MAP.md D81)
+    inner_diameter: Optional[float] = None
     thickness: float = 0.0
     margin: float = 0.0
     sector_angle: float = 360.0
@@ -94,11 +96,13 @@ class Cylinder:
 
     def develop(self) -> FlatGeometry:
         """Calcola il rettangolo di sviluppo (liscio o sfaccettato) e ritorna un FlatGeometry."""
-        for name, value in (("diameter", self.diameter), ("height", self.height)):
-            if value <= 0:
-                raise ValueError(f"{name} deve essere maggiore di zero.")
         if self.thickness < 0:
             raise ValueError("thickness non può essere negativo.")
+        outer_diameter = resolve_outer_diameter(
+            "diameter", self.outer_diameter, self.inner_diameter, self.thickness,
+        )
+        if self.height <= 0:
+            raise ValueError("height deve essere maggiore di zero.")
         if self.margin < 0:
             raise ValueError("margin non può essere negativo.")
         if not (0.0 < self.sector_angle <= 360.0):
@@ -117,9 +121,9 @@ class Cylinder:
 
         effective_angle = self.sector_angle if self.split == 1 else 360.0 / self.split
 
-        diameter_mean = self.diameter - self.thickness
+        diameter_mean = outer_diameter - self.thickness
         if diameter_mean <= 0:
-            raise ValueError("thickness deve essere minore di diameter.")
+            raise ValueError("thickness deve essere minore di outer_diameter.")
 
         bends = []
         if self.faceted:
@@ -170,7 +174,7 @@ class Cylinder:
             reference_entities = swap_xy(reference_entities)
 
         meta = {
-            "diameter": self.diameter,
+            "outer_diameter": outer_diameter,
             "height": self.height,
             "thickness": self.thickness,
             "margin": self.margin,

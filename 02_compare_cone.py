@@ -34,13 +34,13 @@ def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     smooth = Cone(
-        top_diameter=TOP_DIAMETER, bottom_diameter=BOTTOM_DIAMETER,
+        top_outer_diameter=TOP_DIAMETER, bottom_outer_diameter=BOTTOM_DIAMETER,
         height=HEIGHT, thickness=THICKNESS, label="cono_liscio",
     ).develop()
     smooth.to_dxf(OUTPUT_DIR / "confronto_cono_liscio.dxf")
 
     faceted = Cone(
-        top_diameter=TOP_DIAMETER, bottom_diameter=BOTTOM_DIAMETER,
+        top_outer_diameter=TOP_DIAMETER, bottom_outer_diameter=BOTTOM_DIAMETER,
         height=HEIGHT, thickness=THICKNESS, faceted=True, n_facets=N_FACETS,
         facet_bend_radius=FACET_BEND_RADIUS, label="cono_sfaccettato",
     ).develop()

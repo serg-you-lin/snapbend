@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 VALID_ORIENTATIONS = frozenset({"horizontal", "vertical"})
 
@@ -42,6 +42,27 @@ def _check_orientation(orientation: str) -> None:
         raise ValueError(
             f"orientation deve essere 'horizontal' o 'vertical', ricevuto {orientation!r}."
         )
+
+
+def resolve_outer_diameter(
+    prefix: str, outer: Optional[float], inner: Optional[float], thickness: float,
+) -> float:
+    """
+    Diametro ESTERNO a partire da quello dato, esterno o interno (MAP.md D81).
+
+    `prefix` ("", "top_", "bottom_") serve solo a nominare i parametri negli
+    errori. Ne va dato esattamente uno fra `outer` e `inner`; l'interno si
+    porta a esterno con `+ 2 * thickness`.
+    """
+    if (outer is None) == (inner is None):
+        raise ValueError(
+            f"dai {prefix}outer_diameter oppure {prefix}inner_diameter, uno solo dei due."
+        )
+    value = outer if outer is not None else inner + 2.0 * thickness
+    name = f"{prefix}outer_diameter" if outer is not None else f"{prefix}inner_diameter"
+    if (outer if outer is not None else inner) <= 0:
+        raise ValueError(f"{name} deve essere maggiore di zero.")
+    return value
 
 
 def swap_xy(entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:

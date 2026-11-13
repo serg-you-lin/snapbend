@@ -58,7 +58,7 @@ def main() -> None:
 
     # === 1. Sella calandra (liscia) ==========================================
     sella_smooth = Cylinder(
-        diameter=DIAMETER, height=HEIGHT, thickness=THICKNESS,
+        outer_diameter=DIAMETER, height=HEIGHT, thickness=THICKNESS,
         sector_angle=SECTOR_ANGLE, label="sella_calandra",
     ).develop()
     sella_smooth.to_dxf(OUTPUT_DIR / "12_sella_calandra.dxf")
@@ -71,7 +71,7 @@ def main() -> None:
     # === 2. Stessa sella, sfaccettata, CON e SENZA vista in sezione =========
     # 60° su n_facets=30 piene -> 5 faccette in questo pezzo (30*60/360=5).
     sella_faceted = Cylinder(
-        diameter=DIAMETER, height=HEIGHT, thickness=THICKNESS,
+        outer_diameter=DIAMETER, height=HEIGHT, thickness=THICKNESS,
         sector_angle=SECTOR_ANGLE, faceted=True, n_facets=30, label="sella_sfaccettata",
     ).develop()
     sella_faceted.to_dxf(OUTPUT_DIR / "12_sella_sfaccettata_no_section.dxf")

@@ -21,28 +21,28 @@ def main() -> None:
 
     # --- Cilindro sfaccettato, 8 facce (default) --------------------------
     cyl_faceted = Cylinder(
-        diameter=150, height=500, thickness=2, faceted=True,
+        outer_diameter=150, height=500, thickness=2, faceted=True,
         label="cilindro_sfaccettato",
     ).develop()
     cyl_faceted.to_dxf(OUTPUT_DIR / "cilindro_sfaccettato.dxf")
 
     # --- Stesso cilindro, 12 faccette invece di 8 --------------------------
     cyl_faceted_12 = Cylinder(
-        diameter=150, height=500, thickness=2, faceted=True, n_facets=12,
+        outer_diameter=150, height=500, thickness=2, faceted=True, n_facets=12,
         label="cilindro_sfaccettato_12",
     ).develop()
     cyl_faceted_12.to_dxf(OUTPUT_DIR / "cilindro_sfaccettato_12.dxf")
 
     # --- Cono sfaccettato, 8 facce (default) -------------------------------
     cone_faceted = Cone(
-        top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+        top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
         faceted=True, label="cono_sfaccettato",
     ).develop()
     cone_faceted.to_dxf(OUTPUT_DIR / "cono_sfaccettato.dxf")
 
     # --- Confronto: stesso cono, sviluppo liscio da calandra ----------------
     cone_smooth = Cone(
-        top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+        top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
         label="cono_liscio",
     ).develop()
     cone_smooth.to_dxf(OUTPUT_DIR / "cono_liscio.dxf")

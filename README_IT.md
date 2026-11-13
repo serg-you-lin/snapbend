@@ -22,10 +22,10 @@ neutro + i valori calcolati). Niente DXF, niente topo. Solo `.to_dxf()` tocca
 ```python
 from snapbend import Cone, Cylinder
 
-flat = Cone(top_diameter=1600, bottom_diameter=1016, height=1000, thickness=5).develop()
+flat = Cone(top_outer_diameter=1600, bottom_outer_diameter=1016, height=1000, thickness=5).develop()
 flat.to_dxf("cone.dxf")
 
-flat = Cylinder(diameter=1016, height=3895, thickness=5).develop()
+flat = Cylinder(outer_diameter=1016, height=3895, thickness=5).develop()
 flat.to_dxf("cylinder.dxf")
 ```
 

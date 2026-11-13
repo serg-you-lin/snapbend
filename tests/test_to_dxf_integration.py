@@ -20,13 +20,13 @@ from snapbend import Bend, BentProfile, Cone, Cylinder
 class TestToDxfIntegration(unittest.TestCase):
 
     def test_cone_to_topo_result(self):
-        flat = Cone(top_diameter=200, bottom_diameter=150, height=100, thickness=2).develop()
+        flat = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2).develop()
         result = flat.to_topo_result()
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(result.cluster_count, 1)
 
     def test_cylinder_to_topo_result(self):
-        flat = Cylinder(diameter=150, height=500, thickness=2).develop()
+        flat = Cylinder(outer_diameter=150, height=500, thickness=2).develop()
         result = flat.to_topo_result()
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(result.cluster_count, 1)
@@ -42,7 +42,7 @@ class TestToDxfIntegration(unittest.TestCase):
         self.assertEqual(len(result.clusters[0].features("bending_lines")), 1)
 
     def test_faceted_cylinder_detects_seven_bending_lines(self):
-        flat = Cylinder(diameter=150, height=500, thickness=2, faceted=True, n_facets=8).develop()
+        flat = Cylinder(outer_diameter=150, height=500, thickness=2, faceted=True, n_facets=8).develop()
         result = flat.to_topo_result()
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(result.cluster_count, 1)
@@ -50,7 +50,7 @@ class TestToDxfIntegration(unittest.TestCase):
 
     def test_faceted_cone_detects_seven_bending_lines(self):
         flat = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8,
         ).develop()
         result = flat.to_topo_result()
@@ -62,7 +62,7 @@ class TestToDxfIntegration(unittest.TestCase):
         import tempfile
         from pathlib import Path
 
-        flat = Cone(top_diameter=200, bottom_diameter=150, height=100, thickness=2).develop()
+        flat = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2).develop()
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "cone.dxf"
             doc_out = flat.to_dxf(out)
@@ -77,7 +77,7 @@ class TestToDxfIntegration(unittest.TestCase):
         from pathlib import Path
 
         flat = Cylinder(
-            diameter=150, height=500, thickness=2, faceted=True, n_facets=8,
+            outer_diameter=150, height=500, thickness=2, faceted=True, n_facets=8,
         ).develop()
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "cyl.dxf"

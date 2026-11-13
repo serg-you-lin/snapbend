@@ -12,10 +12,10 @@ import di topo.
 
     from snapbend import Cone, Cylinder, Bend, BentProfile
 
-    flat = Cone(top_diameter=1600, bottom_diameter=1016, height=1000, thickness=5).develop()
+    flat = Cone(top_outer_diameter=1600, bottom_outer_diameter=1016, height=1000, thickness=5).develop()
     flat.to_dxf("cone.dxf")   # richiede topo installato a fianco
 
-    flat = Cylinder(diameter=1016, height=3895, thickness=5).develop()
+    flat = Cylinder(outer_diameter=1016, height=3895, thickness=5).develop()
     flat.to_dxf("cylinder.dxf")
 
     flat = BentProfile(

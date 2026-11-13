@@ -1877,6 +1877,22 @@ theirs. A bend drawn dashed in the input (a dash at each end) now counts one
 per dash; a dashed bend that snapbend writes itself (D63) is still one
 `BendingLine` and one bend.
 
+### D81 — `Cone`/`Cylinder`: the diameter's name says its surface; outer or inner, never ambiguous (Federico, 13 Nov 2026)
+
+`diameter` did not say what it measured: D19 made it the outer one, but one
+had to remember it at every call. Now the name carries it: `Cylinder(outer_diameter=…)`
+or `Cylinder(inner_diameter=…)`; `Cone(top_/bottom_ + outer_/inner_diameter)`.
+Exactly one per side, else `ValueError` (the same "never both" shape as
+`sector_angle`/`split`, D46); a cone may mix (top outer, bottom inner). The
+inner one becomes outer with `+ 2·thickness` and the calculation does not
+change: D19 stands (development on the mean fiber), only the way in is
+named. A mean-fiber diameter is not accepted: no drawing is dimensioned that
+way. Clean break, no alias: the parameters are keyword-only (the optional pair
+cannot come before `height`), and `meta` carries `outer_diameter` /
+`top_outer_diameter` / `bottom_outer_diameter` in place of the old keys.
+`height` of the cone stays as given, used on the mean fiber as it is.
+
 → **0.12.0** (D79: `part_fields`, the sheet-metal data for the ERP/CAM JSON).
 → **0.12.1** (D79: `UserWarning` when material or thickness are written as "N/D").
 → **0.12.2** (D80: collinear strokes with material between count as separate bends).
+→ **0.12.3** (D81: `outer_diameter` / `inner_diameter` in `Cone` and `Cylinder`).

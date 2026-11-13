@@ -19,7 +19,9 @@ dello sviluppo (`model`) → pipeline di comodo (`human_layer`).
 
 ```python
 Cone(
-    top_diameter: float, bottom_diameter: float, height: float,
+    *, height: float,
+    top_outer_diameter: float | None = None, top_inner_diameter: float | None = None,
+    bottom_outer_diameter: float | None = None, bottom_inner_diameter: float | None = None,
     thickness: float = 0.0, margin: float = 0.0,
     sector_angle: float | None = None,       # tetto sullo sviluppo naturale (MAP.md D46)
     split: int = 1,                          # scorciatoia: sector_angle = full_angle/split
@@ -50,17 +52,18 @@ uguali saldati (`split=2` = due metà). A differenza di `Cylinder`, qui
   `bend_allowance` valorizzato, `deduction`/`setback` a 0: qui si
   aggiunge materiale, non se ne sottrae). **Mutates**: niente, `Cone` è
   immutabile in pratica (dataclass, ma `.develop()` non tocca `self`).
-  **Raises**: `ValueError` se un diametro/altezza è ≤0, `thickness` ≥ un
-  diametro, `top_diameter` == `bottom_diameter` sulla fibra media (usa
+  **Raises**: `ValueError` se un diametro/altezza è ≤0, per un lato non
+  c'è esattamente uno fra `*_outer_diameter` e `*_inner_diameter`,
+  `thickness` ≥ un diametro, `top_outer_diameter` == `bottom_outer_diameter` sulla fibra media (usa
   `Cylinder`), `orientation` non valida, `n_facets < 3`.
-- `meta` del risultato: `top_diameter_mean`, `bottom_diameter_mean`,
+- `meta` del risultato: `top_outer_diameter`, `bottom_outer_diameter`, `top_diameter_mean`, `bottom_diameter_mean`,
   `slant_height`, `outer_radius`, `inner_radius`, `sector_angle_deg`
   (liscio) o `n_facets`/`facet_angle_deg`/`facet_bend_radius`/
   `facet_k_factor`/`facet_bend_allowance`/... (sfaccettato).
 
 ```python
 from snapbend import Cone
-flat = Cone(top_diameter=1600, bottom_diameter=1016, height=1000, thickness=5).develop()
+flat = Cone(top_outer_diameter=1600, bottom_outer_diameter=1016, height=1000, thickness=5).develop()
 flat.to_dxf("cone.dxf")   # richiede topo installato a fianco
 ```
 
@@ -68,7 +71,8 @@ flat.to_dxf("cone.dxf")   # richiede topo installato a fianco
 
 ```python
 Cylinder(
-    diameter: float, height: float,
+    *, height: float,
+    outer_diameter: float | None = None, inner_diameter: float | None = None,
     thickness: float = 0.0, margin: float = 0.0,
     sector_angle: float = 360.0,             # < 360 = settore parziale (sella calandrata)
     split: int = 1,                          # scorciatoia: sector_angle = 360/split (MAP.md D46)
@@ -98,8 +102,8 @@ principio di `Cone`.
 
 ```python
 from snapbend import Cylinder
-flat = Cylinder(diameter=1016, height=3895, thickness=5).develop()
-sella = Cylinder(diameter=603, height=400, thickness=3, sector_angle=60).develop()
+flat = Cylinder(outer_diameter=1016, height=3895, thickness=5).develop()
+sella = Cylinder(outer_diameter=603, height=400, thickness=3, sector_angle=60).develop()
 ```
 
 ### `Bend`

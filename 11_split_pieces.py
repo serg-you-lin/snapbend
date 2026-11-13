@@ -61,14 +61,14 @@ def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     # === 1. Cilindro diviso in due metà =====================================
-    cyl_full = Cylinder(diameter=600, height=800, thickness=3).develop()
+    cyl_full = Cylinder(outer_diameter=600, height=800, thickness=3).develop()
     cyl_half_smooth = Cylinder(
-        diameter=600, height=800, thickness=3, split=2, margin=3, label="cyl_half_smooth",
+        outer_diameter=600, height=800, thickness=3, split=2, margin=3, label="cyl_half_smooth",
     ).develop()
     cyl_half_smooth.to_dxf(OUTPUT_DIR / "11_cylinder_half_smooth.dxf", show_margin_reference=True)
 
     cyl_half_faceted = Cylinder(
-        diameter=600, height=800, thickness=3, faceted=True, n_facets=12,
+        outer_diameter=600, height=800, thickness=3, faceted=True, n_facets=12,
         split=2, margin=3, label="cyl_half_faceted",
     ).develop()
     cyl_half_faceted.to_dxf(OUTPUT_DIR / "11_cylinder_half_faceted_no_section.dxf")
@@ -81,15 +81,15 @@ def main() -> None:
           f"{len(cyl_half_faceted.bends)} pieghe da {cyl_half_faceted.bends[0].angle:.2f}°")
 
     # === 2. Cono diviso in due ===============================================
-    cone_full = Cone(top_diameter=1600, bottom_diameter=1016, height=1000, thickness=5).develop()
+    cone_full = Cone(top_outer_diameter=1600, bottom_outer_diameter=1016, height=1000, thickness=5).develop()
     cone_half_smooth = Cone(
-        top_diameter=1600, bottom_diameter=1016, height=1000, thickness=5,
+        top_outer_diameter=1600, bottom_outer_diameter=1016, height=1000, thickness=5,
         split=2, margin=5, label="cone_half_smooth",
     ).develop()
     cone_half_smooth.to_dxf(OUTPUT_DIR / "11_cone_half_smooth.dxf", show_margin_reference=True)
 
     cone_half_faceted = Cone(
-        top_diameter=1600, bottom_diameter=1016, height=1000, thickness=5,
+        top_outer_diameter=1600, bottom_outer_diameter=1016, height=1000, thickness=5,
         faceted=True, n_facets=10, split=2, label="cone_half_faceted",
     ).develop()
     cone_half_faceted.to_dxf(OUTPUT_DIR / "11_cone_half_faceted_no_section.dxf")

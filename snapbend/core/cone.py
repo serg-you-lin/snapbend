@@ -5,8 +5,11 @@ Sviluppo piano del tronco di cono (settore anulare). Stessa matematica di
 `cono.py` (dxf-forge), riscritta come motore parametrico puro — zero
 dipendenze, zero DXF: `develop()` ritorna dati, non un file.
 
-Convenzione: i diametri sono ESTERNI. Lo sviluppo è calcolato sulla fibra
-media (D_medio = D_esterno - thickness), come nello script originale.
+Convenzione: i diametri si danno ESTERNI (`top_outer_diameter`,
+`bottom_outer_diameter`) oppure INTERNI (`top_inner_diameter`,
+`bottom_inner_diameter`) — per ciascun lato uno solo dei due (MAP.md D81).
+Lo sviluppo è calcolato sulla fibra media (D_medio = D_esterno - thickness).
+L'altezza è quella fra i due cerchi, usata così com'è sulla fibra media.
 
 Orientamento canonico: il settore è costruito simmetrico rispetto all'asse
 X, con la bisettrice verso +X — nessuna trasformazione. orientation="vertical"
@@ -64,7 +67,7 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 
-from ..model.geometry import FlatGeometry, polar_point, swap_xy, _check_orientation
+from ..model.geometry import FlatGeometry, polar_point, swap_xy, _check_orientation, resolve_outer_diameter
 from .bend import resolve_calibration, resolve_facet_bend
 
 _TOL = 1e-9
@@ -136,11 +139,13 @@ def _faceted_sector_outline(r_inner: float, r_outer: float, vertex_angles: list,
     return entities
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Cone:
-    top_diameter: float
-    bottom_diameter: float
     height: float
+    top_outer_diameter: Optional[float] = None      # per lato uno solo fra outer e inner (MAP.md D81)
+    top_inner_diameter: Optional[float] = None
+    bottom_outer_diameter: Optional[float] = None
+    bottom_inner_diameter: Optional[float] = None
     thickness: float = 0.0
     margin: float = 0.0
     sector_angle: Optional[float] = None        # tetto sullo sviluppo naturale (MAP.md D46); None -> pieno
@@ -156,15 +161,16 @@ class Cone:
 
     def develop(self) -> FlatGeometry:
         """Calcola il settore anulare (liscio o sfaccettato) e ritorna un FlatGeometry."""
-        for name, value in (
-            ("top_diameter", self.top_diameter),
-            ("bottom_diameter", self.bottom_diameter),
-            ("height", self.height),
-        ):
-            if value <= 0:
-                raise ValueError(f"{name} deve essere maggiore di zero.")
         if self.thickness < 0:
             raise ValueError("thickness non può essere negativo.")
+        top_outer = resolve_outer_diameter(
+            "top_", self.top_outer_diameter, self.top_inner_diameter, self.thickness,
+        )
+        bottom_outer = resolve_outer_diameter(
+            "bottom_", self.bottom_outer_diameter, self.bottom_inner_diameter, self.thickness,
+        )
+        if self.height <= 0:
+            raise ValueError("height deve essere maggiore di zero.")
         if self.margin < 0:
             raise ValueError("margin non può essere negativo.")
         if self.split < 1:
@@ -179,16 +185,16 @@ class Cone:
         if self.faceted and self.n_facets < 3:
             raise ValueError("n_facets deve essere almeno 3.")
 
-        top_mean = self.top_diameter - self.thickness
-        bottom_mean = self.bottom_diameter - self.thickness
+        top_mean = top_outer - self.thickness
+        bottom_mean = bottom_outer - self.thickness
 
         if top_mean <= 0:
-            raise ValueError("thickness deve essere minore di top_diameter.")
+            raise ValueError("thickness deve essere minore di top_outer_diameter.")
         if bottom_mean <= 0:
-            raise ValueError("thickness deve essere minore di bottom_diameter.")
+            raise ValueError("thickness deve essere minore di bottom_outer_diameter.")
         if abs(top_mean - bottom_mean) < _TOL:
             raise ValueError(
-                "top_diameter e bottom_diameter coincidono sulla fibra media: "
+                "i due diametri coincidono sulla fibra media: "
                 "usa Cylinder, non Cone."
             )
 
@@ -232,8 +238,8 @@ class Cone:
             reference_entities = swap_xy(reference_entities)
 
         meta = {
-            "top_diameter": self.top_diameter,
-            "bottom_diameter": self.bottom_diameter,
+            "top_outer_diameter": top_outer,
+            "bottom_outer_diameter": bottom_outer,
             "height": self.height,
             "thickness": self.thickness,
             "margin": self.margin,

@@ -10,9 +10,28 @@ class TestConeMath(unittest.TestCase):
     contro topo (develop() non ne ha bisogno).
     """
 
+    def test_inner_diameters_equal_outer_plus_two_thickness(self):
+        # D81: stesso cono dato dall'interno, dall'esterno o con un lato per tipo
+        da_esterno = Cone(top_outer_diameter=200, bottom_outer_diameter=150,
+                          height=100, thickness=2).develop()
+        da_interno = Cone(top_inner_diameter=196, bottom_inner_diameter=146,
+                          height=100, thickness=2).develop()
+        misto = Cone(top_outer_diameter=200, bottom_inner_diameter=146,
+                     height=100, thickness=2).develop()
+        for altro in (da_interno, misto):
+            self.assertAlmostEqual(altro.meta["outer_radius"], da_esterno.meta["outer_radius"], places=9)
+            self.assertAlmostEqual(altro.meta["full_angle_deg"], da_esterno.meta["full_angle_deg"], places=9)
+
+    def test_both_or_neither_diameter_per_side_raises(self):
+        with self.assertRaises(ValueError):
+            Cone(top_outer_diameter=200, top_inner_diameter=196,
+                 bottom_outer_diameter=150, height=100, thickness=2).develop()
+        with self.assertRaises(ValueError):
+            Cone(top_outer_diameter=200, height=100, thickness=2).develop()
+
     def test_sector_angle_and_radii(self):
         flat = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
         ).develop()
         m = flat.meta
 
@@ -28,34 +47,34 @@ class TestConeMath(unittest.TestCase):
         self.assertAlmostEqual(m["sector_angle_deg"], angle, places=6)
 
     def test_entities_form_a_closed_loop(self):
-        flat = Cone(top_diameter=200, bottom_diameter=150, height=100, thickness=2).develop()
+        flat = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2).develop()
         self.assertEqual(len(flat.entities), 4)
         kinds = [e["type"] for e in flat.entities]
         self.assertEqual(kinds, ["arc", "line", "arc", "line"])
 
     def test_equal_diameters_raises(self):
         with self.assertRaises(ValueError):
-            Cone(top_diameter=100, bottom_diameter=100, height=50).develop()
+            Cone(top_outer_diameter=100, bottom_outer_diameter=100, height=50).develop()
 
     def test_thickness_too_large_raises(self):
         with self.assertRaises(ValueError):
-            Cone(top_diameter=10, bottom_diameter=20, height=50, thickness=15).develop()
+            Cone(top_outer_diameter=10, bottom_outer_diameter=20, height=50, thickness=15).develop()
 
     def test_non_positive_dimension_raises(self):
         with self.assertRaises(ValueError):
-            Cone(top_diameter=0, bottom_diameter=100, height=50).develop()
+            Cone(top_outer_diameter=0, bottom_outer_diameter=100, height=50).develop()
 
     def test_default_orientation_is_vertical_transformed(self):
         # orientation="vertical" (default): il settore canonico (bisettrice
         # su +X) viene ruotato — l'angolo iniziale dell'arco esterno non
         # coincide più con quello canonico -angle/2.
-        flat = Cone(top_diameter=200, bottom_diameter=150, height=100, thickness=2).develop()
+        flat = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2).develop()
         angle = flat.meta["sector_angle_deg"]
         self.assertNotAlmostEqual(flat.entities[0]["start_angle"], -angle / 2.0)
 
     def test_horizontal_orientation_is_canonical_no_transform(self):
         flat = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             orientation="horizontal",
         ).develop()
         angle = flat.meta["sector_angle_deg"]
@@ -65,12 +84,12 @@ class TestConeMath(unittest.TestCase):
 
     def test_invalid_orientation_raises(self):
         with self.assertRaises(ValueError):
-            Cone(top_diameter=200, bottom_diameter=150, height=100, orientation="up").develop()
+            Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, orientation="up").develop()
 
     def test_margin_reduces_sector_angle(self):
-        no_margin = Cone(top_diameter=200, bottom_diameter=150, height=100, thickness=2).develop()
+        no_margin = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2).develop()
         with_margin = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2, margin=10,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2, margin=10,
         ).develop()
         self.assertLess(with_margin.meta["sector_angle_deg"], no_margin.meta["sector_angle_deg"])
 
@@ -79,7 +98,7 @@ class TestConeMath(unittest.TestCase):
         # linea, come quello tagliato) non due linee sciolte — così si
         # richiude/collega intorno alla geometria di taglio reale.
         flat = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2, margin=10,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2, margin=10,
         ).develop()
         self.assertEqual(len(flat.reference_entities), 4)
         self.assertEqual(
@@ -89,7 +108,7 @@ class TestConeMath(unittest.TestCase):
         self.assertAlmostEqual(flat.reference_entities[2]["radius"], flat.meta["inner_radius"], places=6)
 
     def test_no_margin_means_no_reference_lines(self):
-        flat = Cone(top_diameter=200, bottom_diameter=150, height=100, thickness=2).develop()
+        flat = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2).develop()
         self.assertEqual(flat.reference_entities, [])
 
 
@@ -106,7 +125,7 @@ class TestConeFaceted(unittest.TestCase):
         from snapbend.core.cone import _BEND_LINE_INSET
 
         flat = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8, orientation="horizontal",
         ).develop()
         bend_lines = [e for e in flat.entities if e.get("role") == "bending"]
@@ -119,7 +138,7 @@ class TestConeFaceted(unittest.TestCase):
 
     def test_outer_facet_width_matches_inscribed_polygon_chord(self):
         flat = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8,
         ).develop()
         top_mean, bottom_mean = 198.0, 148.0
@@ -132,21 +151,21 @@ class TestConeFaceted(unittest.TestCase):
         # dalla calibration (default "default", D33): senza cava nota,
         # raggio = spessore (D62).
         flat = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True,
         ).develop()
         self.assertAlmostEqual(flat.meta["facet_bend_radius"], 2.0)
 
     def test_explicit_facet_bend_radius_still_wins(self):
         flat = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, facet_bend_radius=3.0,
         ).develop()
         self.assertAlmostEqual(flat.meta["facet_bend_radius"], 3.0)
 
     def test_faceted_bends_populated_one_per_joint(self):
         flat = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8,
         ).develop()
         self.assertEqual(len(flat.bends), 7)
@@ -154,17 +173,17 @@ class TestConeFaceted(unittest.TestCase):
         self.assertGreater(flat.bends[0].bend_allowance, 0.0)
 
     def test_default_n_facets_is_eight(self):
-        flat = Cone(top_diameter=200, bottom_diameter=150, height=100, thickness=2, faceted=True).develop()
+        flat = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2, faceted=True).develop()
         self.assertEqual(flat.meta["n_facets"], 8)
 
     def test_facet_span_converges_to_smooth_sector_angle(self):
-        smooth = Cone(top_diameter=200, bottom_diameter=150, height=100, thickness=2).develop()
+        smooth = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2).develop()
         coarse = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8,
         ).develop()
         fine = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=300,
         ).develop()
 
@@ -178,7 +197,7 @@ class TestConeFaceted(unittest.TestCase):
     def test_n_facets_below_three_raises(self):
         with self.assertRaises(ValueError):
             Cone(
-                top_diameter=200, bottom_diameter=150, height=100,
+                top_outer_diameter=200, bottom_outer_diameter=150, height=100,
                 faceted=True, n_facets=2,
             ).develop()
 
@@ -186,7 +205,7 @@ class TestConeFaceted(unittest.TestCase):
         from snapbend.core.cone import _BEND_LINE_INSET
 
         flat = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8, margin=10, orientation="horizontal",
         ).develop()
         bend_lines = [e for e in flat.entities if e.get("role") == "bending"]
@@ -197,7 +216,7 @@ class TestConeFaceted(unittest.TestCase):
             self.assertAlmostEqual(math.hypot(x2 - x1, y2 - y1), expected_length, places=6)
 
     def test_smooth_is_still_the_default(self):
-        flat = Cone(top_diameter=200, bottom_diameter=150, height=100, thickness=2).develop()
+        flat = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2).develop()
         self.assertNotIn("n_facets", flat.meta)
 
 
@@ -206,13 +225,13 @@ class TestConeSplit(unittest.TestCase):
     per farlo in più pezzi saldati insieme."""
 
     def _full_angle(self):
-        return Cone(top_diameter=200, bottom_diameter=150, height=100).develop().meta["full_angle_deg"]
+        return Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100).develop().meta["full_angle_deg"]
 
     def test_split_in_half_matches_explicit_sector_angle(self):
         full_angle = self._full_angle()
-        via_split = Cone(top_diameter=200, bottom_diameter=150, height=100, split=2).develop()
+        via_split = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, split=2).develop()
         via_angle = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, sector_angle=full_angle / 2.0,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, sector_angle=full_angle / 2.0,
         ).develop()
         self.assertAlmostEqual(via_split.meta["sector_angle_deg"], via_angle.meta["sector_angle_deg"])
 
@@ -220,23 +239,23 @@ class TestConeSplit(unittest.TestCase):
         full_angle = self._full_angle()
         with self.assertRaises(ValueError):
             Cone(
-                top_diameter=200, bottom_diameter=150, height=100, sector_angle=full_angle + 1.0,
+                top_outer_diameter=200, bottom_outer_diameter=150, height=100, sector_angle=full_angle + 1.0,
             ).develop()
 
     def test_split_and_sector_angle_together_raises(self):
         with self.assertRaises(ValueError):
             Cone(
-                top_diameter=200, bottom_diameter=150, height=100,
+                top_outer_diameter=200, bottom_outer_diameter=150, height=100,
                 sector_angle=10.0, split=2,
             ).develop()
 
     def test_faceted_split_in_half_gives_half_the_facets(self):
         full = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8,
         ).develop()
         half = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8, split=2,
         ).develop()
         self.assertEqual(half.meta["n_facets"], 4)
@@ -250,11 +269,11 @@ class TestConeSplit(unittest.TestCase):
     def test_margin_on_faceted_half_still_works(self):
         # Stesso parametro margin che accorcia il cono intero (MAP.md D46).
         no_margin = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8, split=2,
         ).develop()
         with_margin = Cone(
-            top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8, split=2, margin=2,
         ).develop()
         self.assertEqual(len(with_margin.entities), len(no_margin.entities))
@@ -262,7 +281,7 @@ class TestConeSplit(unittest.TestCase):
     def test_split_not_on_a_facet_boundary_raises(self):
         with self.assertRaises(ValueError):
             Cone(
-                top_diameter=200, bottom_diameter=150, height=100, thickness=2,
+                top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
                 faceted=True, n_facets=8, split=3,
             ).develop()
 

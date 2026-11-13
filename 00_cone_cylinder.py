@@ -32,8 +32,8 @@ def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     cone_flat = Cone(
-        top_diameter=TOP_DIAMETER,
-        bottom_diameter=BOTTOM_DIAMETER,
+        top_outer_diameter=TOP_DIAMETER,
+        bottom_outer_diameter=BOTTOM_DIAMETER,
         height=CONE_HEIGHT,
         thickness=THICKNESS,
         label="sviluppo_cono",
@@ -41,7 +41,7 @@ def main() -> None:
     cone_flat.to_dxf(OUTPUT_DIR / "sviluppo_cono.dxf")
 
     cylinder_flat = Cylinder(
-        diameter=CYLINDER_DIAMETER,
+        outer_diameter=CYLINDER_DIAMETER,
         height=CYLINDER_HEIGHT,
         thickness=THICKNESS,
         label="sviluppo_cilindro",
