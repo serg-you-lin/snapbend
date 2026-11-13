@@ -67,7 +67,7 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 
-from ..model.geometry import FlatGeometry, polar_point, swap_xy, _check_orientation, resolve_outer_diameter
+from ..model.geometry import FlatGeometry, polar_point, swap_xy, _check_orientation, resolve_outer_diameter, resolve_seam_gap
 from .bend import resolve_calibration, resolve_facet_bend
 
 _TOL = 1e-9
@@ -148,6 +148,7 @@ class Cone:
     bottom_inner_diameter: Optional[float] = None
     thickness: float = 0.0
     margin: float = 0.0
+    overlap: float = 0.0                        # sovrapposizione dei bordi radiali, l'opposto di margin (MAP.md D84)
     sector_angle: Optional[float] = None        # tetto sullo sviluppo naturale (MAP.md D46); None -> pieno
     split: int = 1                              # scorciatoia per sector_angle=full_angle/split
     orientation: str = "vertical"
@@ -171,8 +172,7 @@ class Cone:
         )
         if self.height <= 0:
             raise ValueError("height deve essere maggiore di zero.")
-        if self.margin < 0:
-            raise ValueError("margin non può essere negativo.")
+        gap = resolve_seam_gap(self.margin, self.overlap)
         if self.split < 1:
             raise ValueError("split deve essere almeno 1.")
         if self.split != 1 and self.sector_angle is not None:
@@ -226,11 +226,11 @@ class Cone:
         bends = []
         if self.faceted:
             entities, reference_entities, extra_meta, bends = self._develop_faceted(
-                r_inner, r_outer, big_r, small_r, full_angle, effective_angle,
+                r_inner, r_outer, big_r, small_r, full_angle, effective_angle, gap,
             )
         else:
             entities, reference_entities, extra_meta = self._develop_smooth(
-                r_inner, r_outer, effective_angle,
+                r_inner, r_outer, effective_angle, gap,
             )
 
         if self.orientation == "vertical":
@@ -243,6 +243,7 @@ class Cone:
             "height": self.height,
             "thickness": self.thickness,
             "margin": self.margin,
+            "overlap": self.overlap,
             "top_diameter_mean": top_mean,
             "bottom_diameter_mean": bottom_mean,
             "slant_height": slant,
@@ -260,8 +261,9 @@ class Cone:
 
     # ------------------------------------------------------------------
 
-    def _develop_smooth(self, r_inner: float, r_outer: float, effective_angle: float):
-        half_margin_angle = math.degrees(self.margin / 2.0 / r_outer) if self.margin > 0 else 0.0
+    def _develop_smooth(self, r_inner: float, r_outer: float, effective_angle: float, gap: float):
+        # `gap` ha segno (D84): > 0 stringe il settore, < 0 lo allarga
+        half_margin_angle = math.degrees(gap / 2.0 / r_outer)
         cut_angle = effective_angle - 2.0 * half_margin_angle
         if cut_angle <= 0:
             raise ValueError("margin troppo grande rispetto allo sviluppo del cono.")
@@ -269,13 +271,13 @@ class Cone:
         entities = _sector_entities(r_inner, r_outer, cut_angle, role="outer")
 
         reference_entities = []
-        if self.margin > 0:
+        if gap != 0:
             reference_entities = _sector_entities(r_inner, r_outer, effective_angle)
 
         return entities, reference_entities, {"sector_angle_deg": cut_angle}
 
     def _develop_faceted(self, r_inner: float, r_outer: float, big_r: float, small_r: float,
-                         full_angle: float, effective_angle: float):
+                         full_angle: float, effective_angle: float, gap: float):
         n_full = self.n_facets
 
         # Passo angolare tale che la corda dritta a r_outer coincida col
@@ -316,8 +318,8 @@ class Cone:
         vertex_angles_full = [-full_span / 2.0 + i * angular_step for i in range(n + 1)]
 
         vertex_angles = list(vertex_angles_full)
-        if self.margin > 0:
-            half_margin_angle = math.degrees(self.margin / 2.0 / r_outer)
+        if gap != 0:
+            half_margin_angle = math.degrees(gap / 2.0 / r_outer)
             vertex_angles[0] += half_margin_angle
             vertex_angles[-1] -= half_margin_angle
             if vertex_angles[0] >= vertex_angles[1] or vertex_angles[-1] <= vertex_angles[-2]:
@@ -341,7 +343,7 @@ class Cone:
             })
 
         reference_entities = []
-        if self.margin > 0:
+        if gap != 0:
             reference_entities = _faceted_sector_outline(r_inner, r_outer, vertex_angles_full, role=None)
             for e in reference_entities:
                 e.pop("role", None)

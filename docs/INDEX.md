@@ -8,7 +8,7 @@ python tests/gen_index.py
 
 What this is: the lookup table of *what already exists* in the package, down to internal helpers. `docs/API.md` documents the public surface (`snapbend.<name>`) with full cards; this file lists every module-level function and class so nothing gets rewritten because it was not found. Signatures and docstring lines come straight from the source, so they cannot drift.
 
-`31` modules · `115` module-level functions · `25` classes · `5150` lines of code.
+`31` modules · `116` module-level functions · `25` classes · `5179` lines of code.
 
 Sections: [Lookup](#lookup) · [Duplicate names](#duplicate-names) · [Dependency rule](#dependency-rule) · [By module](#by-module) · [Internal dependencies](#internal-dependencies)
 
@@ -88,7 +88,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `FlangeFace` | class | `snapbend/model/section.py:78` | Per una flangia: la faccia ESTERNA (convessa) se è coerente da un |
 | `FlangeQuote` | class | `snapbend/model/section.py:92` | La quota da disegnare per una flangia nella vista in sezione |
 | `FlatFlange` | class | `snapbend/core/bend.py:202` | Una flangia di `BentProfile` sullo sviluppo (MAP.md D72). |
-| `FlatGeometry` | class | `snapbend/model/geometry.py:102` | Sviluppo piano di una forma sviluppabile — output di Cone.develop() / |
+| `FlatGeometry` | class | `snapbend/model/geometry.py:123` | Sviluppo piano di una forma sviluppabile — output di Cone.develop() / |
 | `_fmt` | func | `snapbend/model/section.py:63` |  |
 | `_handle_engrave_closed` | func | `snapbend/flat/detect.py:740` |  |
 | `_handle_engrave_closed_loose` | func | `snapbend/flat/detect.py:727` | Come _handle_engrave_open ma per una traccia engrave già chiusa |
@@ -130,6 +130,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `resolve_calibration` | func | `snapbend/core/bend.py:408` | Nome stringa -> `Calibration` caricata, oggetto già risolto -> se |
 | `resolve_facet_bend` | func | `snapbend/core/bend.py:419` | Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla |
 | `resolve_outer_diameter` | func | `snapbend/model/geometry.py:47` | Diametro ESTERNO a partire da quello dato, esterno o interno (MAP.md D81). |
+| `resolve_seam_gap` | func | `snapbend/model/geometry.py:68` | Gioco della cucitura longitudinale CON SEGNO (MAP.md D84): positivo = |
 | `_result_arcs` | func | `snapbend/flat/detect.py:524` | Ogni arco del risultato: ogni curva è contorno di un cluster o sta in |
 | `Section` | class | `snapbend/model/section.py:110` |  |
 | `SectionBend` | class | `snapbend/rules/read_section.py:88` | Una piega letta da sola, senza camminare il profilo (MAP.md D74): una |
@@ -139,7 +140,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `SheetThicknessTable` | class | `snapbend/rules/read_section.py:64` |  |
 | `_side` | func | `snapbend/rules/read_section.py:564` | +1 se `p` sta a sinistra della retta percorsa da start a end, -1 a destra. |
 | `_split_into_sides` | func | `snapbend/rules/read_section.py:592` |  |
-| `swap_xy` | func | `snapbend/model/geometry.py:68` | Riflette la geometria lungo la diagonale y=x (scambia gli assi X/Y) — il |
+| `swap_xy` | func | `snapbend/model/geometry.py:89` | Riflette la geometria lungo la diagonale y=x (scambia gli assi X/Y) — il |
 | `_sweep_deg` | func | `snapbend/rules/read_section.py:136` | Signed sweep from a0 to a1 in (-360, 360), positive when ccw. |
 | `_tangent` | func | `snapbend/rules/read_section.py:571` | La retta tocca l'arco in un suo capo ed è perpendicolare al raggio lì. |
 | `_thickness` | func | `snapbend/rules/read_section.py:255` |  |
@@ -210,7 +211,7 @@ _snapbend/core/bend.py_
 - `resolve_calibration(calibration)` — L408 — Nome stringa -> `Calibration` caricata, oggetto già risolto -> se
 - `resolve_facet_bend(calibration, thickness: float, angle_deg: float, explicit_radius: Optional[float], explicit_k: Optional[float], material: str)` — L419 — Risolve raggio e K per UNA piega a faccette di `Cone`/`Cylinder` dalla
 
-#### `snapbend/core/cone.py` — 361 lines
+#### `snapbend/core/cone.py` — 363 lines
 
 _snapbend/core/cone.py_
 
@@ -219,7 +220,7 @@ _snapbend/core/cone.py_
 - **class** `Cone` — L143
   - methods: `develop`, `_develop_smooth`, `_develop_faceted`
 
-#### `snapbend/core/cylinder.py` — 245 lines
+#### `snapbend/core/cylinder.py` — 251 lines
 
 _snapbend/core/cylinder.py_
 
@@ -413,15 +414,16 @@ _snapbend/model_
 
 No module-level function or class.
 
-#### `snapbend/model/geometry.py` — 189 lines
+#### `snapbend/model/geometry.py` — 210 lines
 
 _snapbend/model/geometry.py_
 
 - `polar_point(radius: float, angle_deg: float, origin: Tuple[float, float]=(0.0, 0.0)) -> Tuple[float, float]` — L30 — Punto a coordinate polari (angolo in gradi).
 - `_check_orientation(orientation: str) -> None` — L40
 - `resolve_outer_diameter(prefix: str, outer: Optional[float], inner: Optional[float], thickness: float) -> float` — L47 — Diametro ESTERNO a partire da quello dato, esterno o interno (MAP.md D81).
-- `swap_xy(entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]` — L68 — Riflette la geometria lungo la diagonale y=x (scambia gli assi X/Y) — il
-- **class** `FlatGeometry` — L102 — Sviluppo piano di una forma sviluppabile — output di Cone.develop() /
+- `resolve_seam_gap(margin: float, overlap: float) -> float` — L68 — Gioco della cucitura longitudinale CON SEGNO (MAP.md D84): positivo =
+- `swap_xy(entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]` — L89 — Riflette la geometria lungo la diagonale y=x (scambia gli assi X/Y) — il
+- **class** `FlatGeometry` — L123 — Sviluppo piano di una forma sviluppabile — output di Cone.develop() /
   - methods: `to_topo_result`, `to_json`, `to_dxf`
 
 #### `snapbend/model/section.py` — 428 lines

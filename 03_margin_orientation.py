@@ -16,9 +16,15 @@ Prova dei due nuovi parametri di Cone/Cylinder:
   tratteggiato su un layer separato ("MarginReference") — solo riferimento,
   mai geometria di taglio.
 
-Genera 4 file per il cilindro (orizzontale/verticale x con/senza margine) e
-2 per il cono (con/senza margine, verticale), così puoi aprirli e
-confrontarli in AutoCAD.
+- overlap (D84): l'opposto di margin, per lamiere sottili che si accavallano —
+  il foglio esce PIÙ LUNGO del giro nominale (overlap=6 -> 3 mm in più per
+  lato). Stessa conversione del margine (cono: angolo sul raggio esterno).
+  Non si dà insieme a margin (ValueError). Il riferimento tratteggiato è il
+  contorno nominale, senza accavallamento.
+
+Genera 5 file per il cilindro (orizzontale/verticale x con/senza margine, più
+uno con overlap) e 3 per il cono (senza, con margine, con overlap, verticale),
+così puoi aprirli e confrontarli in AutoCAD.
 
 Richiede topo installato a fianco: pip install -e ../dxf-forge
 """
@@ -51,6 +57,12 @@ def main() -> None:
     ).develop()
     cyl_margin.to_dxf(OUTPUT_DIR / "cyl_margin.dxf", show_margin_reference=True)
 
+    # --- Cilindro: con 6 mm di sovrapposizione (D84), il foglio è più lungo
+    cyl_overlap = Cylinder(
+        outer_diameter=150, height=25, thickness=2, overlap=6, label="cyl_overlap",
+    ).develop()
+    cyl_overlap.to_dxf(OUTPUT_DIR / "cyl_overlap.dxf", show_margin_reference=True)
+
     # --- Cono: verticale (default), senza e con margine --------------------
     Cone(
         top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
@@ -63,6 +75,12 @@ def main() -> None:
     ).develop()
     cone_margin.to_dxf(OUTPUT_DIR / "cone_margin.dxf", show_margin_reference=True)
 
+    cone_overlap = Cone(
+        top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
+        overlap=10, label="cone_overlap",
+    ).develop()
+    cone_overlap.to_dxf(OUTPUT_DIR / "cone_overlap.dxf", show_margin_reference=True)
+
     cyl_no_margin = Cylinder(outer_diameter=150, height=25, thickness=2).develop()
     cone_no_margin = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2).develop()
 
@@ -70,6 +88,8 @@ def main() -> None:
     print("Cilindro con margine=6 — width:", cyl_margin.meta["width"], "(piena) width_cut:", cyl_margin.meta["width_cut"], "(atteso: width - 6)")
     print("Cono senza margine — angolo settore:", cone_no_margin.meta["sector_angle_deg"])
     print("Cono con margine=10 — angolo settore:", cone_margin.meta["sector_angle_deg"], "(atteso: più piccolo)")
+    print("Cilindro con overlap=6 — width:", cyl_overlap.meta["width"], "(nominale) width_cut:", cyl_overlap.meta["width_cut"], "(atteso: width + 6)")
+    print("Cono con overlap=10 — angolo settore:", cone_overlap.meta["sector_angle_deg"], "(atteso: più grande)")
     print()
     print("File in", OUTPUT_DIR.resolve())
 

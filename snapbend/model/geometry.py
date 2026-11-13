@@ -65,6 +65,27 @@ def resolve_outer_diameter(
     return value
 
 
+def resolve_seam_gap(margin: float, overlap: float) -> float:
+    """
+    Gioco della cucitura longitudinale CON SEGNO (MAP.md D84): positivo =
+    spazio di saldatura (`margin`), negativo = sovrapposizione (`overlap`,
+    per lamiere sottili che si accavallano). Zero = bordi a contatto.
+
+    `margin` e `overlap` non si danno insieme (lo stesso schema "mai
+    entrambi" di `sector_angle`/`split`): sono lo stesso numero in verso opposto.
+    """
+    if margin < 0:
+        raise ValueError("margin non può essere negativo.")
+    if overlap < 0:
+        raise ValueError("overlap non può essere negativo (per accavallare usa overlap positivo, non margin negativo).")
+    if margin and overlap:
+        raise ValueError(
+            "margin (spazio di saldatura) e overlap (sovrapposizione) sono "
+            "l'uno il contrario dell'altro — usane solo uno."
+        )
+    return margin - overlap
+
+
 def swap_xy(entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Riflette la geometria lungo la diagonale y=x (scambia gli assi X/Y) — il

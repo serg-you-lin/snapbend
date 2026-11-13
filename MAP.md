@@ -1914,9 +1914,25 @@ other half of the datum — how many whole parts the customer orders — stays t
 caller's. The material grade as a field of the generator is not done: it needs
 a name apart from `material` (the calibration key, D45).
 
+### D84 — `Cone`/`Cylinder`: `overlap`, the opposite of `margin`, a parameter of its own (Federico, 13 Nov 2026)
+
+A very thin sheet is wrapped with the edges overlapping, not with a weld gap:
+the sheet must be LONGER than the nominal turn. Two ways: `margin` with a
+negative value, or a parameter apart. A parameter apart: the sign would
+change the meaning without saying so, and the library's names have to explain
+themselves (D81). `margin` and `overlap` are the same number in opposite
+directions, never together (`ValueError`, same shape as `sector_angle`/`split`,
+D46); negative values of either raise. Inside, one signed `gap = margin −
+overlap` (`resolve_seam_gap`), so the code of D-margin is not doubled. The
+cone converts it to an angle on the outer radius, as `margin` did. The
+cylinder shifts the sheet so the bbox still starts at 0. `reference_entities`
+keep the nominal outline. It is the longitudinal seam only, not the butt
+weld between two sections (height).
+
 → **0.12.0** (D79: `part_fields`, the sheet-metal data for the ERP/CAM JSON).
 → **0.12.1** (D79: `UserWarning` when material or thickness are written as "N/D").
 → **0.12.2** (D80: collinear strokes with material between count as separate bends).
 → **0.12.3** (D81: `outer_diameter` / `inner_diameter` in `Cone` and `Cylinder`).
 → **0.12.4** (D82: `FlatGeometry.to_json`).
 → **0.12.5** (D83: `to_json` quantity × split).
+→ **0.12.6** (D84: `overlap` in `Cone` and `Cylinder`).

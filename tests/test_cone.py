@@ -29,6 +29,31 @@ class TestConeMath(unittest.TestCase):
         with self.assertRaises(ValueError):
             Cone(top_outer_diameter=200, height=100, thickness=2).develop()
 
+    def test_overlap_allarga_il_settore_come_margin_lo_stringe(self):
+        # D84: stessa conversione arco -> angolo sul raggio esterno, verso opposto
+        kw = dict(top_outer_diameter=100, bottom_outer_diameter=250, height=300, thickness=2)
+        nominale = Cone(**kw).develop()
+        r_outer = nominale.meta["outer_radius"]
+        extra = math.degrees(10 / r_outer)
+        con_overlap = Cone(overlap=10, **kw).develop()
+        con_margin = Cone(margin=10, **kw).develop()
+        self.assertAlmostEqual(con_overlap.meta["sector_angle_deg"],
+                               nominale.meta["sector_angle_deg"] + extra, places=9)
+        self.assertAlmostEqual(con_margin.meta["sector_angle_deg"],
+                               nominale.meta["sector_angle_deg"] - extra, places=9)
+
+    def test_overlap_sfaccettato_allarga_le_faccette_estreme(self):
+        kw = dict(top_outer_diameter=100, bottom_outer_diameter=250, height=300,
+                  thickness=2, split=2, faceted=True, n_facets=8)
+        base, con = Cone(**kw).develop(), Cone(overlap=10, **kw).develop()
+        self.assertEqual(len(con.bends), len(base.bends))
+        self.assertGreater(len(con.reference_entities), 0)
+
+    def test_margin_e_overlap_insieme_sollevano(self):
+        with self.assertRaises(ValueError):
+            Cone(top_outer_diameter=100, bottom_outer_diameter=250, height=300,
+                 thickness=2, margin=2, overlap=2).develop()
+
     def test_sector_angle_and_radii(self):
         flat = Cone(
             top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,

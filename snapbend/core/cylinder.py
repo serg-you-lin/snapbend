@@ -72,7 +72,7 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 
-from ..model.geometry import FlatGeometry, swap_xy, _check_orientation, resolve_outer_diameter
+from ..model.geometry import FlatGeometry, swap_xy, _check_orientation, resolve_outer_diameter, resolve_seam_gap
 from .bend import resolve_calibration, resolve_facet_bend
 
 
@@ -83,6 +83,7 @@ class Cylinder:
     inner_diameter: Optional[float] = None
     thickness: float = 0.0
     margin: float = 0.0
+    overlap: float = 0.0                        # sovrapposizione della cucitura, l'opposto di margin (MAP.md D84)
     sector_angle: float = 360.0
     split: int = 1                              # scorciatoia per sector_angle=360/split (MAP.md D46)
     orientation: str = "vertical"
@@ -103,8 +104,7 @@ class Cylinder:
         )
         if self.height <= 0:
             raise ValueError("height deve essere maggiore di zero.")
-        if self.margin < 0:
-            raise ValueError("margin non può essere negativo.")
+        gap = resolve_seam_gap(self.margin, self.overlap)
         if not (0.0 < self.sector_angle <= 360.0):
             raise ValueError("sector_angle deve essere maggiore di zero e al massimo 360.")
         if self.split < 1:
@@ -134,15 +134,20 @@ class Cylinder:
             width = math.radians(effective_angle) * (diameter_mean / 2.0)
             bend_lines, extra_meta = [], {}
 
-        half_margin = self.margin / 2.0
-        cut_width = width - self.margin
+        # `gap` ha segno (D84): > 0 accorcia, < 0 allunga. Con una
+        # sovrapposizione il foglio esce a sinistra dello 0 nominale: si
+        # trasla tutto di `shift` per tenere il bbox che parte da 0.
+        half_gap = gap / 2.0
+        cut_width = width - gap
         if cut_width <= 0:
             raise ValueError("margin troppo grande rispetto allo sviluppo del cilindro.")
-        if bend_lines and (half_margin >= bend_lines[0] or half_margin >= width - bend_lines[-1]):
+        if bend_lines and (half_gap >= bend_lines[0] or half_gap >= width - bend_lines[-1]):
             raise ValueError(
                 "margin troppo grande rispetto alla faccetta estrema del cilindro sfaccettato."
             )
-        x0 = half_margin
+        shift = max(-half_gap, 0.0)
+        x0 = half_gap + shift
+        bend_lines = [pos + shift for pos in bend_lines]
 
         # Canonico: X = circonferenza/sviluppo sfaccettato (accorciata a
         # destra e sinistra dal margine), Y = lunghezza assiale (invariata).
@@ -160,12 +165,12 @@ class Cylinder:
             })
 
         reference_entities = []
-        if self.margin > 0:
+        if gap != 0:
             reference_entities = [{
                 "type": "polygon",
                 "points": [
-                    (0.0, 0.0), (width, 0.0),
-                    (width, self.height), (0.0, self.height),
+                    (shift, 0.0), (shift + width, 0.0),
+                    (shift + width, self.height), (shift, self.height),
                 ],
             }]
 
@@ -178,6 +183,7 @@ class Cylinder:
             "height": self.height,
             "thickness": self.thickness,
             "margin": self.margin,
+            "overlap": self.overlap,
             "sector_angle_deg": effective_angle,
             "split": self.split,
             "diameter_mean": diameter_mean,

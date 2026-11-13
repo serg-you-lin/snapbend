@@ -23,6 +23,33 @@ class TestCylinderMath(unittest.TestCase):
         with self.assertRaises(ValueError):
             Cylinder(height=500, thickness=2).develop()
 
+    def test_overlap_allunga_il_foglio_e_tiene_il_bbox_a_zero(self):
+        # D84: l'opposto di margin — il foglio è più largo del giro nominale
+        nominale = Cylinder(outer_diameter=150, height=500, thickness=2).develop()
+        flat = Cylinder(outer_diameter=150, height=500, thickness=2, overlap=10).develop()
+        self.assertAlmostEqual(flat.meta["width_cut"], nominale.meta["width"] + 10, places=9)
+        xs = [x for x, _ in flat.entities[0]["points"]]
+        self.assertAlmostEqual(min(xs), 0.0, places=9)
+        self.assertEqual(len(flat.reference_entities), 1)
+
+    def test_overlap_sfaccettato_sposta_le_pieghe_con_il_foglio(self):
+        base = Cylinder(outer_diameter=150, height=500, thickness=2,
+                        faceted=True, n_facets=8).develop()
+        flat = Cylinder(outer_diameter=150, height=500, thickness=2,
+                        faceted=True, n_facets=8, overlap=10).develop()
+        pos_base = sorted(e["start"][0] for e in base.entities if e.get("role") == "bending")
+        pos = sorted(e["start"][0] for e in flat.entities if e.get("role") == "bending")
+        for a, b in zip(pos_base, pos):
+            self.assertAlmostEqual(b, a + 5.0, places=9)
+
+    def test_margin_e_overlap_insieme_sollevano(self):
+        with self.assertRaises(ValueError):
+            Cylinder(outer_diameter=150, height=500, thickness=2, margin=2, overlap=2).develop()
+
+    def test_overlap_negativo_solleva(self):
+        with self.assertRaises(ValueError):
+            Cylinder(outer_diameter=150, height=500, thickness=2, overlap=-1).develop()
+
     def test_entity_is_a_polygon(self):
         flat = Cylinder(outer_diameter=150, height=3895, thickness=2).develop()
         self.assertEqual(len(flat.entities), 1)
