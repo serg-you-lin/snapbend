@@ -42,12 +42,12 @@ in testa:
 - `02_compare_cone.py` — liscio vs sfaccettato, stesso cono, confronto
   numerico fianco a fianco.
 - `03_margin_orientation.py` — i due parametri di layout: `orientation`
-  (quale asse è il lato lungo del foglio) e `margin` (saldatura tolta in
+  (quale asse è il lato lungo del foglio) e `seam_margin` (saldatura tolta in
   parti uguali).
 - `11_split_pieces.py` — `split` (MAP.md D46): dividere il pezzo in N
   parti UGUALI saldate insieme (`split=2` = due metà, liscio o
   **sfaccettato** — prima di stanotte lo sfaccettato parziale era
-  esplicitamente "non deciso"). `margin` (la giunzione a saldatura)
+  esplicitamente "non deciso"). `seam_margin` (la giunzione a saldatura)
   funziona identico sui pezzi interi e su quelli divisi — stesso
   parametro, zero cose nuove da imparare lì. Lo sfaccettato esportato
   CON e SENZA la vista in sezione: una metà sfaccettata è, in sezione, la

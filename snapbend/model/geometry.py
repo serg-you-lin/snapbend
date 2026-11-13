@@ -65,25 +65,25 @@ def resolve_outer_diameter(
     return value
 
 
-def resolve_seam_gap(margin: float, overlap: float) -> float:
+def resolve_seam_gap(seam_margin: float, seam_overlap: float) -> float:
     """
     Gioco della cucitura longitudinale CON SEGNO (MAP.md D84): positivo =
-    spazio di saldatura (`margin`), negativo = sovrapposizione (`overlap`,
+    spazio di saldatura (`seam_margin`), negativo = sovrapposizione (`seam_overlap`,
     per lamiere sottili che si accavallano). Zero = bordi a contatto.
 
-    `margin` e `overlap` non si danno insieme (lo stesso schema "mai
+    `seam_margin` e `seam_overlap` non si danno insieme (lo stesso schema "mai
     entrambi" di `sector_angle`/`split`): sono lo stesso numero in verso opposto.
     """
-    if margin < 0:
-        raise ValueError("margin non può essere negativo.")
-    if overlap < 0:
-        raise ValueError("overlap non può essere negativo (per accavallare usa overlap positivo, non margin negativo).")
-    if margin and overlap:
+    if seam_margin < 0:
+        raise ValueError("seam_margin non può essere negativo.")
+    if seam_overlap < 0:
+        raise ValueError("seam_overlap non può essere negativo (per accavallare usa seam_overlap positivo, non seam_margin negativo).")
+    if seam_margin and seam_overlap:
         raise ValueError(
-            "margin (spazio di saldatura) e overlap (sovrapposizione) sono "
+            "seam_margin (spazio di saldatura) e seam_overlap (sovrapposizione) sono "
             "l'uno il contrario dell'altro — usane solo uno."
         )
-    return margin - overlap
+    return seam_margin - seam_overlap
 
 
 def check_end_trims(top_trim: float, bottom_trim: float, height: float) -> None:

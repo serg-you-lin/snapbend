@@ -8,7 +8,7 @@ mezzaluna a settore libero (una sella): quella è `12_selle.py`.
 
 Tre pezzi, liscio E sfaccettato per ciascuno:
   1. Cilindro diviso in due metà — margine di saldatura sui due bordi di
-     CIASCUNA metà, stesso parametro `margin` di sempre (zero codice
+     CIASCUNA metà, stesso parametro `seam_margin` di sempre (zero codice
      nuovo per quello, era già generico).
   2. Cono diviso in due — qui "pieno" non è 360 a scelta: è il valore che
      la geometria del cono impone (`meta["full_angle_deg"]`).
@@ -63,13 +63,13 @@ def main() -> None:
     # === 1. Cilindro diviso in due metà =====================================
     cyl_full = Cylinder(outer_diameter=600, height=800, thickness=3).develop()
     cyl_half_smooth = Cylinder(
-        outer_diameter=600, height=800, thickness=3, split=2, margin=3, label="cyl_half_smooth",
+        outer_diameter=600, height=800, thickness=3, split=2, seam_margin=3, label="cyl_half_smooth",
     ).develop()
     cyl_half_smooth.to_dxf(OUTPUT_DIR / "11_cylinder_half_smooth.dxf", show_margin_reference=True)
 
     cyl_half_faceted = Cylinder(
         outer_diameter=600, height=800, thickness=3, faceted=True, n_facets=12,
-        split=2, margin=3, label="cyl_half_faceted",
+        split=2, seam_margin=3, label="cyl_half_faceted",
     ).develop()
     cyl_half_faceted.to_dxf(OUTPUT_DIR / "11_cylinder_half_faceted_no_section.dxf")
 
@@ -84,7 +84,7 @@ def main() -> None:
     cone_full = Cone(top_outer_diameter=1600, bottom_outer_diameter=1016, height=1000, thickness=5).develop()
     cone_half_smooth = Cone(
         top_outer_diameter=1600, bottom_outer_diameter=1016, height=1000, thickness=5,
-        split=2, margin=5, label="cone_half_smooth",
+        split=2, seam_margin=5, label="cone_half_smooth",
     ).develop()
     cone_half_smooth.to_dxf(OUTPUT_DIR / "11_cone_half_smooth.dxf", show_margin_reference=True)
 

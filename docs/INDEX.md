@@ -422,7 +422,7 @@ _snapbend/model/geometry.py_
 - `polar_point(radius: float, angle_deg: float, origin: Tuple[float, float]=(0.0, 0.0)) -> Tuple[float, float]` — L30 — Punto a coordinate polari (angolo in gradi).
 - `_check_orientation(orientation: str) -> None` — L40
 - `resolve_outer_diameter(prefix: str, outer: Optional[float], inner: Optional[float], thickness: float) -> float` — L47 — Diametro ESTERNO a partire da quello dato, esterno o interno (MAP.md D81).
-- `resolve_seam_gap(margin: float, overlap: float) -> float` — L68 — Gioco della cucitura longitudinale CON SEGNO (MAP.md D84): positivo =
+- `resolve_seam_gap(seam_margin: float, seam_overlap: float) -> float` — L68 — Gioco della cucitura longitudinale CON SEGNO (MAP.md D84): positivo =
 - `check_end_trims(top_trim: float, bottom_trim: float, height: float) -> None` — L89 — Accorciamenti alle due estremità dell'altezza (MAP.md D85): solo
 - `swap_xy(entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]` — L101 — Riflette la geometria lungo la diagonale y=x (scambia gli assi X/Y) — il
 - **class** `FlatGeometry` — L135 — Sviluppo piano di una forma sviluppabile — output di Cone.develop() /

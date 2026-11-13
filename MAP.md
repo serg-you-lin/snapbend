@@ -1947,6 +1947,18 @@ generatrix by `slant / height`; the end with the larger mean diameter moves
 `reference_entities` keep the nominal outline. No allowance beyond the
 nominal height: if it is ever needed, it is a new decision.
 
+### D86 — `margin` → `seam_margin`, `overlap` → `seam_overlap`: the name says which edge (Federico, 13 Nov 2026)
+
+With `top_trim`/`bottom_trim` (D85) a bare `margin` no longer says which edge it
+works on — the same defect `diameter` had (D81). The longitudinal seam is
+`seam_margin` (welding gap) and `seam_overlap` (D84); the ends of the height
+stay `top_trim`/`bottom_trim`. Clean break, no alias, nobody uses the library
+yet so it stays 0.12.x. The `meta` keys follow (`seam_margin`, `seam_overlap`).
+`resolve_seam_gap` takes the new names. NOT renamed: the `margin` of
+`export_part`/`write_part_dxf` (the layout gap between stacked views, 20 mm) —
+another thing, another module. The older entries (D45-D85) keep the old name
+in their text: they are history.
+
 → **0.12.0** (D79: `part_fields`, the sheet-metal data for the ERP/CAM JSON).
 → **0.12.1** (D79: `UserWarning` when material or thickness are written as "N/D").
 → **0.12.2** (D80: collinear strokes with material between count as separate bends).
@@ -1955,3 +1967,4 @@ nominal height: if it is ever needed, it is a new decision.
 → **0.12.5** (D83: `to_json` quantity × split).
 → **0.12.6** (D84: `overlap` in `Cone` and `Cylinder`).
 → **0.12.7** (D85: `top_trim` / `bottom_trim` in `Cone` and `Cylinder`).
+→ **0.12.8** (D86: `seam_margin` / `seam_overlap`).

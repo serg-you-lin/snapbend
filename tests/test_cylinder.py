@@ -24,9 +24,9 @@ class TestCylinderMath(unittest.TestCase):
             Cylinder(height=500, thickness=2).develop()
 
     def test_overlap_allunga_il_foglio_e_tiene_il_bbox_a_zero(self):
-        # D84: l'opposto di margin — il foglio è più largo del giro nominale
+        # D84: l'opposto di seam_margin — il foglio è più largo del giro nominale
         nominale = Cylinder(outer_diameter=150, height=500, thickness=2).develop()
-        flat = Cylinder(outer_diameter=150, height=500, thickness=2, overlap=10).develop()
+        flat = Cylinder(outer_diameter=150, height=500, thickness=2, seam_overlap=10).develop()
         self.assertAlmostEqual(flat.meta["width_cut"], nominale.meta["width"] + 10, places=9)
         xs = [x for x, _ in flat.entities[0]["points"]]
         self.assertAlmostEqual(min(xs), 0.0, places=9)
@@ -36,7 +36,7 @@ class TestCylinderMath(unittest.TestCase):
         base = Cylinder(outer_diameter=150, height=500, thickness=2,
                         faceted=True, n_facets=8).develop()
         flat = Cylinder(outer_diameter=150, height=500, thickness=2,
-                        faceted=True, n_facets=8, overlap=10).develop()
+                        faceted=True, n_facets=8, seam_overlap=10).develop()
         pos_base = sorted(e["start"][0] for e in base.entities if e.get("role") == "bending")
         pos = sorted(e["start"][0] for e in flat.entities if e.get("role") == "bending")
         for a, b in zip(pos_base, pos):
@@ -44,11 +44,11 @@ class TestCylinderMath(unittest.TestCase):
 
     def test_margin_e_overlap_insieme_sollevano(self):
         with self.assertRaises(ValueError):
-            Cylinder(outer_diameter=150, height=500, thickness=2, margin=2, overlap=2).develop()
+            Cylinder(outer_diameter=150, height=500, thickness=2, seam_margin=2, seam_overlap=2).develop()
 
     def test_overlap_negativo_solleva(self):
         with self.assertRaises(ValueError):
-            Cylinder(outer_diameter=150, height=500, thickness=2, overlap=-1).develop()
+            Cylinder(outer_diameter=150, height=500, thickness=2, seam_overlap=-1).develop()
 
     def test_top_e_bottom_trim_accorciano_l_altezza(self):
         # D85: flangia in appoggio - il foglio è più basso alle due estremità
@@ -117,7 +117,7 @@ class TestCylinderMath(unittest.TestCase):
         # circonferenza, per la cucitura longitudinale del rotolo), non
         # sopra/sotto — l'altezza (lunghezza assiale) resta invariata.
         no_margin = Cylinder(outer_diameter=150, height=500, thickness=2).develop()
-        with_margin = Cylinder(outer_diameter=150, height=500, thickness=2, margin=2).develop()
+        with_margin = Cylinder(outer_diameter=150, height=500, thickness=2, seam_margin=2).develop()
         self.assertAlmostEqual(with_margin.meta["height"], no_margin.meta["height"], places=6)
         self.assertAlmostEqual(with_margin.meta["width_cut"], with_margin.meta["width"] - 2.0, places=6)
 
@@ -125,7 +125,7 @@ class TestCylinderMath(unittest.TestCase):
         # orientation="vertical" (canonico, default): X=circonferenza,
         # Y=lunghezza — il contorno pieno di riferimento deve essere alto
         # quanto height e largo quanto la circonferenza PIENA (non ridotta).
-        flat = Cylinder(outer_diameter=150, height=500, thickness=2, margin=2, orientation="vertical").develop()
+        flat = Cylinder(outer_diameter=150, height=500, thickness=2, seam_margin=2, orientation="vertical").develop()
         self.assertEqual(len(flat.reference_entities), 1)
         ref = flat.reference_entities[0]
         self.assertEqual(ref["type"], "polygon")
@@ -140,7 +140,7 @@ class TestCylinderMath(unittest.TestCase):
 
     def test_margin_too_large_raises(self):
         with self.assertRaises(ValueError):
-            Cylinder(outer_diameter=10, height=50, margin=1000).develop()
+            Cylinder(outer_diameter=10, height=50, seam_margin=1000).develop()
 
     def test_full_sector_angle_matches_default_width(self):
         # sector_angle=360 (default esplicito) deve tornare la stessa
@@ -199,14 +199,14 @@ class TestCylinderPartialFaceted(unittest.TestCase):
         self.assertAlmostEqual(half.meta["facet_bend_radius"], full.meta["facet_bend_radius"])
 
     def test_margin_on_half_trims_the_weld_edges(self):
-        # Lo stesso parametro margin che accorcia il pezzo intero (MAP.md
+        # Lo stesso parametro seam_margin che accorcia il pezzo intero (MAP.md
         # D46: "stessi parametri di accorciamento") vale sui due bordi
         # della meta' — quelli che poi si saldano all'altra meta'.
         no_margin = Cylinder(
             outer_diameter=150, height=500, thickness=2, faceted=True, n_facets=8, split=2,
         ).develop()
         with_margin = Cylinder(
-            outer_diameter=150, height=500, thickness=2, faceted=True, n_facets=8, split=2, margin=2,
+            outer_diameter=150, height=500, thickness=2, faceted=True, n_facets=8, split=2, seam_margin=2,
         ).develop()
         self.assertAlmostEqual(with_margin.meta["width_cut"], with_margin.meta["width"] - 2.0)
         self.assertAlmostEqual(with_margin.meta["width"], no_margin.meta["width"])
@@ -294,17 +294,17 @@ class TestCylinderFaceted(unittest.TestCase):
         # (width_cut < width), l'altezza e la lunghezza di ogni faccetta
         # (facet_width) non cambiano.
         no_margin = Cylinder(outer_diameter=150, height=500, thickness=2, faceted=True, n_facets=8).develop()
-        with_margin = Cylinder(outer_diameter=150, height=500, thickness=2, faceted=True, n_facets=8, margin=2).develop()
+        with_margin = Cylinder(outer_diameter=150, height=500, thickness=2, faceted=True, n_facets=8, seam_margin=2).develop()
         self.assertAlmostEqual(with_margin.meta["height"], no_margin.meta["height"], places=6)
         self.assertAlmostEqual(with_margin.meta["facet_width"], no_margin.meta["facet_width"], places=6)
         self.assertAlmostEqual(with_margin.meta["width_cut"], with_margin.meta["width"] - 2.0, places=6)
 
     def test_margin_too_large_for_end_facet_raises(self):
-        # margin che mangerebbe oltre la prima/ultima faccetta intera —
+        # seam_margin che mangerebbe oltre la prima/ultima faccetta intera —
         # non solo un pezzetto del suo bordo — deve essere rifiutato.
         with self.assertRaises(ValueError):
             Cylinder(
-                outer_diameter=150, height=500, thickness=2, faceted=True, n_facets=8, margin=200,
+                outer_diameter=150, height=500, thickness=2, faceted=True, n_facets=8, seam_margin=200,
             ).develop()
 
     def test_smooth_is_still_the_default(self):

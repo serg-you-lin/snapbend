@@ -16,8 +16,8 @@ X, con la bisettrice verso +X — nessuna trasformazione. orientation="vertical"
 (default) lo ruota di 90° (bisettrice verso +Y). orientation="horizontal"
 tiene la costruzione canonica.
 
-Margine di saldatura (margin): quantità TOTALE, tolta in parti uguali dai due
-bordi radiali del settore (metà per lato) — es. margin=2 accorcia lo
+Margine di saldatura (seam_margin): quantità TOTALE, tolta in parti uguali dai due
+bordi radiali del settore (metà per lato) — es. seam_margin=2 accorcia lo
 sviluppo di 1 mm per lato. È convertito in una riduzione d'angolo usando il
 raggio esterno come riferimento (arco ≈ raggio × angolo in radianti): per un
 raggio esterno molto più grande del margine — il caso normale — l'errore
@@ -43,7 +43,7 @@ qui è quindi un TETTO su quel valore naturale (deve stare in
 caso reale — "il cono è troppo grande per farlo da un pezzo solo, lo
 facciamo in N pezzi uguali saldati insieme" — `split=2` sviluppa
 `full_angle/2`, senza dover calcolare `full_angle` a mano prima.
-Alternativo a `sector_angle` esplicito, non combinabile. `margin`
+Alternativo a `sector_angle` esplicito, non combinabile. `seam_margin`
 continua a valere com'è, tolto ai due bordi radiali di QUESTO pezzo — è
 la giunzione a saldatura fra i pezzi, non cambia parametro passando da
 un pezzo intero a un pezzo diviso. Sfaccettato + parziale: `n_facets`
@@ -147,8 +147,8 @@ class Cone:
     bottom_outer_diameter: Optional[float] = None
     bottom_inner_diameter: Optional[float] = None
     thickness: float = 0.0
-    margin: float = 0.0
-    overlap: float = 0.0                        # sovrapposizione dei bordi radiali, l'opposto di margin (MAP.md D84)
+    seam_margin: float = 0.0
+    seam_overlap: float = 0.0                        # sovrapposizione dei bordi radiali, l'opposto di seam_margin (MAP.md D84)
     top_trim: float = 0.0                       # mm tolti dall'altezza ASSIALE dal lato di top_*_diameter (MAP.md D85)
     bottom_trim: float = 0.0                    # idem dal lato di bottom_*_diameter
     sector_angle: Optional[float] = None        # tetto sullo sviluppo naturale (MAP.md D46); None -> pieno
@@ -175,7 +175,7 @@ class Cone:
         if self.height <= 0:
             raise ValueError("height deve essere maggiore di zero.")
         check_end_trims(self.top_trim, self.bottom_trim, self.height)
-        gap = resolve_seam_gap(self.margin, self.overlap)
+        gap = resolve_seam_gap(self.seam_margin, self.seam_overlap)
         if self.split < 1:
             raise ValueError("split deve essere almeno 1.")
         if self.split != 1 and self.sector_angle is not None:
@@ -254,8 +254,8 @@ class Cone:
             "bottom_outer_diameter": bottom_outer,
             "height": self.height,
             "thickness": self.thickness,
-            "margin": self.margin,
-            "overlap": self.overlap,
+            "seam_margin": self.seam_margin,
+            "seam_overlap": self.seam_overlap,
             "top_trim": self.top_trim,
             "bottom_trim": self.bottom_trim,
             "top_diameter_mean": top_mean,
@@ -281,7 +281,7 @@ class Cone:
         half_margin_angle = math.degrees(gap / 2.0 / r_outer)
         cut_angle = effective_angle - 2.0 * half_margin_angle
         if cut_angle <= 0:
-            raise ValueError("margin troppo grande rispetto allo sviluppo del cono.")
+            raise ValueError("seam_margin troppo grande rispetto allo sviluppo del cono.")
 
         entities = _sector_entities(r_inner + trim_inner, r_outer - trim_outer, cut_angle, role="outer")
 
@@ -340,7 +340,7 @@ class Cone:
             vertex_angles[-1] -= half_margin_angle
             if vertex_angles[0] >= vertex_angles[1] or vertex_angles[-1] <= vertex_angles[-2]:
                 raise ValueError(
-                    "margin troppo grande rispetto alla faccetta estrema del cono sfaccettato."
+                    "seam_margin troppo grande rispetto alla faccetta estrema del cono sfaccettato."
                 )
 
         cut_inner, cut_outer = r_inner + trim_inner, r_outer - trim_outer

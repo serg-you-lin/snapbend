@@ -15,13 +15,13 @@ questa costruzione così com'è. orientation="horizontal" ruota il tutto di
 circonferenza, il lato lungo del foglio (es. un tubo lungo con diametro
 piccolo).
 
-Margine di saldatura (margin): quantità TOTALE, tolta in parti uguali dai due
+Margine di saldatura (seam_margin): quantità TOTALE, tolta in parti uguali dai due
 bordi lungo lo sviluppo/circonferenza (destra e sinistra, non sopra/sotto
-lungo l'altezza) — es. margin=2 accorcia il pezzo di 1 mm per lato. È il
+lungo l'altezza) — es. seam_margin=2 accorcia il pezzo di 1 mm per lato. È il
 margine per la cucitura longitudinale del rotolo (i due bordi del foglio
 piano che si affacciano quando lo arrotoli a formare il cilindro), non per
 la saldatura di testa fra due tronchi di cilindro consecutivi — stessa
-convenzione di `cone.py`, dove margin riduce l'angolo del settore invece
+convenzione di `cone.py`, dove seam_margin riduce l'angolo del settore invece
 della generatrice. Con faceted=True taglia nelle due faccette estreme
 (prima e ultima), le altre restano intatte.
 
@@ -45,7 +45,7 @@ grande/lungo per farlo da un pezzo solo, lo facciamo in N pezzi uguali
 saldati insieme" — `split=2` sviluppa 1/2 del giro (`sector_angle=180`
 equivalente, ma senza dover calcolare l'angolo a mano). Alternativo a
 `sector_angle` esplicito, non combinabile (uno dei due, mai entrambi
-diversi dal default). `margin` continua a valere com'è, tolto ai due
+diversi dal default). `seam_margin` continua a valere com'è, tolto ai due
 bordi di QUESTO pezzo — è la giunzione a saldatura fra i pezzi, non
 cambia parametro passando da un pezzo intero a un pezzo diviso.
 
@@ -82,8 +82,8 @@ class Cylinder:
     outer_diameter: Optional[float] = None      # uno solo fra outer_diameter e inner_diameter (MAP.md D81)
     inner_diameter: Optional[float] = None
     thickness: float = 0.0
-    margin: float = 0.0
-    overlap: float = 0.0                        # sovrapposizione della cucitura, l'opposto di margin (MAP.md D84)
+    seam_margin: float = 0.0
+    seam_overlap: float = 0.0                        # sovrapposizione della cucitura, l'opposto di seam_margin (MAP.md D84)
     top_trim: float = 0.0                       # mm tolti dall'altezza all'estremità alta (flangia in appoggio, MAP.md D85)
     bottom_trim: float = 0.0                    # idem all'estremità bassa
     sector_angle: float = 360.0
@@ -107,7 +107,7 @@ class Cylinder:
         if self.height <= 0:
             raise ValueError("height deve essere maggiore di zero.")
         check_end_trims(self.top_trim, self.bottom_trim, self.height)
-        gap = resolve_seam_gap(self.margin, self.overlap)
+        gap = resolve_seam_gap(self.seam_margin, self.seam_overlap)
         if not (0.0 < self.sector_angle <= 360.0):
             raise ValueError("sector_angle deve essere maggiore di zero e al massimo 360.")
         if self.split < 1:
@@ -143,10 +143,10 @@ class Cylinder:
         half_gap = gap / 2.0
         cut_width = width - gap
         if cut_width <= 0:
-            raise ValueError("margin troppo grande rispetto allo sviluppo del cilindro.")
+            raise ValueError("seam_margin troppo grande rispetto allo sviluppo del cilindro.")
         if bend_lines and (half_gap >= bend_lines[0] or half_gap >= width - bend_lines[-1]):
             raise ValueError(
-                "margin troppo grande rispetto alla faccetta estrema del cilindro sfaccettato."
+                "seam_margin troppo grande rispetto alla faccetta estrema del cilindro sfaccettato."
             )
         shift = max(-half_gap, 0.0)
         x0 = half_gap + shift
@@ -188,8 +188,8 @@ class Cylinder:
             "outer_diameter": outer_diameter,
             "height": self.height,
             "thickness": self.thickness,
-            "margin": self.margin,
-            "overlap": self.overlap,
+            "seam_margin": self.seam_margin,
+            "seam_overlap": self.seam_overlap,
             "top_trim": self.top_trim,
             "bottom_trim": self.bottom_trim,
             "sector_angle_deg": effective_angle,

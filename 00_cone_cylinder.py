@@ -45,7 +45,7 @@ def main() -> None:
         height=CYLINDER_HEIGHT,
         thickness=THICKNESS,
         label="sviluppo_cilindro",
-        margin=2.0
+        seam_margin=2.0
         
     ).develop()
     cylinder_flat.to_dxf(OUTPUT_DIR / "sviluppo_cilindro.dxf")

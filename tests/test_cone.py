@@ -35,8 +35,8 @@ class TestConeMath(unittest.TestCase):
         nominale = Cone(**kw).develop()
         r_outer = nominale.meta["outer_radius"]
         extra = math.degrees(10 / r_outer)
-        con_overlap = Cone(overlap=10, **kw).develop()
-        con_margin = Cone(margin=10, **kw).develop()
+        con_overlap = Cone(seam_overlap=10, **kw).develop()
+        con_margin = Cone(seam_margin=10, **kw).develop()
         self.assertAlmostEqual(con_overlap.meta["sector_angle_deg"],
                                nominale.meta["sector_angle_deg"] + extra, places=9)
         self.assertAlmostEqual(con_margin.meta["sector_angle_deg"],
@@ -45,14 +45,14 @@ class TestConeMath(unittest.TestCase):
     def test_overlap_sfaccettato_allarga_le_faccette_estreme(self):
         kw = dict(top_outer_diameter=100, bottom_outer_diameter=250, height=300,
                   thickness=2, split=2, faceted=True, n_facets=8)
-        base, con = Cone(**kw).develop(), Cone(overlap=10, **kw).develop()
+        base, con = Cone(**kw).develop(), Cone(seam_overlap=10, **kw).develop()
         self.assertEqual(len(con.bends), len(base.bends))
         self.assertGreater(len(con.reference_entities), 0)
 
     def test_margin_e_overlap_insieme_sollevano(self):
         with self.assertRaises(ValueError):
             Cone(top_outer_diameter=100, bottom_outer_diameter=250, height=300,
-                 thickness=2, margin=2, overlap=2).develop()
+                 thickness=2, seam_margin=2, seam_overlap=2).develop()
 
     def test_trim_assiale_diventa_radiale_sul_lato_giusto(self):
         # D85: top_ è il lato PICCOLO qui (100 contro 250) -> sposta r_inner;
@@ -148,7 +148,7 @@ class TestConeMath(unittest.TestCase):
     def test_margin_reduces_sector_angle(self):
         no_margin = Cone(top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2).develop()
         with_margin = Cone(
-            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2, margin=10,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2, seam_margin=10,
         ).develop()
         self.assertLess(with_margin.meta["sector_angle_deg"], no_margin.meta["sector_angle_deg"])
 
@@ -157,7 +157,7 @@ class TestConeMath(unittest.TestCase):
         # linea, come quello tagliato) non due linee sciolte — così si
         # richiude/collega intorno alla geometria di taglio reale.
         flat = Cone(
-            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2, margin=10,
+            top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2, seam_margin=10,
         ).develop()
         self.assertEqual(len(flat.reference_entities), 4)
         self.assertEqual(
@@ -265,7 +265,7 @@ class TestConeFaceted(unittest.TestCase):
 
         flat = Cone(
             top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
-            faceted=True, n_facets=8, margin=10, orientation="horizontal",
+            faceted=True, n_facets=8, seam_margin=10, orientation="horizontal",
         ).develop()
         bend_lines = [e for e in flat.entities if e.get("role") == "bending"]
         self.assertEqual(len(bend_lines), 7)
@@ -326,14 +326,14 @@ class TestConeSplit(unittest.TestCase):
         self.assertAlmostEqual(half.meta["facet_bend_radius"], full.meta["facet_bend_radius"])
 
     def test_margin_on_faceted_half_still_works(self):
-        # Stesso parametro margin che accorcia il cono intero (MAP.md D46).
+        # Stesso parametro seam_margin che accorcia il cono intero (MAP.md D46).
         no_margin = Cone(
             top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
             faceted=True, n_facets=8, split=2,
         ).develop()
         with_margin = Cone(
             top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,
-            faceted=True, n_facets=8, split=2, margin=2,
+            faceted=True, n_facets=8, split=2, seam_margin=2,
         ).develop()
         self.assertEqual(len(with_margin.entities), len(no_margin.entities))
 

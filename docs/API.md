@@ -22,8 +22,8 @@ Cone(
     *, height: float,
     top_outer_diameter: float | None = None, top_inner_diameter: float | None = None,
     bottom_outer_diameter: float | None = None, bottom_inner_diameter: float | None = None,
-    thickness: float = 0.0, margin: float = 0.0,
-    overlap: float = 0.0,                    # l'opposto di margin (MAP.md D84)
+    thickness: float = 0.0, seam_margin: float = 0.0,
+    seam_overlap: float = 0.0,                    # l'opposto di seam_margin (MAP.md D84)
     top_trim: float = 0.0, bottom_trim: float = 0.0,   # mm tolti dall'altezza alle estremità (MAP.md D85)
     sector_angle: float | None = None,       # tetto sullo sviluppo naturale (MAP.md D46)
     split: int = 1,                          # scorciatoia: sector_angle = full_angle/split
@@ -54,7 +54,7 @@ uguali saldati (`split=2` = due metà). A differenza di `Cylinder`, qui
   `bend_allowance` valorizzato, `deduction`/`setback` a 0: qui si
   aggiunge materiale, non se ne sottrae). **Mutates**: niente, `Cone` è
   immutabile in pratica (dataclass, ma `.develop()` non tocca `self`).
-  **Raises**: `ValueError` se un diametro/altezza è ≤0, `margin` e `overlap` entrambi dati (o negativi), per un lato non
+  **Raises**: `ValueError` se un diametro/altezza è ≤0, `seam_margin` e `seam_overlap` entrambi dati (o negativi), per un lato non
   c'è esattamente uno fra `*_outer_diameter` e `*_inner_diameter`,
   `thickness` ≥ un diametro, `top_outer_diameter` == `bottom_outer_diameter` sulla fibra media (usa
   `Cylinder`), `orientation` non valida, `n_facets < 3`.
@@ -75,8 +75,8 @@ flat.to_dxf("cone.dxf")   # richiede topo installato a fianco
 Cylinder(
     *, height: float,
     outer_diameter: float | None = None, inner_diameter: float | None = None,
-    thickness: float = 0.0, margin: float = 0.0,
-    overlap: float = 0.0,                    # l'opposto di margin (MAP.md D84)
+    thickness: float = 0.0, seam_margin: float = 0.0,
+    seam_overlap: float = 0.0,                    # l'opposto di seam_margin (MAP.md D84)
     top_trim: float = 0.0, bottom_trim: float = 0.0,   # mm tolti dall'altezza alle estremità (MAP.md D85)
     sector_angle: float = 360.0,             # < 360 = settore parziale (sella calandrata)
     split: int = 1,                          # scorciatoia: sector_angle = 360/split (MAP.md D46)
@@ -110,10 +110,10 @@ flat = Cylinder(outer_diameter=1016, height=3895, thickness=5).develop()
 sella = Cylinder(outer_diameter=603, height=400, thickness=3, sector_angle=60).develop()
 ```
 
-`margin` (spazio di saldatura) e `overlap` (sovrapposizione, per lamiere
+`seam_margin` (spazio di saldatura) e `seam_overlap` (sovrapposizione, per lamiere
 sottili che si accavallano — MAP.md D84) sono lo stesso numero in verso
-opposto, **mai insieme** (`ValueError`): `margin` accorcia il foglio dai due
-bordi della cucitura (metà per lato), `overlap` lo allunga. Con `overlap` il
+opposto, **mai insieme** (`ValueError`): `seam_margin` accorcia il foglio dai due
+bordi della cucitura (metà per lato), `seam_overlap` lo allunga. Con `seam_overlap` il
 contorno nominale resta in `reference_entities`.
 
 `top_trim`/`bottom_trim` (MAP.md D85): mm **tolti dall'altezza** all'estremità
@@ -123,7 +123,7 @@ negativo, o `top_trim + bottom_trim ≥ height`, solleva `ValueError`. Nel
 lato di `top_*_diameter`, e il valore è sull'altezza **assiale** (lo sviluppo
 lo converte sulla generatrice): l'estremità col diametro maggiore sposta
 `r_outer`, quella minore `r_inner`. L'angolo del settore non cambia. Il
-contorno nominale resta in `reference_entities`. Non è `margin`: quello
+contorno nominale resta in `reference_entities`. Non è `seam_margin`: quello
 lavora sulla cucitura (i bordi laterali), questo sull'altezza.
 
 ### `Bend`

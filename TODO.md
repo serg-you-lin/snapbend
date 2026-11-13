@@ -207,7 +207,7 @@ arco, foro quadro con gli spigoli raccordati, sede esagonale per un dado.
   non esisteva nessun modo di limitare lo sviluppo naturale). Sfaccettato
   parziale ora supportato per entrambi (era esplicitamente "non ancora
   deciso" per `Cylinder` da D42) — deve tornare un numero intero di
-  faccette, altrimenti errore esplicito. `margin` funziona così com'è,
+  faccette, altrimenti errore esplicito. `seam_margin` funziona così com'è,
   zero codice nuovo per quello — era già generico. Trovato e corretto un
   bug vero nel farlo: la larghezza faccetta di `Cone` sfaccettato usava
   il conteggio del pezzo invece che del poligono intero. 11 test nuovi,
