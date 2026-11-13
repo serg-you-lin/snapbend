@@ -1844,3 +1844,4 @@ lane runs (what the wrapper did). The lanes on an already-read `Result` are
 `flat.detect._detect_in_result`, internal: only the two idempotency tests call
 it (running the lanes twice must not duplicate). Clean break, no alias; ~60
 call sites moved (tests, `io/dxf.py`). No golden moved.
+→ **0.11.0** (D76-D78: topo 1.0 API, `detect_flat(doc)`, `Invalid`).
