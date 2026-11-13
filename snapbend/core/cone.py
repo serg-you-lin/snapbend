@@ -67,7 +67,7 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 
-from ..model.geometry import FlatGeometry, polar_point, swap_xy, _check_orientation, resolve_outer_diameter, resolve_seam_gap
+from ..model.geometry import FlatGeometry, polar_point, swap_xy, _check_orientation, resolve_outer_diameter, resolve_seam_gap, check_end_trims
 from .bend import resolve_calibration, resolve_facet_bend
 
 _TOL = 1e-9
@@ -149,6 +149,8 @@ class Cone:
     thickness: float = 0.0
     margin: float = 0.0
     overlap: float = 0.0                        # sovrapposizione dei bordi radiali, l'opposto di margin (MAP.md D84)
+    top_trim: float = 0.0                       # mm tolti dall'altezza ASSIALE dal lato di top_*_diameter (MAP.md D85)
+    bottom_trim: float = 0.0                    # idem dal lato di bottom_*_diameter
     sector_angle: Optional[float] = None        # tetto sullo sviluppo naturale (MAP.md D46); None -> pieno
     split: int = 1                              # scorciatoia per sector_angle=full_angle/split
     orientation: str = "vertical"
@@ -172,6 +174,7 @@ class Cone:
         )
         if self.height <= 0:
             raise ValueError("height deve essere maggiore di zero.")
+        check_end_trims(self.top_trim, self.bottom_trim, self.height)
         gap = resolve_seam_gap(self.margin, self.overlap)
         if self.split < 1:
             raise ValueError("split deve essere almeno 1.")
@@ -212,6 +215,14 @@ class Cone:
         r_outer = slant * big_r / delta_r
         r_inner = slant * small_r / delta_r
 
+        # Trim assiali (D85) -> radiali sullo sviluppo: l'estremità col
+        # diametro maggiore tocca r_outer, quella minore r_inner; la
+        # generatrice sta all'altezza come slant sta a height.
+        scale = slant / self.height
+        top_is_big = top_mean > bottom_mean
+        trim_outer = (self.top_trim if top_is_big else self.bottom_trim) * scale
+        trim_inner = (self.bottom_trim if top_is_big else self.top_trim) * scale
+
         full_angle = 360.0 * big_r / r_outer
         if self.sector_angle is not None:
             if not (0.0 < self.sector_angle <= full_angle + 1e-9):
@@ -227,10 +238,11 @@ class Cone:
         if self.faceted:
             entities, reference_entities, extra_meta, bends = self._develop_faceted(
                 r_inner, r_outer, big_r, small_r, full_angle, effective_angle, gap,
+                trim_inner, trim_outer,
             )
         else:
             entities, reference_entities, extra_meta = self._develop_smooth(
-                r_inner, r_outer, effective_angle, gap,
+                r_inner, r_outer, effective_angle, gap, trim_inner, trim_outer,
             )
 
         if self.orientation == "vertical":
@@ -244,6 +256,8 @@ class Cone:
             "thickness": self.thickness,
             "margin": self.margin,
             "overlap": self.overlap,
+            "top_trim": self.top_trim,
+            "bottom_trim": self.bottom_trim,
             "top_diameter_mean": top_mean,
             "bottom_diameter_mean": bottom_mean,
             "slant_height": slant,
@@ -261,23 +275,25 @@ class Cone:
 
     # ------------------------------------------------------------------
 
-    def _develop_smooth(self, r_inner: float, r_outer: float, effective_angle: float, gap: float):
+    def _develop_smooth(self, r_inner: float, r_outer: float, effective_angle: float, gap: float,
+                        trim_inner: float, trim_outer: float):
         # `gap` ha segno (D84): > 0 stringe il settore, < 0 lo allarga
         half_margin_angle = math.degrees(gap / 2.0 / r_outer)
         cut_angle = effective_angle - 2.0 * half_margin_angle
         if cut_angle <= 0:
             raise ValueError("margin troppo grande rispetto allo sviluppo del cono.")
 
-        entities = _sector_entities(r_inner, r_outer, cut_angle, role="outer")
+        entities = _sector_entities(r_inner + trim_inner, r_outer - trim_outer, cut_angle, role="outer")
 
         reference_entities = []
-        if gap != 0:
+        if gap != 0 or trim_inner or trim_outer:
             reference_entities = _sector_entities(r_inner, r_outer, effective_angle)
 
         return entities, reference_entities, {"sector_angle_deg": cut_angle}
 
     def _develop_faceted(self, r_inner: float, r_outer: float, big_r: float, small_r: float,
-                         full_angle: float, effective_angle: float, gap: float):
+                         full_angle: float, effective_angle: float, gap: float,
+                         trim_inner: float, trim_outer: float):
         n_full = self.n_facets
 
         # Passo angolare tale che la corda dritta a r_outer coincida col
@@ -327,7 +343,8 @@ class Cone:
                     "margin troppo grande rispetto alla faccetta estrema del cono sfaccettato."
                 )
 
-        entities = _faceted_sector_outline(r_inner, r_outer, vertex_angles, role="outer")
+        cut_inner, cut_outer = r_inner + trim_inner, r_outer - trim_outer
+        entities = _faceted_sector_outline(cut_inner, cut_outer, vertex_angles, role="outer")
         # Le linee di piega si fermano un filo prima del vero raggio interno/
         # esterno (_BEND_LINE_INSET): se toccassero esattamente lo stesso
         # nodo dei vertici del contorno, il grafo di topo le userebbe per
@@ -337,13 +354,13 @@ class Cone:
         for angle in vertex_angles[1:-1]:
             entities.append({
                 "type": "line",
-                "start": polar_point(r_inner + _BEND_LINE_INSET, angle),
-                "end": polar_point(r_outer - _BEND_LINE_INSET, angle),
+                "start": polar_point(cut_inner + _BEND_LINE_INSET, angle),
+                "end": polar_point(cut_outer - _BEND_LINE_INSET, angle),
                 "role": "bending",
             })
 
         reference_entities = []
-        if gap != 0:
+        if gap != 0 or trim_inner or trim_outer:
             reference_entities = _faceted_sector_outline(r_inner, r_outer, vertex_angles_full, role=None)
             for e in reference_entities:
                 e.pop("role", None)

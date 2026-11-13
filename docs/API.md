@@ -24,6 +24,7 @@ Cone(
     bottom_outer_diameter: float | None = None, bottom_inner_diameter: float | None = None,
     thickness: float = 0.0, margin: float = 0.0,
     overlap: float = 0.0,                    # l'opposto di margin (MAP.md D84)
+    top_trim: float = 0.0, bottom_trim: float = 0.0,   # mm tolti dall'altezza alle estremità (MAP.md D85)
     sector_angle: float | None = None,       # tetto sullo sviluppo naturale (MAP.md D46)
     split: int = 1,                          # scorciatoia: sector_angle = full_angle/split
     orientation: str = "vertical",           # "vertical" | "horizontal"
@@ -76,6 +77,7 @@ Cylinder(
     outer_diameter: float | None = None, inner_diameter: float | None = None,
     thickness: float = 0.0, margin: float = 0.0,
     overlap: float = 0.0,                    # l'opposto di margin (MAP.md D84)
+    top_trim: float = 0.0, bottom_trim: float = 0.0,   # mm tolti dall'altezza alle estremità (MAP.md D85)
     sector_angle: float = 360.0,             # < 360 = settore parziale (sella calandrata)
     split: int = 1,                          # scorciatoia: sector_angle = 360/split (MAP.md D46)
     orientation: str = "vertical",
@@ -113,6 +115,16 @@ sottili che si accavallano — MAP.md D84) sono lo stesso numero in verso
 opposto, **mai insieme** (`ValueError`): `margin` accorcia il foglio dai due
 bordi della cucitura (metà per lato), `overlap` lo allunga. Con `overlap` il
 contorno nominale resta in `reference_entities`.
+
+`top_trim`/`bottom_trim` (MAP.md D85): mm **tolti dall'altezza** all'estremità
+alta e bassa, per esempio una flangia che va in appoggio. Solo accorciamento:
+negativo, o `top_trim + bottom_trim ≥ height`, solleva `ValueError`. Nel
+`Cylinder` "alto" è il lato con Y maggiore dello sviluppo; nel `Cone` è il
+lato di `top_*_diameter`, e il valore è sull'altezza **assiale** (lo sviluppo
+lo converte sulla generatrice): l'estremità col diametro maggiore sposta
+`r_outer`, quella minore `r_inner`. L'angolo del settore non cambia. Il
+contorno nominale resta in `reference_entities`. Non è `margin`: quello
+lavora sulla cucitura (i bordi laterali), questo sull'altezza.
 
 ### `Bend`
 

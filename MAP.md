@@ -1929,6 +1929,24 @@ cylinder shifts the sheet so the bbox still starts at 0. `reference_entities`
 keep the nominal outline. It is the longitudinal seam only, not the butt
 weld between two sections (height).
 
+### D85 — `Cone`/`Cylinder`: `top_trim` and `bottom_trim`, the height shortened at the ends (Federico, 13 Nov 2026)
+
+A flange rests on a support and its value is taken off the height: the sheet
+must be lower at one or both ends. `margin`/`overlap` (D84) work on the other
+axis (the longitudinal seam); this one works along the height, so it is not
+redundant with them. Names: `top_trim`, `bottom_trim` — `margin` in this
+library means "welding gap" and `setback` is bend vocabulary; the word `trim`
+also names the dashing of bend lines in `flat/trim.py` (a different module,
+a function, not a parameter of the generators: accepted, noted). Only
+shortening: negative values raise, as does `top_trim + bottom_trim ≥ height`.
+Cylinder: Y is the axial length, "top" is the larger Y; the bend lines of the
+faceted one shorten with the sheet. Cone: the value is on the AXIAL height (it
+is how `height` is defined and how a designer thinks), converted to the
+generatrix by `slant / height`; the end with the larger mean diameter moves
+`r_outer`, the smaller one `r_inner`; the sector angle does not change.
+`reference_entities` keep the nominal outline. No allowance beyond the
+nominal height: if it is ever needed, it is a new decision.
+
 → **0.12.0** (D79: `part_fields`, the sheet-metal data for the ERP/CAM JSON).
 → **0.12.1** (D79: `UserWarning` when material or thickness are written as "N/D").
 → **0.12.2** (D80: collinear strokes with material between count as separate bends).
@@ -1936,3 +1954,4 @@ weld between two sections (height).
 → **0.12.4** (D82: `FlatGeometry.to_json`).
 → **0.12.5** (D83: `to_json` quantity × split).
 → **0.12.6** (D84: `overlap` in `Cone` and `Cylinder`).
+→ **0.12.7** (D85: `top_trim` / `bottom_trim` in `Cone` and `Cylinder`).

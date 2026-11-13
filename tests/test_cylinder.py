@@ -50,6 +50,31 @@ class TestCylinderMath(unittest.TestCase):
         with self.assertRaises(ValueError):
             Cylinder(outer_diameter=150, height=500, thickness=2, overlap=-1).develop()
 
+    def test_top_e_bottom_trim_accorciano_l_altezza(self):
+        # D85: flangia in appoggio - il foglio è più basso alle due estremità
+        flat = Cylinder(outer_diameter=150, height=500, thickness=2,
+                        top_trim=20, bottom_trim=10).develop()
+        ys = [y for _, y in flat.entities[0]["points"]]
+        self.assertAlmostEqual(min(ys), 10.0, places=9)
+        self.assertAlmostEqual(max(ys), 480.0, places=9)
+        self.assertEqual(len(flat.reference_entities), 1)
+
+    def test_trim_sfaccettato_accorcia_anche_le_pieghe(self):
+        flat = Cylinder(outer_diameter=150, height=500, thickness=2, faceted=True,
+                        n_facets=8, bottom_trim=10, top_trim=20).develop()
+        pieghe = [e for e in flat.entities if e.get("role") == "bending"]
+        self.assertEqual(len(pieghe), 7)
+        for e in pieghe:
+            self.assertAlmostEqual(e["start"][1], 10.0, places=9)
+            self.assertAlmostEqual(e["end"][1], 480.0, places=9)
+
+    def test_trim_negativo_o_che_mangia_tutto_solleva(self):
+        with self.assertRaises(ValueError):
+            Cylinder(outer_diameter=150, height=500, thickness=2, top_trim=-1).develop()
+        with self.assertRaises(ValueError):
+            Cylinder(outer_diameter=150, height=500, thickness=2,
+                     top_trim=300, bottom_trim=200).develop()
+
     def test_entity_is_a_polygon(self):
         flat = Cylinder(outer_diameter=150, height=3895, thickness=2).develop()
         self.assertEqual(len(flat.entities), 1)

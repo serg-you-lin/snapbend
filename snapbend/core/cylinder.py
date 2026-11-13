@@ -72,7 +72,7 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 
-from ..model.geometry import FlatGeometry, swap_xy, _check_orientation, resolve_outer_diameter, resolve_seam_gap
+from ..model.geometry import FlatGeometry, swap_xy, _check_orientation, resolve_outer_diameter, resolve_seam_gap, check_end_trims
 from .bend import resolve_calibration, resolve_facet_bend
 
 
@@ -84,6 +84,8 @@ class Cylinder:
     thickness: float = 0.0
     margin: float = 0.0
     overlap: float = 0.0                        # sovrapposizione della cucitura, l'opposto di margin (MAP.md D84)
+    top_trim: float = 0.0                       # mm tolti dall'altezza all'estremità alta (flangia in appoggio, MAP.md D85)
+    bottom_trim: float = 0.0                    # idem all'estremità bassa
     sector_angle: float = 360.0
     split: int = 1                              # scorciatoia per sector_angle=360/split (MAP.md D46)
     orientation: str = "vertical"
@@ -104,6 +106,7 @@ class Cylinder:
         )
         if self.height <= 0:
             raise ValueError("height deve essere maggiore di zero.")
+        check_end_trims(self.top_trim, self.bottom_trim, self.height)
         gap = resolve_seam_gap(self.margin, self.overlap)
         if not (0.0 < self.sector_angle <= 360.0):
             raise ValueError("sector_angle deve essere maggiore di zero e al massimo 360.")
@@ -151,21 +154,24 @@ class Cylinder:
 
         # Canonico: X = circonferenza/sviluppo sfaccettato (accorciata a
         # destra e sinistra dal margine), Y = lunghezza assiale (invariata).
+        # Y = lunghezza assiale: i trim tolgono alle due estremità (D85),
+        # lo sviluppo nominale (riferimento) resta alto `height`.
+        y0, y1 = self.bottom_trim, self.height - self.top_trim
         entities = [{
             "type": "polygon",
             "points": [
-                (x0, 0.0), (x0 + cut_width, 0.0),
-                (x0 + cut_width, self.height), (x0, self.height),
+                (x0, y0), (x0 + cut_width, y0),
+                (x0 + cut_width, y1), (x0, y1),
             ],
             "role": "outer",
         }]
         for pos in bend_lines:
             entities.append({
-                "type": "line", "start": (pos, 0.0), "end": (pos, self.height), "role": "bending",
+                "type": "line", "start": (pos, y0), "end": (pos, y1), "role": "bending",
             })
 
         reference_entities = []
-        if gap != 0:
+        if gap != 0 or self.top_trim or self.bottom_trim:
             reference_entities = [{
                 "type": "polygon",
                 "points": [
@@ -184,6 +190,8 @@ class Cylinder:
             "thickness": self.thickness,
             "margin": self.margin,
             "overlap": self.overlap,
+            "top_trim": self.top_trim,
+            "bottom_trim": self.bottom_trim,
             "sector_angle_deg": effective_angle,
             "split": self.split,
             "diameter_mean": diameter_mean,

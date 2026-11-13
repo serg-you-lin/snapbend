@@ -54,6 +54,40 @@ class TestConeMath(unittest.TestCase):
             Cone(top_outer_diameter=100, bottom_outer_diameter=250, height=300,
                  thickness=2, margin=2, overlap=2).develop()
 
+    def test_trim_assiale_diventa_radiale_sul_lato_giusto(self):
+        # D85: top_ è il lato PICCOLO qui (100 contro 250) -> sposta r_inner;
+        # bottom_ è il lato grande -> sposta r_outer. Misurato sull'altezza assiale.
+        kw = dict(top_outer_diameter=100, bottom_outer_diameter=250, height=300, thickness=2)
+        nominale = Cone(**kw).develop().meta
+        flat = Cone(top_trim=30, bottom_trim=60, **kw).develop()
+        scala = nominale["slant_height"] / 300
+        raggi = sorted(e["radius"] for e in flat.entities if e["type"] == "arc")
+        self.assertAlmostEqual(raggi[0], nominale["inner_radius"] + 30 * scala, places=9)
+        self.assertAlmostEqual(raggi[1], nominale["outer_radius"] - 60 * scala, places=9)
+        self.assertEqual(flat.meta["sector_angle_deg"], nominale["sector_angle_deg"])
+
+    def test_trim_scambiando_i_lati_scambia_il_raggio(self):
+        # stesso pezzo con top grande: top_trim ora sposta r_outer
+        kw = dict(top_outer_diameter=250, bottom_outer_diameter=100, height=300, thickness=2)
+        nominale = Cone(**kw).develop().meta
+        flat = Cone(top_trim=60, **kw).develop()
+        scala = nominale["slant_height"] / 300
+        raggi = sorted(e["radius"] for e in flat.entities if e["type"] == "arc")
+        self.assertAlmostEqual(raggi[1], nominale["outer_radius"] - 60 * scala, places=9)
+        self.assertAlmostEqual(raggi[0], nominale["inner_radius"], places=9)
+
+    def test_trim_sfaccettato_tiene_pieghe_e_riferimento(self):
+        kw = dict(top_outer_diameter=100, bottom_outer_diameter=250, height=300,
+                  thickness=2, split=2, faceted=True, n_facets=8)
+        flat = Cone(top_trim=30, bottom_trim=60, **kw).develop()
+        self.assertEqual(len(flat.bends), 3)
+        self.assertGreater(len(flat.reference_entities), 0)
+
+    def test_trim_che_mangia_tutta_l_altezza_solleva(self):
+        with self.assertRaises(ValueError):
+            Cone(top_outer_diameter=100, bottom_outer_diameter=250, height=300,
+                 thickness=2, top_trim=200, bottom_trim=100).develop()
+
     def test_sector_angle_and_radii(self):
         flat = Cone(
             top_outer_diameter=200, bottom_outer_diameter=150, height=100, thickness=2,

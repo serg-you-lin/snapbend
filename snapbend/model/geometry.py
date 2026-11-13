@@ -86,6 +86,18 @@ def resolve_seam_gap(margin: float, overlap: float) -> float:
     return margin - overlap
 
 
+def check_end_trims(top_trim: float, bottom_trim: float, height: float) -> None:
+    """
+    Accorciamenti alle due estremità dell'altezza (MAP.md D85): solo
+    positivi o zero, e insieme devono lasciare del materiale.
+    """
+    for name, value in (("top_trim", top_trim), ("bottom_trim", bottom_trim)):
+        if value < 0:
+            raise ValueError(f"{name} non può essere negativo.")
+    if top_trim + bottom_trim >= height:
+        raise ValueError("top_trim + bottom_trim devono restare minori di height.")
+
+
 def swap_xy(entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Riflette la geometria lungo la diagonale y=x (scambia gli assi X/Y) — il

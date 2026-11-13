@@ -3,6 +3,19 @@
 Unico posto per il lavoro aperto. Le decisioni e il perché stanno in
 `MAP.md`; qui non si ripetono, si rimanda con "vedi `MAP.md` D...".
 
+## JSON dei pezzi generati (MAP.md D82, D83)
+
+- [ ] **Il grado del materiale come campo del generatore.** Oggi `to_json(material="S275JR")`
+  si dà a mano a ogni chiamata, ed esce `N/D` se manca. `Cone`/`Cylinder`/`BentProfile`
+  potrebbero portarlo, ma `material` è già la chiave di calibrazione (`"acciaio"`, D45):
+  serve un nome a parte (per esempio `grade`). Idem la `quantity` di pezzi interi, oggi
+  solo argomento di `to_json` (il moltiplicatore `split` è già automatico, D83).
+- [ ] Un campo in testata che dica "generato da snapbend" (oggi `source_format` è `geometry`,
+  vocabolario di topo). Da verificare prima se `topo.save_json` accetta campi in testata:
+  `extra` entra solo nel cluster.
+- [ ] Fori e interni infilati dal chiamante: oggi si fa mutando `flat.entities` a mano
+  (funziona: `role` `hole` / `inner`). API vera (`add_hole`, `add_inner`) da decidere.
+
 ## Richieste dai consumer (MAP.md D71)
 
 I consumer (pippo, …) non scrivono qui: mettono le richieste nel loro
