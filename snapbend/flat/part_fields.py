@@ -60,8 +60,9 @@ def part_fields(
 
     Dal pezzo (da `describe_features` e da `Cluster.to_dict()`):
       `plain_holes_count`, `countersink_count`, `threaded_holes_count`,
-      `holes_count` (la somma), `bend_count` (colpi di piega, NON tratti: le
-      linee collineari contano una piega, come in `describe_features`),
+      `holes_count` (la somma), `bend_count` (colpi di piega, NON tratti: tratti
+      collineari uniti da un vuoto o che si toccano contano una piega, con del
+      materiale in mezzo due, MAP.md D80),
       `engrave_length_mm`, `marking_length_mm`, `total_perimeter_mm`.
     """
     avvisati: set = set()

@@ -8,6 +8,8 @@ risultato di `topo.heal()`. Arrivato da topo (topo MAP.md D88).
 
 from __future__ import annotations
 
+import math
+
 from typing import Optional
 
 import topo
@@ -242,6 +244,45 @@ def _detect_in_result(
     return result
 
 
+def _in_void(cluster: topo.Cluster, point) -> bool:
+    """
+    Il punto sta in un vuoto del pezzo: un foro o un invalido (tolti dagli
+    `inners` dalle lane), o un inner il cui più interno che lo contiene ha
+    profondità dispari.
+    """
+    if any(v.contains(point) for name in ("holes", "invalid") for v in cluster.features(name)):
+        return True
+    depths = [i.depth for i in cluster.inners if i.contains(point)]
+    return bool(depths) and max(depths) % 2 == 1
+
+
+def _count_bends(cluster: topo.Cluster, bending_lines: list) -> int:
+    """
+    Colpi di piega (non tratti). Due tratti sulla stessa retta sono UNA piega
+    se fra loro non c'è materiale: si toccano, o li separa un vuoto (un foro,
+    MAP.md D53). Se fra i due c'è materiale restano due pieghe (MAP.md D80).
+    """
+    bends = 0
+    for group in topo.geometry.group_collinear_lines(bending_lines, tolerance=_BENDING_GROUP_TOLERANCE):
+        ax, ay = group[0].start
+        bx, by = group[0].end
+        norm = math.hypot(bx - ax, by - ay) or 1.0
+        ux, uy = (bx - ax) / norm, (by - ay) / norm
+        spans = sorted(
+            ((min(t0, t1), max(t0, t1)) for t0, t1 in
+             (((l.start[0] - ax) * ux + (l.start[1] - ay) * uy,
+               (l.end[0] - ax) * ux + (l.end[1] - ay) * uy) for l in group)))
+        bends += 1
+        reach = spans[0][1]
+        for lo, hi in spans[1:]:
+            if lo - reach > _BENDING_GROUP_TOLERANCE:
+                mid = (reach + lo) / 2
+                if not _in_void(cluster, (ax + ux * mid, ay + uy * mid)):
+                    bends += 1
+            reach = max(reach, hi)
+    return bends
+
+
 def describe_features(cluster: topo.Cluster) -> dict:
     """
     Conteggio ricco per i tipi **noti di topo** — fori per tipo, pieghe
@@ -263,13 +304,7 @@ def describe_features(cluster: topo.Cluster) -> dict:
     from collections import Counter
     htypes = Counter(h.hole_type for h in holes)
 
-    bending_groups = (
-        len(topo.geometry.group_collinear_lines(
-            bending_lines,
-            tolerance=_BENDING_GROUP_TOLERANCE,
-        ))
-        if bending_lines else 0
-    )
+    bending_groups = _count_bends(cluster, bending_lines)
 
     marking = cluster.features("marking_entities")
 

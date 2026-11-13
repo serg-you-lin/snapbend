@@ -1859,7 +1859,24 @@ thickness are written as "N/D", never invented; an explicit `None` is not writte
 `marking_length_mm`, `total_perimeter_mm`. Area, bbox, perimeters, `inner_count`
 and `label` are topo's and are not repeated (a name topo writes raises
 `ValueError`). `bend_count` is bends, not strokes (`describe_features`); the
-rule "collinear strokes with material between stay separate" is not in yet.
+rule "collinear strokes with material between stay separate" is D80.
+
+### D80 — collinear bend strokes with material between them are separate bends (Federico, 13 Nov 2026)
+`describe_features` grouped every pair of strokes on the same line into one
+bend. That is right when nothing is between them (they touch) or a void is
+(a hole interrupts the bend, D53), wrong when there is sheet between them: two
+bend strokes with material in the middle are two bends, two strikes of the
+press. `_count_bends` sorts each collinear group along its line and, for each
+gap wider than the grouping tolerance, looks at its midpoint: in a void (a
+hole, an `Invalid`, an inner of odd depth) the strokes stay one bend, on
+material they split. The grouping itself is still topo's
+(`group_collinear_lines`); only the question "what is in the gap" is snapbend's,
+because it is process meaning. The count changes for a file drawn that way
+(three strokes, three bends); `senza_linea_piega` and every other golden keep
+theirs. A bend drawn dashed in the input (a dash at each end) now counts one
+per dash; a dashed bend that snapbend writes itself (D63) is still one
+`BendingLine` and one bend.
 
 → **0.12.0** (D79: `part_fields`, the sheet-metal data for the ERP/CAM JSON).
 → **0.12.1** (D79: `UserWarning` when material or thickness are written as "N/D").
+→ **0.12.2** (D80: collinear strokes with material between count as separate bends).

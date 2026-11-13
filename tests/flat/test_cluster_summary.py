@@ -67,15 +67,23 @@ class TestDescribeFeatures(unittest.TestCase):
         cluster = _part(engrave_lines=eng)
         self.assertEqual(describe_features(cluster)["total_engrave_length"], 15.5)
 
-    def test_bending_collinear_grouped(self):
-        # due segmenti collineari sulla stessa retta → una piega logica
+    def test_bending_collinear_with_material_between_stay_separate(self):
+        # due segmenti collineari con del materiale in mezzo → due pieghe (D80)
         bl = [
             BendingLine(role=BEND, start=(0, 50), end=(40, 50), length=40),
             BendingLine(role=BEND, start=(60, 50), end=(100, 50), length=40),
             BendingLine(role=BEND, start=(50, 0), end=(50, 100), length=100),
         ]
         cluster = _part(bending_lines=bl)
-        self.assertEqual(describe_features(cluster)["bending_lines"], 2)
+        self.assertEqual(describe_features(cluster)["bending_lines"], 3)
+
+    def test_bending_collinear_touching_is_one(self):
+        # due tratti che si toccano sono una linea sola
+        bl = [
+            BendingLine(role=BEND, start=(0, 50), end=(40, 50), length=40),
+            BendingLine(role=BEND, start=(40, 50), end=(100, 50), length=60),
+        ]
+        self.assertEqual(describe_features(_part(bending_lines=bl))["bending_lines"], 1)
 
     def test_marking_length_from_overlay_entities(self):
         p = _part()

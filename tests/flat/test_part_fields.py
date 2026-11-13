@@ -48,6 +48,16 @@ class TestPartFields(unittest.TestCase):
         self.assertEqual(cluster["overlay"]["bending_lines"], 3)                  # topo: conteggio grezzo
         self.assertEqual(cluster["bend_count"], 2)                                # colpi di piega
 
+    def test_collineari_con_materiale_in_mezzo_restano_separate(self):
+        # il file con due tratti sulla stessa retta e materiale fra loro: 3 colpi di piega (D80)
+        import pathlib
+        import topo_dxf
+        path = pathlib.Path(__file__).parent.parent / "data/flat/golden/b_l_same_rect_material_inside.dxf"
+        result = detect_flat(topo_dxf.load_dxf(str(path)), features="all")
+        data = json.loads(topo.to_json(result, extra=part_fields()))
+        cluster = data["clusters"][0]
+        self.assertEqual((cluster["overlay"]["bending_lines"], cluster["bend_count"]), (3, 3))
+
     def test_materiale_e_spessore_non_si_inventano(self):
         cluster = self._json()[0]["clusters"][0]
         self.assertEqual((cluster["material"], cluster["thickness_mm"]), ("N/D", "N/D"))
