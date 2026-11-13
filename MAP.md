@@ -1892,7 +1892,20 @@ cannot come before `height`), and `meta` carries `outer_diameter` /
 `top_outer_diameter` / `bottom_outer_diameter` in place of the old keys.
 `height` of the cone stays as given, used on the mean fiber as it is.
 
+### D82 — `FlatGeometry.to_json`: the JSON comes from the same in-memory Result as `to_dxf` (Federico, 13 Nov 2026)
+
+`Cone`, `Cylinder`, `BentProfile` and the section already ended in
+`to_topo_result()` (what `to_dxf` writes from); the JSON was one line of topo
+away but asked the thickness again, which the generator already holds. Now
+`flat.to_json(path, material=None, quantity=1)` is the sibling of `to_dxf`:
+same `Result` (no file read back), `thickness_mm` from `flat.meta["thickness"]`
+(N/D when 0), through `part_fields` (D79). `material` is the grade
+("S275JR"), never the generator's calibration key `material="acciaio"` —
+those are two different things. No new JSON format: it is topo's, as
+`detect_flat` gives it. Lives in `io/dxf.py` (the one door to topo, D69).
+
 → **0.12.0** (D79: `part_fields`, the sheet-metal data for the ERP/CAM JSON).
 → **0.12.1** (D79: `UserWarning` when material or thickness are written as "N/D").
 → **0.12.2** (D80: collinear strokes with material between count as separate bends).
 → **0.12.3** (D81: `outer_diameter` / `inner_diameter` in `Cone` and `Cylinder`).
+→ **0.12.4** (D82: `FlatGeometry.to_json`).

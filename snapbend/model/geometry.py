@@ -143,6 +143,23 @@ class FlatGeometry:
         from ..io.dxf import to_topo_result
         return to_topo_result(self, tolerance=tolerance)
 
+    def to_json(
+        self,
+        path: str,
+        material: Optional[str] = None,
+        quantity: int = 1,
+        tolerance: float = 0.05,
+        extra=None,
+    ):
+        """
+        Scrive il JSON del pezzo dallo stesso Result in memoria di `to_dxf`
+        (MAP.md D82). Spessore da `.meta`; `material` è il grado (es.
+        "S275JR"), "N/D" se non dato. Vedi `snapbend.io.dxf.to_json`.
+        """
+        from ..io.dxf import to_json
+        return to_json(self, path, material=material, quantity=quantity,
+                       tolerance=tolerance, extra=extra)
+
     def to_dxf(
         self,
         path: str,

@@ -4,7 +4,7 @@ snapbend/io/dxf.py
 Export di un FlatGeometry (snapbend.model.geometry) su file DXF, via topo.
 Unico modulo di `snapbend` che importa topo — e lo fa lazy: se topo non è
 installato, il resto del pacchetto (calcolo dello sviluppo) funziona
-comunque; solo queste due funzioni sollevano ImportError.
+comunque; solo queste funzioni sollevano ImportError.
 
 `FlatGeometry.to_topo_result()`/`.to_dxf()` sono deleghe sottili a queste
 due funzioni: da fuori si continua a chiamare `flat.to_dxf(...)`, il corpo
@@ -85,6 +85,37 @@ def to_dxf(
 
     doc_out.saveas(path)
     return doc_out
+
+
+def to_json(
+    flat: "FlatGeometry",
+    path: str,
+    material: Optional[str] = None,
+    quantity: int = 1,
+    tolerance: float = 0.05,
+    extra=None,
+):
+    """
+    Scrive su file il JSON del pezzo, dallo stesso Result in memoria che
+    usa `to_dxf` (MAP.md D82) — stesso contenuto di `detect_flat` +
+    `topo.save_json` + `part_fields`.
+
+    Lo spessore viene da `flat.meta["thickness"]` (se > 0, altrimenti resta
+    "N/D"); il materiale è il GRADO (es. "S275JR"), non la chiave di
+    calibrazione `material="acciaio"` del generatore, che qui non c'entra.
+    `extra`: come in `part_fields`, campi in più per pezzo.
+    """
+    import topo
+    from ..flat.part_fields import NOT_AVAILABLE, part_fields
+
+    result = to_topo_result(flat, tolerance=tolerance)
+    thickness = (flat.meta or {}).get("thickness") or 0.0
+    topo.save_json(result, path, extra=part_fields(
+        material=material if material is not None else NOT_AVAILABLE,
+        thickness_mm=thickness if thickness > 0 else NOT_AVAILABLE,
+        quantity=quantity, extra=extra,
+    ))
+    return result
 
 
 def write_section_dxf(

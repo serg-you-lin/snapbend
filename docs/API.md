@@ -402,6 +402,7 @@ Il contratto neutro fra `snapbend` e chiunque a valle — output di ogni
 |---|---|---|
 | `.to_topo_result(tolerance=0.05)` | `Result` di topo | topo installato |
 | `.to_dxf(path, tolerance=0.05, annotate=True, show_margin_reference=False)` | scrive un file DXF (con `annotate=True`, il blocco note include anche `.bends`, MAP.md D47) | topo installato |
+| `.to_json(path, material=None, quantity=1, tolerance=0.05, extra=None)` | scrive il JSON del pezzo dallo stesso `Result` in memoria di `to_dxf` (MAP.md D82): area, perimetri, bbox, `bend_count`, più i campi di `part_fields`. Spessore da `.meta` (N/D se 0); `material` è il grado, N/D se non dato | topo installato |
 
 **Raises**: `ImportError` da entrambi i metodi se topo non è
 installato (messaggio esplicito, `pip install -e <path a topo>`).
