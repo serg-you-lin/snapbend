@@ -15,7 +15,7 @@ from snapbend.flat import detect_flat, is_structural
 class TestManufacturingIsStructural(unittest.TestCase):
     """
     Predicato ESTESO — outer/inner (motore) + hole/countersink/threaded_hole
-    (processo) — quello che `heal_and_detect()` passa a
+    (processo) — quello che `detect_flat(features="all")` passa a
     `topo.heal(is_structural=...)`.
     """
 
@@ -43,13 +43,13 @@ class TestConsumerRolesSurviveDetect(unittest.TestCase):
         ])
 
     def test_detect_non_sposta_il_ruolo_custom_fuori_dalla_trash(self):
-        result = topo.heal(self._framed_doc()).faces()
+        result = topo.heal(self._framed_doc(), is_structural=is_structural).faces()
         trash_prima = len(result.loose)
         frame_prima = sum(1 for t in result.loose
                           if topo.model.role_str(getattr(t, "role", "")) == "frame")
         self.assertGreater(frame_prima, 0)
 
-        detect_flat(result, features="all")
+        result = detect_flat(self._framed_doc(), features="all")
 
         frame_dopo = sum(1 for t in result.loose
                          if topo.model.role_str(getattr(t, "role", "")) == "frame")

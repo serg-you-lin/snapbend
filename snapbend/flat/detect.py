@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import Optional
 
 import topo
-from .roles import HOLE, COUNTERSINK, THREADED_HOLE, BEND, ENGRAVE, MARKING
+from .roles import HOLE, COUNTERSINK, THREADED_HOLE, BEND, ENGRAVE, MARKING, INVALID, is_structural
 from .model import (
     BendingLine,
     ClassifiedEntity,
@@ -121,41 +121,118 @@ def _release_touching_rings(result: topo.Result) -> None:
             ]
 
 
+def _mark_invalid_inners(result: topo.Result, min_distance: float) -> None:
+    """
+    Un `inner` senza ruolo a meno di `min_distance` mm dall'outer (misura:
+    `topo.geometry.gap`) diventa un `Invalid(reason="inner-too-close")` in
+    `cluster.overlay["invalid"]`, e sparisce da `cluster.inners` come un foro
+    promosso: non è più un foro candidato e nel DXF va sul layer `Invalid`.
+    Resta un vuoto (`is_void`), l'area netta non cambia. La soglia è del
+    chiamante, snapbend non ne ha una. Un inner con un ruolo deciso dal
+    chiamante non si tocca. Un `Diagnostic` dice dove, in `result.warnings`.
+    """
+    from .model import Invalid, REASON_INNER_TOO_CLOSE
+    points = []
+    for cluster in result.clusters:
+        kept = []
+        for inner in cluster.inners:
+            gap = None
+            if inner.depth == 1 and inner.role == topo.model.ContourRole.INNER:
+                gap = topo.geometry.gap(inner, cluster.outer)
+            if gap is None or gap.distance >= min_distance:
+                kept.append(inner)
+                continue
+            _ensure_overlay(cluster).add("invalid", Invalid(
+                role=INVALID, segments=list(inner.segments), styles=list(inner.styles or []),
+                reason=REASON_INNER_TOO_CLOSE, distance=gap.distance,
+            ))
+            points.append(gap.on_a)
+        cluster.inners = kept
+    if points:
+        result.warnings.append(topo.Diagnostic(
+            REASON_INNER_TOO_CLOSE,
+            f"{len(points)} inner contour(s) closer than {min_distance} mm to the outer, "
+            f"in the overlay as 'invalid'",
+            points=points,
+            help="detect_flat(result, min_inner_distance=...) with a smaller limit",
+        ))
+
+
 # ---------------------------------------------------------------------------
 # API pubblica
 # ---------------------------------------------------------------------------
 
 def detect_flat(
-    result:            topo.Result,
+    doc:               topo.Document,
     features=None,
     *,
+    tolerance:         Optional[float] = None,
+    max_gap:           Optional[float] = None,
+    label:             str = "",
+    source_file:       str = "",
     max_drill_diameter: float = HOLE_DIAMETER_THRESHOLD,
     bending_tolerance: float = 1.0,
     engrave_tolerance: float = 1.0,
+    min_inner_distance: Optional[float] = None,
 ) -> topo.Result:
     """
-    Classifica le feature dentro le parti già trovate da heal().
+    Legge un pezzo piano (file di taglio, sviluppo) dal `Document` di topo:
+    `topo.heal(doc, is_structural=snapbend.flat.is_structural).faces()` e poi
+    la classificazione delle feature dentro le parti trovate. L'unico
+    ingresso: il predicato strutturale di processo (un foro è un contorno di
+    pezzo) lo passa lei, nessuno può dimenticarlo (MAP.md D78).
 
-    `detect_flat(result)` nudo esegue solo la lane dei ruoli assegnati al load (`role_rules`) e la
+    `tolerance`, `max_gap`, `label`, `source_file` sono le opzioni di
+    `topo.heal` (stessi default). Se il documento non dà parti valide il
+    `Result` torna comunque, con `is_valid=False`, e le lane non girano.
+
+    `detect_flat(doc)` nudo esegue solo la lane dei ruoli assegnati al load (`role_rules`) e la
     pulizia della topologia: i contorni circolari restano `inners`, nessun
     `Hole`. È il default per il taglio laser (`laser-cutting-default`).
 
     Le lane geometriche sono opt-in via `features`:
-        detect_flat(result, "holes")           → promozione fori (Ø < max_drill_diameter)
-        detect_flat(result, "all")             → fori + pieghe + incisioni
-        detect_flat(result, {"holes", "bending"})
+        detect_flat(doc, "holes")           → promozione fori (Ø < max_drill_diameter)
+        detect_flat(doc, "all")             → fori + pieghe + incisioni
+        detect_flat(doc, {"holes", "bending"})
 
     `max_drill_diameter` (default `HOLE_DIAMETER_THRESHOLD`, 32.1 mm) è un
     parametro di processo: sotto soglia il contorno circolare è un foro da
     punta, sopra resta un contorno interno.
 
-    Muta `result` in-place (parti e loose) e lo
-    ritorna, così la catena resta esplicita: `result = topo.detect_flat(result)`.
+    `min_inner_distance` (mm, default `None` = nessun limite): un contorno
+    interno senza ruolo più vicino di così all'outer diventa un
+    `Invalid` in `cluster.overlay["invalid"]` (layer `Invalid`) e non un foro. È la scelta
+    del chiamante, snapbend non ne propone una: nessun valore, nessun
+    controllo. Diverso dal "tocca" (distanza <= 1e-6), che è sempre invalido
+    e sempre letto (un anello che tocca l'outer torna in `loose`).
     """
+    result = topo.heal(doc, tolerance=tolerance, max_gap=max_gap, label=label,
+                       source_file=source_file, is_structural=is_structural).faces()
+    if not (result.is_valid and result.clusters):
+        return result
+    return _detect_in_result(
+        result, features,
+        max_drill_diameter=max_drill_diameter, bending_tolerance=bending_tolerance,
+        engrave_tolerance=engrave_tolerance, min_inner_distance=min_inner_distance,
+    )
+
+
+def _detect_in_result(
+    result:             topo.Result,
+    features,
+    *,
+    max_drill_diameter: float = HOLE_DIAMETER_THRESHOLD,
+    bending_tolerance:  float = 1.0,
+    engrave_tolerance:  float = 1.0,
+    min_inner_distance: Optional[float] = None,
+) -> topo.Result:
+    """Le lane di `detect_flat()` su un `Result` già letto. Muta `result` e lo ritorna."""
     feats = _normalize_features(features)
 
     _release_touching_rings(result)
     _detect_labeled(result)
+    if min_inner_distance is not None:
+        _mark_invalid_inners(result, min_inner_distance)
     if "bending" in feats:
         _detect_bending(result, bending_tolerance=bending_tolerance)
     if "engrave" in feats:

@@ -28,7 +28,7 @@ sys.path.insert(0, str(project_root))
 import topo
 import topo_dxf
 from snapbend.flat import ROLE_STYLES, LAYERS
-from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
+from snapbend.flat import detect_flat, describe_features, ALL_FEATURES
 from topo_dxf.layers import TRASH_LAYER
 from snapbend.flat.roles import LAYER_ENGRAVE
 from snapbend.flat.detect import describe_features
@@ -45,14 +45,8 @@ def _run_pipeline(
 ):
     doc = topo_dxf.document_from_msp(msp, role_rules=topo.name_rules(special_layers))
 
-    result = topo.heal(
-        doc,
-        tolerance=tolerance,
-    ).faces()
 
-    detect_flat(
-        result, features="all",
-    )
+    result = detect_flat(doc, features="all", tolerance=tolerance)
 
     doc_out = topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)
 

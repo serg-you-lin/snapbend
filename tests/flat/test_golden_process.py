@@ -24,7 +24,7 @@ sys.path.insert(0, str(project_root))
 
 import topo
 import topo_dxf
-from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
+from snapbend.flat import detect_flat, describe_features, ALL_FEATURES
 from topo_dxf.layers import role_to_dxf_layer
 from snapbend.flat import LAYERS
 from snapbend.flat.detect import describe_features
@@ -105,20 +105,15 @@ def _make_test(path):
         }
 
         from snapbend.flat.roles import is_structural
-        result = topo.heal(
-            topo_dxf.load_dxf(
+
+        result = detect_flat(topo_dxf.load_dxf(
                 str(dxf_path),
                 upgrade=True,
                 explode_inserts=True,
                 flatten_z=True,
                 tolerance=config.get("tolerance", DEFAULT_TOLERANCE),
                 role_rules=topo.name_rules(name_roles),
-            ),
-            tolerance=config.get("tolerance", DEFAULT_TOLERANCE),
-            is_structural=is_structural,
-        ).faces()
-
-        detect_flat(result, features="all")
+            ), features="all", tolerance=config.get("tolerance", DEFAULT_TOLERANCE))
 
         # --- cluster count ---
         self.assertEqual(
@@ -368,10 +363,8 @@ MULTIPLI_PROC_DIR = MULTIPLI_DIR / "process"
 
 @lru_cache(maxsize=None)
 def _multipli_clusters(parent_path: Path, tolerance: float):
-    result = topo.heal(topo_dxf.load_dxf(parent_path, explode_inserts=True, tolerance=tolerance),
-                        tolerance=tolerance).faces()
-    if result.is_valid and result.clusters:
-        detect_flat(result, features="all")
+    result = detect_flat(topo_dxf.load_dxf(parent_path, explode_inserts=True, tolerance=tolerance),
+                         features="all", tolerance=tolerance)
     return result.clusters if result.is_valid else []
 
 

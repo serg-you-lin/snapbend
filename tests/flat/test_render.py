@@ -23,7 +23,7 @@ def _plate():
         {"type": "circle", "center": (20, 25), "radius": 6},
         {"type": "circle", "center": (70, 25), "radius": 4},
     ])
-    return doc, topo.heal(doc).faces()
+    return doc
 
 
 def _layers(out):
@@ -34,8 +34,8 @@ class TestRender(unittest.TestCase):
 
     def test_001_i_fori_non_sono_scritti_due_volte(self):
         # (arrivato da topo tests/unit/test_attached_export.py)
-        doc, result = _plate()
-        detect_flat(result, "holes")
+        doc = _plate()
+        result = detect_flat(doc, "holes")
         n_holes = len(result.clusters[0].features("holes"))
         self.assertGreater(n_holes, 0)
         # un'entità per foro, sul layer del suo tipo: nessun doppione
@@ -46,8 +46,8 @@ class TestRender(unittest.TestCase):
         )
 
     def test_002_la_svasatura_va_sul_suo_layer(self):
-        doc, result = _plate()
-        detect_flat(result, "holes")
+        doc = _plate()
+        result = detect_flat(doc, "holes")
         layers = _layers(topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS))
         self.assertEqual(layers.count(LAYER_COUNTERSINK), 1)
         self.assertEqual(layers.count(LAYER_HOLE), 1)
@@ -57,8 +57,7 @@ class TestRender(unittest.TestCase):
             {"type": "polygon", "points": [(0, 0), (100, 0), (100, 50), (0, 50)]},
             {"type": "line", "start": (50, 0), "end": (50, 50)},
         ])
-        result = topo.heal(doc).faces()
-        detect_flat(result, "bending")
+        result = detect_flat(doc, "bending")
         out = topo_dxf.to_dxf(result, doc, role_styles=ROLE_STYLES, layers=LAYERS)
         bends = [e for e in out.modelspace() if e.dxf.layer == LAYER_BENDING]
         self.assertEqual([e.dxftype() for e in bends], ["LINE"])
@@ -69,8 +68,8 @@ class TestRender(unittest.TestCase):
             {"type": "polygon", "points": [(0, 0), (100, 0), (100, 50), (0, 50)], "role": "outer"},
             {"type": "circle", "center": (20, 25), "radius": 5, "role": "hole"},
         ])
-        from snapbend.flat import heal_and_detect
-        result = heal_and_detect(doc, label="rect_test")
+        from snapbend.flat import detect_flat
+        result = detect_flat(doc, features="all", label="rect_test")
         self.assertTrue(result.is_valid, result.errors)
         self.assertEqual(len(result.clusters[0].features("holes")), 1)
 
@@ -83,8 +82,7 @@ class TestBendingRule(unittest.TestCase):
         entities = [{"type": "polygon",
                      "points": [(0, 0), (100, 0), (100, 50), (0, 50)]}]
         entities += [{"type": "line", "start": a, "end": b} for a, b in lines]
-        result = topo.heal(topo.load_geometry(entities)).faces()
-        detect_flat(result, "bending")
+        result = detect_flat(topo.load_geometry(entities), "bending")
         return result.clusters[0].features("bending_lines")
 
     def test_001_da_bordo_a_bordo_e_una_piega(self):
@@ -107,8 +105,7 @@ class TestBendingRule(unittest.TestCase):
         if window:
             entities.append({"type": "polygon",
                              "points": [(40, 10), (60, 10), (60, 40), (40, 40)]})
-        result = topo.heal(topo.load_geometry(entities)).faces()
-        detect_flat(result, "bending")
+        result = detect_flat(topo.load_geometry(entities), "bending")
         return result.clusters[0].features("bending_lines")
 
     def test_004_piega_interrotta_da_un_vuoto_e_una_piega(self):

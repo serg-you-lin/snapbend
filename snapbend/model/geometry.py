@@ -116,7 +116,7 @@ class FlatGeometry:
     def to_topo_result(self, tolerance: float = 0.05):
         """
         Traduce questo sviluppo in un Result passando da
-        topo.load_geometry() + snapbend.flat.heal_and_detect() — stesso contratto
+        topo.load_geometry() + snapbend.flat.detect_flat() — stesso contratto
         di qualsiasi altra sorgente topo (DXF, PDF, ...).
         """
         from ..io.dxf import to_topo_result

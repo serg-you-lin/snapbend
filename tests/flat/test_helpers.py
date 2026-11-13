@@ -19,7 +19,7 @@ import ezdxf
 import topo
 import topo_dxf
 from snapbend.flat import ROLE_STYLES, LAYERS
-from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
+from snapbend.flat import detect_flat, describe_features, ALL_FEATURES
 
 
 TESTS_DIR = Path(__file__).resolve().parent
@@ -72,17 +72,9 @@ def run_pipeline(
         role_rules=topo.name_rules(special_layers or {}),
     )
 
-    result = topo.heal(
-        doc,
-        tolerance=tolerance,
-        label=Path(dxf_name).stem,
-        source_file=dxf_name,
-    ).faces()
 
     if do_detect:
-        detect_flat(
-            result, features="all"
-        )
+        result = detect_flat(doc, features="all", tolerance=tolerance, label=Path(dxf_name).stem, source_file=dxf_name)
 
     doc_out = None
     if do_write:

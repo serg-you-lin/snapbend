@@ -12,7 +12,7 @@ from pathlib import Path
 
 import topo
 import topo_dxf
-from snapbend.flat import ROLE_STYLES, heal_and_detect
+from snapbend.flat import ROLE_STYLES, detect_flat
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "data" / "flat"
 MULTI_PART   = EXAMPLES / "golden" / "example_4_polylines.dxf"
@@ -25,7 +25,7 @@ SPECIAL_LM = {"Piega": "bending", "bend": "bending", "MARK": "engrave",
 
 def _result(path, name_roles=None):
     doc = topo_dxf.load_dxf(str(path), tolerance=0.5, role_rules=topo.name_rules(name_roles or {}))
-    return heal_and_detect(doc, features="all")
+    return detect_flat(doc, features="all")
 
 
 class TestViewModel(unittest.TestCase):

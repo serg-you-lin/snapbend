@@ -90,8 +90,7 @@ def generate_single(force: bool, only: str = None) -> None:
         roles = {**GLOBAL_NAME_ROLES, **config.get("name_roles", {})}
         doc = topo_dxf.load_dxf(dxf_path, upgrade=True, explode_inserts=True, flatten_z=True,
                              tolerance=tol, verbose=False, role_rules=topo.name_rules(roles))
-        result = topo.heal(doc, tolerance=tol, is_structural=is_structural).faces()
-        detect_flat(result, features="all")
+        result = detect_flat(doc, features="all", tolerance=tol)
         if not result.is_valid:
             print(f"  SKIP (non valido): {dxf_path.name}")
             continue
@@ -106,12 +105,11 @@ def generate_multipli(force: bool, only: str = None) -> None:
         if only and parent_path.stem != only:
             continue
         tol = _config(parent_path).get("tolerance", DEFAULT_TOLERANCE)
-        result = topo.heal(topo_dxf.load_dxf(parent_path, upgrade=True, explode_inserts=True),
-                            tolerance=tol).faces()
+        result = detect_flat(topo_dxf.load_dxf(parent_path, upgrade=True, explode_inserts=True),
+                             features="all", tolerance=tol)
         if not result.is_valid or not result.clusters:
             print(f"  SKIP (non valido): {parent_path.name}")
             continue
-        detect_flat(result, features="all")
         for part_index, cluster in enumerate(result.clusters):
             out = MULTIPLI_PROC_DIR / f"{parent_path.stem}__{part_index:03d}.json"
             if out.exists() and not force:

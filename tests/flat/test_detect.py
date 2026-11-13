@@ -5,7 +5,8 @@ import sys
 
 import topo
 import topo_dxf
-from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
+from snapbend.flat import detect_flat, describe_features, ALL_FEATURES
+from snapbend.flat.detect import _detect_in_result
 from topo_dxf.layers import LAYER_INNER
 from snapbend.flat.roles import LAYER_HOLE
 from snapbend.flat.thresholds import HOLE_DIAMETER_THRESHOLD
@@ -41,8 +42,7 @@ class TestDetectBase(unittest.TestCase):
         doc = load("rect_with_circle_hole.dxf")
         self.msp = doc.modelspace()
 
-        self.result = topo.heal(topo_dxf.document_from_msp(self.msp)).faces()
-        detect_flat(self.result, features="all")
+        self.result = detect_flat(topo_dxf.document_from_msp(self.msp), features="all")
 
     # ---------------------------------------------------------------
     # detect NON deve rompere heal
@@ -74,7 +74,7 @@ class TestDetectBase(unittest.TestCase):
         hole = self.result.clusters[0].features("holes")[0]
         first = hole.hole_type
 
-        detect_flat(self.result, features="all")
+        _detect_in_result(self.result, "all")
         second = hole.hole_type
 
         self.assertEqual(first, second)
@@ -90,8 +90,7 @@ class TestDetectCountersink(unittest.TestCase):
         doc = load("rect_with_countersink.dxf")
         self.msp = doc.modelspace()
 
-        self.result = topo.heal(topo_dxf.document_from_msp(self.msp)).faces()
-        detect_flat(self.result, features="all")
+        self.result = detect_flat(topo_dxf.document_from_msp(self.msp), features="all")
         
     def test_001_countersink_detected(self):
         holes = self.result.clusters[0].features("holes")
@@ -116,9 +115,7 @@ class TestDetectLabelMap(unittest.TestCase):
         }
 
         from snapbend.flat.roles import is_structural
-        self.result = topo.heal(topo_dxf.document_from_msp(self.msp, role_rules=topo.name_rules(name_roles)),
-                                  is_structural=is_structural).faces()
-        detect_flat(self.result, features="all")
+        self.result = detect_flat(topo_dxf.document_from_msp(self.msp, role_rules=topo.name_rules(name_roles)), features="all")
 
     def test_001_name_rule_override(self):
         hole = self.result.clusters[0].features("holes")[0]
@@ -137,8 +134,7 @@ class TestDetectThreaded(unittest.TestCase):
         doc = load("rect_with_threaded_holes_geometric.dxf")
         self.msp = doc.modelspace()
 
-        self.result = topo.heal(topo_dxf.document_from_msp(self.msp)).faces()
-        detect_flat(self.result, features="all")
+        self.result = detect_flat(topo_dxf.document_from_msp(self.msp), features="all")
 
     def test_001_thread_detected(self):
         holes = self.result.clusters[0].features("holes")
@@ -156,8 +152,7 @@ class TestFlangeCountersink(unittest.TestCase):
 
     def setUp(self):
         doc = load("flangia semplice.DXF")
-        self.result = topo.heal(topo_dxf.document_from_msp(doc.modelspace())).faces()
-        detect_flat(self.result, features="all")
+        self.result = detect_flat(topo_dxf.document_from_msp(doc.modelspace()), features="all")
 
     def test_concentric_large_hole_is_not_countersink(self):
         cluster = self.result.clusters[0]
@@ -187,41 +182,35 @@ class TestDetectParametric(unittest.TestCase):
 
     def _healed(self, name="rect_with_circle_hole.dxf"):
         doc = load(name)
-        return topo.heal(topo_dxf.document_from_msp(doc.modelspace())).faces()
+        return topo_dxf.document_from_msp(doc.modelspace())
 
     def test_bare_detect_promotes_no_holes(self):
         # detect_flat(result) nudo = solo topologia pulita + ruoli assegnati al load.
-        result = self._healed()
-        detect_flat(result)
+        result = detect_flat(self._healed())
         self.assertEqual(sum(len(p.features("holes")) for p in result.clusters), 0)
         self.assertEqual(sum(len(p.inners) for p in result.clusters), 1)
 
     def test_features_holes_promotes(self):
-        result = self._healed()
-        detect_flat(result, features="holes")
+        result = detect_flat(self._healed(), features="holes")
         self.assertEqual(sum(len(p.features("holes")) for p in result.clusters), 1)
         self.assertEqual(sum(len(p.inners) for p in result.clusters), 0)
 
     def test_features_all_equivalent_to_holes_here(self):
-        result = self._healed()
-        detect_flat(result, features="all")
+        result = detect_flat(self._healed(), features="all")
         self.assertEqual(sum(len(p.features("holes")) for p in result.clusters), 1)
 
     def test_max_drill_diameter_gates_promotion(self):
         # Con soglia sotto il Ø del foro, il cerchio resta contorno interno.
-        result = self._healed()
-        hole_d = None
-        detect_flat(result, features="holes")
+        result = detect_flat(self._healed(), features="holes")
         hole_d = result.clusters[0].features("holes")[0].diameter
 
-        result2 = self._healed()
-        detect_flat(result2, features="holes", max_drill_diameter=hole_d - 1.0)
+        result2 = detect_flat(self._healed(), features="holes", max_drill_diameter=hole_d - 1.0)
         self.assertEqual(len(result2.clusters[0].features("holes")), 0)
         self.assertEqual(len(result2.clusters[0].inners), 1)
 
-    def test_heal_and_detect_defaults_to_all(self):
+    def test_detect_flat_all_su_documento(self):
         doc = load("rect_with_circle_hole.dxf")
-        result = heal_and_detect(topo_dxf.document_from_msp(doc.modelspace()))
+        result = detect_flat(topo_dxf.document_from_msp(doc.modelspace()), features="all")
         self.assertEqual(sum(len(p.features("holes")) for p in result.clusters), 1)
 
 
@@ -246,8 +235,7 @@ class TestDetectStyleMap(unittest.TestCase):
             {"linetype": "DASHED"}, {},
         )
         doc = topo_dxf.document_from_msp(msp, role_rules=[topo.RoleRule("bending", dashed=True)])
-        result = topo.heal(doc).faces()
-        detect_flat(result)
+        result = detect_flat(doc)
 
         cluster = result.clusters[0]
         self.assertEqual(len(cluster.features("bending_lines")), 1)
@@ -258,8 +246,7 @@ class TestDetectStyleMap(unittest.TestCase):
             {}, {"color": 4},  # 4 = cyan ACI
         )
         doc = topo_dxf.document_from_msp(msp, role_rules=[topo.RoleRule("engrave", color="cyan")])
-        result = topo.heal(doc).faces()
-        detect_flat(result)
+        result = detect_flat(doc)
 
         cluster = result.clusters[0]
         self.assertEqual(len(cluster.features("engrave_lines")), 1)
@@ -270,8 +257,7 @@ class TestDetectStyleMap(unittest.TestCase):
         for key in ((0, 255, 255), "#00ffff"):
             msp = self._rect_with_internal_lines({}, {"color": 4})
             doc = topo_dxf.document_from_msp(msp, role_rules=[topo.RoleRule("engrave", color=key)])
-            result = topo.heal(doc).faces()
-            detect_flat(result)
+            result = detect_flat(doc)
             self.assertEqual(len(result.clusters[0].features("engrave_lines")), 1, msg=f"key={key!r}")
 
     def test_004_first_matching_rule_wins(self):
@@ -289,8 +275,7 @@ class TestDetectStyleMap(unittest.TestCase):
                 topo.RoleRule("engrave", color="cyan"),
             ],
         )
-        result = topo.heal(topo_doc).faces()
-        detect_flat(result)
+        result = detect_flat(topo_doc)
 
         cluster = result.clusters[0]
         self.assertEqual(len(cluster.features("bending_lines")), 1)

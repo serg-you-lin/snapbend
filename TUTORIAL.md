@@ -196,7 +196,7 @@ non c'è.
   i tre blocchi, uno sotto l'altro, allineati a sinistra.
 
 **Cosa dovresti saper rispondere alla fine**: perché la vista in sezione,
-qui dentro, non passa da `snapbend.flat.heal_and_detect()` come il taglio (`MAP.md`
+qui dentro, non passa da `snapbend.flat.detect_flat()` come il taglio (`MAP.md`
 D32) — cosa succederebbe se lo facesse.
 
 ## Da qui in poi: i riferimenti, non un percorso lineare

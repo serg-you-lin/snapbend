@@ -1813,3 +1813,34 @@ Its sides go back to `loose` as one `OpenCurve` each, so every lane reads them
 through the one path; descendants rise one level. It runs in every call, not
 only with the bending lane. The "no inner closer than N mm" limit is another
 thing (a process threshold) and is not done.
+
+### D77 — `detect_flat(min_inner_distance=None)`: the limit is the caller's, `gap` measures it ✅ (13 Nov 2026)
+A sheet may need no inner closer than N mm to the outer. N is a process choice,
+so snapbend has **no default**: `None` runs no check (not `0`: "touches" is
+already always handled, D76). With a value, an unlabeled depth-1 inner with
+`topo.geometry.gap(inner, outer).distance < N` becomes an `Invalid`
+(`reason="inner-too-close"`, `distance`) in `cluster.overlay["invalid"]`, is no
+hole candidate, and an `inner-too-close` `Diagnostic` says where. It runs after
+the labeled lane and before the geometric ones. A role the caller set is never
+overwritten.
+`Invalid` is generic on purpose (Federico: "it may serve for other things too"):
+role `invalid`, layer `Invalid`, `reason` a kebab-case code like a
+`Diagnostic`'s, `void` says whether it still counts as a void of the part.
+Why an overlay item and not only a role: topo's DXF writer puts every contour
+of `cluster.inners` on the inner layer whatever its role (`topo_dxf/writer.py`,
+"anche se ne porta un altro"), so a role alone left the problem invisible in
+the output file, which is what a person who never reads warnings looks at.
+Same pattern as `Hole`: out of `cluster.inners`, into the overlay.
+
+### D78 — `detect_flat(doc, ...)` is the one entry; `heal_and_detect` is gone ✅ (13 Nov 2026, Federico)
+`heal_and_detect` existed only because `heal()` needs snapbend's `is_structural`
+and `detect_flat` received an already-healed `Result`: whoever called
+`topo.heal(doc).faces()` by hand and forgot the predicate got labeled holes
+set aside into `loose` with a warning nobody reads, and a wrong output file.
+Now `detect_flat(doc, features=None, *, tolerance, max_gap, label, source_file,
+...)` runs `topo.heal(doc, is_structural=...).faces()` itself and then the
+lanes; an invalid document returns the `Result` with `is_valid=False` and no
+lane runs (what the wrapper did). The lanes on an already-read `Result` are
+`flat.detect._detect_in_result`, internal: only the two idempotency tests call
+it (running the lanes twice must not duplicate). Clean break, no alias; ~60
+call sites moved (tests, `io/dxf.py`). No golden moved.

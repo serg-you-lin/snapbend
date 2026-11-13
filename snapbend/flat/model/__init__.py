@@ -14,6 +14,7 @@ from .hole import (
 )
 from .bending_line import BendingLine
 from .engraving import Engraving
+from .invalid import Invalid, REASON_INNER_TOO_CLOSE
 from .classified import ClassifiedEntity
 from .render import RenderContour
 
@@ -26,6 +27,8 @@ __all__ = [
     "VALID_HOLE_TYPES",
     "BendingLine",
     "Engraving",
+    "Invalid",
+    "REASON_INNER_TOO_CLOSE",
     "ClassifiedEntity",
     "RenderContour",
 ]

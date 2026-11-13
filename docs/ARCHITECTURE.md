@@ -161,7 +161,7 @@ esterno ipotetico:
   passare per forza da `develop_from_external_flanges()`.
 - `read_section()` → `SectionReading` — leggere un contorno senza
   costruire nessuna forma.
-- `snapbend.flat` — `heal_and_detect()`, `detect_flat()`,
+- `snapbend.flat` — `detect_flat()` (dal `Document`, un solo ingresso),
   `describe_features()`, i ruoli e i tipi (`Hole`, `BendingLine`,
   `Engraving`): la lettura di un file di taglio sopra `topo.heal()`.
   `trim_bending_lines()` tratteggia le pieghe (D63).

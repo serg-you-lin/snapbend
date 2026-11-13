@@ -3,7 +3,7 @@ tests/flat/test_pipeline_api.py
 -------------------------------
 (arrivato da topo tests/unit/test_pipeline_api.py, topo MAP.md D88)
 Copre la superficie API introdotta in Fase 3 (MAP.md D2, D3):
-  - heal_and_detect(doc) -> Result
+  - detect_flat(doc, features="all") -> Result
   - detect_flat(result) ritorna il Result
 """
 
@@ -12,7 +12,7 @@ import ezdxf
 
 import topo
 import topo_dxf
-from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
+from snapbend.flat import detect_flat, describe_features, ALL_FEATURES
 
 
 def _square_doc(side: float = 100.0):
@@ -26,42 +26,30 @@ def _square_doc(side: float = 100.0):
 
 class TestPipelineApi(unittest.TestCase):
 
-    def test_heal_and_detect_returns_result(self):
-        r = heal_and_detect(_square_doc(), label="X")
+    def test_detect_flat_prende_il_documento_e_ritorna_un_result(self):
+        r = detect_flat(_square_doc(), features="all", label="X")
         self.assertIsInstance(r, topo.Result)
         self.assertTrue(r.is_valid)
         self.assertEqual(r.cluster_count, 1)
+        self.assertEqual(r.clusters[0].label, "X")      # le opzioni di heal passano
 
-    def test_heal_and_detect_equivalent_to_separate_calls(self):
-        doc_a, doc_b = _square_doc(), _square_doc()
-        combined = heal_and_detect(doc_a)
-        step = detect_flat(topo.heal(doc_b).faces(), features="all")
-        self.assertEqual(combined.cluster_count, step.cluster_count)
-        self.assertEqual(
-            [h.hole_type for p in combined.clusters for h in p.features("holes")],
-            [h.hole_type for p in step.clusters for h in p.features("holes")],
-        )
-
-    def test_detect_returns_same_result_object(self):
-        result = topo.heal(_square_doc()).faces()
-        self.assertIs(detect_flat(result), result)
-
-    def test_heal_and_detect_invalid_still_returns_result(self):
-        # 3 lati di un quadrato: nessun contorno chiuso -> non valido
+    def test_documento_non_valido_torna_comunque_un_result(self):
+        # 3 lati di un quadrato: nessun contorno chiuso -> non valido, le lane non girano
         d = ezdxf.new("R2010")
         msp = d.modelspace()
         for a, b in [((0, 0), (100, 0)), ((100, 0), (100, 100)), ((100, 100), (0, 100))]:
             msp.add_line(a, b)
         doc = topo_dxf.document_from_msp(msp, tolerance=0.5)
-        r = heal_and_detect(doc)
+        r = detect_flat(doc, features="all")
         self.assertIsInstance(r, topo.Result)
         self.assertFalse(r.is_valid)
         self.assertTrue(r.errors)
 
-    def test_heal_and_detect_exported(self):
+    def test_un_solo_ingresso(self):
+        # niente wrapper: `detect_flat(doc)` e basta (MAP.md D78)
         import snapbend.flat
-        self.assertIn("heal_and_detect", snapbend.flat.__all__)
-        self.assertNotIn("heal_and_detect", topo.__all__)
+        self.assertIn("detect_flat", snapbend.flat.__all__)
+        self.assertFalse(hasattr(snapbend.flat, "heal_and_detect"))
 
 
 if __name__ == "__main__":

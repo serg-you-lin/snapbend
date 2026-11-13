@@ -34,8 +34,7 @@ def _rect_with_hole_and_frame():
     msp.add_line((200, 200), (220, 200), dxfattribs={'layer': 'FRAME'})
 
     doc_in = topo_dxf.document_from_msp(msp, role_rules=topo.name_rules({'FRAME': 'frame'}))
-    result = topo.heal(doc_in, tolerance=0.05).faces()
-    detect_flat(result, features="all")
+    result = detect_flat(doc_in, features="all", tolerance=0.05)
     return result, doc_in
 
 

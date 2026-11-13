@@ -17,7 +17,7 @@ from snapbend.flat import LAYER_BENDING, DashPattern, describe_features, detect_
 def _read(outline, bends):
     segments = topo.geometry.polygon(outline)
     segments += [topo.primitives.LineSeg(start=a, end=b) for a, b in bends]
-    return detect_flat(topo.heal(topo.load_segments(segments)).faces(), "bending")
+    return detect_flat(topo.load_segments(segments), "bending")
 
 
 def _plate():

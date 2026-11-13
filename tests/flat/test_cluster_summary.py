@@ -113,7 +113,7 @@ class TestSummaryMatchesGoldenFixtures(unittest.TestCase):
         import json
         from pathlib import Path
         import topo
-        from snapbend.flat import heal_and_detect
+        from snapbend.flat import detect_flat
 
         ex = Path(__file__).resolve().parents[1] / "data" / "flat"
         gdir = ex / "golden" / "process"
@@ -132,11 +132,8 @@ class TestSummaryMatchesGoldenFixtures(unittest.TestCase):
             tol = cfg.get("tolerance", 0.5)
             lm = {**GLOBAL_NAME_ROLES, **cfg.get("name_roles", {})}
             try:
-                result = heal_and_detect(
-                    topo_dxf.load_dxf(str(dxf), explode_inserts=True,
-                                   flatten_z=True, role_rules=topo.name_rules(lm)),
-                    tolerance=tol,
-                )
+                result = detect_flat(topo_dxf.load_dxf(str(dxf), explode_inserts=True,
+                                   flatten_z=True, role_rules=topo.name_rules(lm)), features="all", tolerance=tol)
             except Exception:
                 continue
             if not result.is_valid:

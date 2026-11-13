@@ -5,7 +5,7 @@ Vocabolario di processo — foro, foro filettato, svasatura, piega, incisione,
 marcatura (arrivato da topo `tools/manufacturing_role.py`, topo MAP.md D88).
 
 topo non conosce questi ruoli: `heal(doc, is_structural=...)` riceve
-`is_structural` da qui (lo passa `heal_and_detect()`), e colori e layer di
+`is_structural` da qui (lo passa `detect_flat()`), e colori e layer di
 output sono due mappe di snapbend, `ROLE_STYLES` e `LAYERS`, che chi
 esporta passa a topo (`topo_dxf.to_dxf(result, role_styles=ROLE_STYLES,
 layers=LAYERS)`) — topo non ne tiene nessuna (topo MAP.md D128).
@@ -29,6 +29,7 @@ THREADED_HOLE = "threaded_hole"
 BEND          = "bending"
 ENGRAVE       = "engrave"
 MARKING       = "marking"
+INVALID       = "invalid"         # letto e giudicato non valido per il processo (`Invalid.reason` dice perché)
 
 # Quali di questi sono topologia di contorno di pezzo (un foro è un vero
 # contorno interno, una piega/incisione/marcatura non lo è) — la stessa
@@ -64,12 +65,13 @@ LAYER_THREADED_HOLE = "ThreadHole"
 LAYER_BENDING       = "Bending"
 LAYER_ENGRAVE       = "Engrave"
 LAYER_MARKING       = "Marking"
+LAYER_INVALID       = "Invalid"
 
 
 def is_structural(role) -> bool:
     """
     Predicato strutturale COMPLETO: outer/inner (motore) + hole/countersink/
-    threaded_hole (manifatturiero). Questo è quello che `heal_and_detect()`
+    threaded_hole (manifatturiero). Questo è quello che `detect_flat()`
     passa a `heal(doc, is_structural=...)` — il motore da solo conosce solo
     la metà `model.role.is_structural_role`.
     """
@@ -85,6 +87,7 @@ ROLE_STYLES: Dict[str, "topo.RoleStyle"] = {
     BEND:          topo.RoleStyle(color=(255, 127, 127)),   # rosa
     ENGRAVE:       topo.RoleStyle(color=(192, 192, 192)),   # grigio chiaro
     MARKING:       topo.RoleStyle(color=(128, 128, 128)),   # grigio scuro
+    INVALID:       topo.RoleStyle(color=(255, 120, 0)),     # arancio
 }
 
 # Layer DXF di ogni ruolo di processo in uscita.
@@ -95,4 +98,5 @@ LAYERS: Dict[str, str] = {
     BEND:          LAYER_BENDING,
     ENGRAVE:       LAYER_ENGRAVE,
     MARKING:       LAYER_MARKING,
+    INVALID:       LAYER_INVALID,
 }

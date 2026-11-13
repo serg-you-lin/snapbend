@@ -17,6 +17,7 @@ TEST_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(TEST_DIR))
 
 from snapbend.flat import detect_flat
+from snapbend.flat.detect import _detect_in_result
 from test_helpers import (
     run_pipeline,
     get_custom,
@@ -151,9 +152,9 @@ class TestPipelineDetectIdempotency(unittest.TestCase):
         before = get_custom(result, "bending_lines")
 
 
-        detect_flat(
-            result, features="all"
-        )
+        # le lane girate due volte sullo stesso Result: `detect_flat(doc)` rifà heal,
+        # l'idempotenza si prova sul passo interno
+        _detect_in_result(result, "all")
 
         after = get_custom(result, "bending_lines")
 

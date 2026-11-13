@@ -601,24 +601,24 @@ flangia — succede sull'anima di una Z/omega (MAP.md D1), mai su L/U.
 ## Lettura di un pezzo piano — `snapbend.flat` (richiede topo)
 
 Arrivato da topo (topo MAP.md D88/D90, qui D51). Lavora sopra un
-`topo.Result` e scrive su `cluster.detected` (l'overlay di topo).
+`topo.Result` (da `topo.heal(...).faces()`) e scrive su `cluster.overlay` (l'overlay di topo).
 Presuppone un pezzo piano visto dalla faccia (file di taglio, sviluppo): mai
-sull'output di `topo.island()`.
+sull'output di `topo.heal(...).outlines()`.
 
 ```python
-snapbend.flat.heal_and_detect(doc, tolerance=None, label="", source_file="",
-                              features="all", max_drill_diameter=32.1,
-                              bending_tolerance=1.0, engrave_tolerance=1.0) -> Result
-snapbend.flat.detect_flat(result, features=None, *, max_drill_diameter=32.1,
-                          bending_tolerance=1.0, engrave_tolerance=1.0) -> Result
+snapbend.flat.detect_flat(doc, features=None, *, tolerance=None, max_gap=None,
+                          label="", source_file="", max_drill_diameter=32.1,
+                          bending_tolerance=1.0, engrave_tolerance=1.0,
+                          min_inner_distance=None) -> Result
 snapbend.flat.describe_features(cluster) -> dict
 ```
 
-- **`heal_and_detect`** — `topo.heal(doc, is_structural=snapbend.flat.is_structural)`
-  + `detect_flat(features="all")`; salta la detection se heal non produce
-  parti valide.
-- **`detect_flat`** — nudo: solo i ruoli assegnati al load (`role_rules` di
-  topo). `features` (`"holes"`, `"bending"`, `"engrave"`, `"all"`):
+- **`detect_flat`** — l'unico ingresso (D78). Prende il `topo.Document`, fa
+  `topo.heal(doc, is_structural=snapbend.flat.is_structural).faces()` e poi le
+  lane. `tolerance`, `max_gap`, `label`, `source_file` sono le opzioni di
+  `topo.heal`. Se il documento non dà parti valide torna il `Result` con
+  `is_valid=False` e le lane non girano. Nudo: solo i ruoli assegnati al load
+  (`role_rules` di topo). `features` (`"holes"`, `"bending"`, `"engrave"`, `"all"`):
   - fori: contorno interno circolare Ø < `max_drill_diameter` → `Hole`
     (`plain` / `countersink` / `threaded`); sopra soglia resta contorno.
     Svasatura: nel gruppo di cerchi concentrici (`topo.geometry.concentric_groups`,
@@ -631,18 +631,33 @@ snapbend.flat.describe_features(cluster) -> dict
     (D52); tratti sulla stessa retta separati solo da un vuoto valgono come
     una piega (D53);
   - incisioni: le tracce con ruolo `engrave` dentro una parte.
+  - **un anello che tocca l'outer** (`topo.geometry.gap` <= 1e-6): un inner
+    senza ruolo che tocca l'outer non è un contorno interno (un vuoto non può
+    avere bordo in comune con l'esterno). Esce da `cluster.inners`, i suoi lati
+    tornano in `loose` e la lane pieghe li legge (le quattro pieghe attorno alla
+    base di una vaschetta, D76). Sempre, a ogni chiamata.
+  - **`min_inner_distance`** (mm, default `None` = nessun limite; **lo decide il
+    chiamante**, snapbend non ne propone uno): un inner senza ruolo a meno di
+    così dall'outer (misura `topo.geometry.gap`) prende il ruolo
+    un `Invalid(reason="inner-too-close", distance=...)` in
+    `cluster.overlay["invalid"]` e non diventa un foro; esce da `cluster.inners`
+    come un foro promosso, resta un vuoto (area netta invariata) e nel DXF va sul
+    layer `Invalid`. Un `Diagnostic` `inner-too-close` in `result.warnings` dice
+    dove. Un inner con un ruolo deciso dal chiamante non si tocca. Solo inner di
+    profondità 1.
   **Muta** `result` e lo ritorna; scrive `holes` / `bending_lines` /
-  `engrave_lines` su `cluster.detected`.
+  `engrave_lines` su `cluster.overlay`.
 - **`describe_features`** — conteggi per tipo: `plain_holes_count`,
   `countersink_count`, `threaded_holes_count`, `bending_lines` (gruppi
   collineari), `total_engrave_length`, `total_marking_length`.
 - Ruoli e layer: `HOLE`, `COUNTERSINK`, `THREADED_HOLE`, `BEND`, `ENGRAVE`,
-  `MARKING`, `LAYER_*`, `is_structural(role)`; `ROLE_STYLES` e `LAYERS`, le
+  `MARKING`, `INVALID`, `LAYER_*`, `is_structural(role)`; `ROLE_STYLES` e `LAYERS`, le
   mappe ruolo → colore e ruolo → layer che chi esporta passa a topo
   (`topo_dxf.to_dxf(result, role_styles=ROLE_STYLES, layers=LAYERS)`, anche
   `split`, `to_svg`, `to_view_model`): topo non tiene un registro (topo D128).
 - Tipi: `Hole` (`is_void = True`: topo lo toglie dall'area), `BendingLine`,
-  `Engraving`, `ClassifiedEntity`; `contours` dice a topo su che layer
+  `Engraving`, `Invalid` (`reason`, `distance`, `void`: una cosa letta e giudicata
+  non valida per il processo, con il motivo), `ClassifiedEntity`; `contours` dice a topo su che layer
   disegnarli (una svasatura sul suo layer, una piega come LINE). Nessun tipo
   shapely (D70): un `Hole` si costruisce da `segments`; una `BendingLine` ha
   `start`/`end` (l'asse intero); un'`Engraving` ha `closed: bool` (traccia già
@@ -676,9 +691,9 @@ trim_bending_lines(result, lambda bl: None if bl.length < 100 else DashPattern(2
 
 ```python
 import topo, topo_dxf
-from snapbend.flat import heal_and_detect, describe_features
+from snapbend.flat import detect_flat, describe_features
 
-result = heal_and_detect(topo_dxf.load_dxf("pezzo.dxf", tolerance=0.5))
+result = detect_flat(topo_dxf.load_dxf("pezzo.dxf", tolerance=0.5), features="all")
 if result.is_valid:
     print(describe_features(result.clusters[0]))
     topo_dxf.to_dxf(result, allow_invalid=False).saveas("pezzo_letto.dxf")

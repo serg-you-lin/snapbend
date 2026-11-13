@@ -22,7 +22,7 @@ sys.path.insert(0, str(project_root))
 import topo
 import topo_dxf
 from snapbend.flat import ROLE_STYLES, LAYERS
-from snapbend.flat import detect_flat, heal_and_detect, describe_features, ALL_FEATURES
+from snapbend.flat import detect_flat, describe_features, ALL_FEATURES
 from topo_dxf.layers import ALL_LAYERS, TRASH_LAYER
 from topo_dxf.layers import LAYER_OUTER, role_to_dxf_layer
 from snapbend.flat.roles import LAYER_BENDING
@@ -49,14 +49,7 @@ def _run_pipeline(dxf_path: Path) -> tuple:
     source_doc = topo_dxf.load_dxf(
         dxf_path, explode_inserts=True, role_rules=topo.name_rules(SPECIAL_LAYERS),
     )
-    result = topo.heal(
-        source_doc,
-        tolerance=1,
-        label=dxf_path.stem,
-        source_file=dxf_path.name,
-        is_structural=is_structural,
-    ).faces()
-    detect_flat(result, features="all", bending_tolerance=0.2)
+    result = detect_flat(source_doc, features="all", bending_tolerance=0.2, tolerance=1, label=dxf_path.stem, source_file=dxf_path.name)
     doc_out = topo_dxf.to_dxf(result, source_doc, role_styles=ROLE_STYLES, layers=LAYERS)
 
     return source_doc, doc_out, result
@@ -233,13 +226,7 @@ class TestLineetteSpurie(unittest.TestCase):
             raise unittest.SkipTest(f"File non trovato: {cls.dxf_path}")
 
         src_doc = topo_dxf.load_dxf(cls.dxf_path, explode_inserts=True)
-        cls.result = topo.heal(
-            src_doc,
-            tolerance=1,
-            label=cls.dxf_path.stem,
-            source_file=cls.dxf_path.name,
-        ).faces()
-        detect_flat(cls.result, features="all")
+        cls.result = detect_flat(src_doc, features="all", tolerance=1, label=cls.dxf_path.stem, source_file=cls.dxf_path.name)
         cls.msp = topo_dxf.to_dxf(cls.result, src_doc, role_styles=ROLE_STYLES, layers=LAYERS).modelspace()
 
     def test_un_solo_part(self):

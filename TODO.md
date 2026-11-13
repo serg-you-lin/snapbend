@@ -90,9 +90,9 @@ Suite verde (432). Non erano nomi rinominati ma comportamenti di topo cambiati:
 - [x] **vaschetta** — `detect_flat` libera da `inners` un anello senza ruolo che
   tocca l'outer (`gap`, MAP.md D76); la richiesta a topo (l'anello non deve
   entrare in gerarchia) resta fatta nella sua sessione.
-- [ ] **limite inner–outer** (es. nessun inner a meno di 2 mm dall'outer): soglia
-  di processo in `flat/thresholds.py`, misura `topo.geometry.gap`; "tocca" ne è
-  il caso 0. Non fatta.
+- [x] **limite inner–outer** — `detect_flat(min_inner_distance=None)`, ruolo
+  `Invalid` nell'overlay, layer `Invalid` (MAP.md D77). Fatto.
+- [x] **`detect_flat(doc, ...)` al posto di `heal_and_detect`** (MAP.md D78).
 - [x] **`F6`** — un solo cluster è la lettura giusta (Federico, a occhio, 13
   novembre); golden rigenerato, solo quello (MAP.md D76).
 - [ ] `13_ARC_splitter_injected_fuzzy_new.py` (non tracciato, dati cliente)
