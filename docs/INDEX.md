@@ -8,7 +8,7 @@ python tests/gen_index.py
 
 What this is: the lookup table of *what already exists* in the package, down to internal helpers. `docs/API.md` documents the public surface (`snapbend.<name>`) with full cards; this file lists every module-level function and class so nothing gets rewritten because it was not found. Signatures and docstring lines come straight from the source, so they cannot drift.
 
-`30` modules · `109` module-level functions · `25` classes · `4932` lines of code.
+`31` modules · `111` module-level functions · `25` classes · `5023` lines of code.
 
 Sections: [Lookup](#lookup) · [Duplicate names](#duplicate-names) · [Dependency rule](#dependency-rule) · [By module](#by-module) · [Internal dependencies](#internal-dependencies)
 
@@ -108,6 +108,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `officina_file` | func | `snapbend/rules/officina.py:36` | Un file dentro la cartella officina, se c'è una cartella officina e il file esiste. |
 | `officina_folder` | func | `snapbend/rules/officina.py:27` | La cartella officina scelta con `set_officina`; None se nessuna. |
 | `_order_chain` | func | `snapbend/rules/read_section.py:626` |  |
+| `part_fields` | func | `snapbend/flat/part_fields.py:41` | La funzione `extra` per `topo.to_json(result, extra=...)`, con i dati di |
 | `_partner` | func | `snapbend/rules/read_section.py:476` | L'arco concentrico ad `arc` il cui raggio differisce dello spessore. |
 | `_perimeter` | func | `snapbend/flat/detect.py:794` |  |
 | `_perp_distance` | func | `snapbend/rules/read_section.py:349` |  |
@@ -145,6 +146,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `trim_bending_lines` | func | `snapbend/flat/trim.py:34` | Tratteggia ogni `BendingLine` di `result` con `pattern`: le stesse misure |
 | `_turn_deg` | func | `snapbend/model/section.py:67` | Signed rotation relative to going straight (>0 = to the left). |
 | `_unit` | func | `snapbend/model/section.py:72` |  |
+| `_value` | func | `snapbend/flat/part_fields.py:37` |  |
 | `_weights` | func | `snapbend/rules/read_section.py:380` | valore -> peso totale (o conteggio), i valori entro 1e-3 contano come uno. |
 | `_write_entity` | func | `snapbend/flat/detect.py:760` | I dati dell'entità nell'overlay, sotto `<tipo>_entities`. La piega no: è |
 | `_write_flange_quotes` | func | `snapbend/io/dxf.py:255` |  |
@@ -240,7 +242,7 @@ _snapbend/drawing/sections.py_
 
 ### `snapbend/flat/`
 
-#### `snapbend/flat/__init__.py` — 34 lines
+#### `snapbend/flat/__init__.py` — 35 lines
 
 _snapbend/flat/__init__.py_
 
@@ -335,6 +337,13 @@ _snapbend/flat/model/invalid.py_
 _snapbend/flat/model/render.py_
 
 - **class** `RenderContour` — L21
+
+#### `snapbend/flat/part_fields.py` — 90 lines
+
+_snapbend/flat/part_fields.py_
+
+- `_value(value: PerPart, cluster: topo.Cluster)` — L37
+- `part_fields(*, material: PerPart=NOT_AVAILABLE, thickness_mm: PerPart=NOT_AVAILABLE, quantity: PerPart=1, extra: Optional[Union[dict, Callable[[topo.Cluster], dict]]]=None) -> Callable[[topo.Cluster], dict]` — L41 — La funzione `extra` per `topo.to_json(result, extra=...)`, con i dati di
 
 #### `snapbend/flat/roles.py` — 102 lines
 
@@ -508,7 +517,7 @@ Which `snapbend` modules each module imports — "what works with what". Modules
 | `snapbend/core/cylinder.py` | `snapbend.core.bend` · `snapbend.model.geometry` |
 | `snapbend/drawing/__init__.py` | `snapbend.drawing.sections` |
 | `snapbend/drawing/sections.py` | `snapbend.rules.read_section` |
-| `snapbend/flat/__init__.py` | `snapbend.flat.detect` · `snapbend.flat.model` · `snapbend.flat.roles` · `snapbend.flat.thresholds` · `snapbend.flat.trim` |
+| `snapbend/flat/__init__.py` | `snapbend.flat.detect` · `snapbend.flat.model` · `snapbend.flat.part_fields` · `snapbend.flat.roles` · `snapbend.flat.thresholds` · `snapbend.flat.trim` |
 | `snapbend/flat/detect.py` | `snapbend.flat.holes` · `snapbend.flat.model` · `snapbend.flat.roles` · `snapbend.flat.thresholds` |
 | `snapbend/flat/holes.py` | `snapbend.flat.thresholds` |
 | `snapbend/flat/model/__init__.py` | `snapbend.flat.model.bending_line` · `snapbend.flat.model.classified` · `snapbend.flat.model.engraving` · `snapbend.flat.model.hole` · `snapbend.flat.model.invalid` · `snapbend.flat.model.render` |
@@ -516,6 +525,7 @@ Which `snapbend` modules each module imports — "what works with what". Modules
 | `snapbend/flat/model/engraving.py` | `snapbend.flat.model.render` · `snapbend.flat.roles` |
 | `snapbend/flat/model/hole.py` | `snapbend.flat.model.render` · `snapbend.flat.roles` |
 | `snapbend/flat/model/invalid.py` | `snapbend.flat.model.render` · `snapbend.flat.roles` |
+| `snapbend/flat/part_fields.py` | `snapbend.flat.detect` |
 | `snapbend/flat/trim.py` | `snapbend.flat.model` |
 | `snapbend/human_layer.py` | `snapbend.core.bend` · `snapbend.io.dxf` · `snapbend.model.geometry` · `snapbend.model.section` · `snapbend.rules.deduction` |
 | `snapbend/io/dxf.py` | `snapbend.flat` · `snapbend.flat.roles` · `snapbend.model.geometry` · `snapbend.model.section` |

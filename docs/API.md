@@ -611,6 +611,7 @@ snapbend.flat.detect_flat(doc, features=None, *, tolerance=None, max_gap=None,
                           bending_tolerance=1.0, engrave_tolerance=1.0,
                           min_inner_distance=None) -> Result
 snapbend.flat.describe_features(cluster) -> dict
+snapbend.flat.part_fields(*, material=None, thickness_mm=None, quantity=1, extra=None) -> Callable
 ```
 
 - **`detect_flat`** — l'unico ingresso (D78). Prende il `topo.Document`, fa
@@ -647,6 +648,17 @@ snapbend.flat.describe_features(cluster) -> dict
     profondità 1.
   **Muta** `result` e lo ritorna; scrive `holes` / `bending_lines` /
   `engrave_lines` su `cluster.overlay`.
+- **`part_fields`** — i dati di lamiera di ogni pezzo, per chi li manda a un
+  gestionale o a un CAM (MAP.md D79). Non scrive JSON: restituisce la funzione
+  `extra(cluster) -> dict` per `topo.to_json`/`save_json`
+  (`topo.save_json(result, "p.json", extra=part_fields(material="S275JR", thickness_mm=3.0))`).
+  Dal chiamante: `material`, `thickness_mm`, `quantity` (default 1), un valore o
+  `cluster -> valore`; se manca, `material` e `thickness_mm` valgono "N/D" (snapbend non
+  propone materiale né spessore); un `None` esplicito non viene scritto; `extra`: altri campi suoi. Dal pezzo:
+  `plain_holes_count`, `countersink_count`, `threaded_holes_count`, `holes_count`,
+  `bend_count` (colpi di piega, non tratti), `engrave_length_mm`,
+  `marking_length_mm`, `total_perimeter_mm`. Area, bbox, perimetri, `inner_count`
+  e `label` li scrive già topo.
 - **`describe_features`** — conteggi per tipo: `plain_holes_count`,
   `countersink_count`, `threaded_holes_count`, `bending_lines` (gruppi
   collineari), `total_engrave_length`, `total_marking_length`.

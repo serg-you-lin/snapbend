@@ -16,6 +16,7 @@ from .roles import (
 )
 from .thresholds import HOLE_DIAMETER_THRESHOLD
 from .detect import detect_flat, describe_features, ALL_FEATURES
+from .part_fields import part_fields
 from .trim import DashPattern, DashRule, trim_bending_lines
 from .model import (
     Hole, BendingLine, Engraving, ClassifiedEntity,
@@ -27,7 +28,7 @@ __all__ = [
     "LAYER_HOLE", "LAYER_COUNTERSINK", "LAYER_THREADED_HOLE", "LAYER_BENDING",
     "LAYER_ENGRAVE", "LAYER_MARKING", "LAYER_INVALID", "ROLE_STYLES", "LAYERS", "is_structural",
     "HOLE_DIAMETER_THRESHOLD",
-    "detect_flat", "describe_features", "ALL_FEATURES",
+    "detect_flat", "describe_features", "ALL_FEATURES", "part_fields",
     "DashPattern", "DashRule", "trim_bending_lines",
     "Hole", "BendingLine", "Engraving", "ClassifiedEntity",
     "HOLE_TYPE_PLAIN", "HOLE_TYPE_COUNTERSINK", "HOLE_TYPE_THREADED",

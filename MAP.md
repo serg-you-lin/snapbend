@@ -1845,3 +1845,20 @@ lane runs (what the wrapper did). The lanes on an already-read `Result` are
 it (running the lanes twice must not duplicate). Clean break, no alias; ~60
 call sites moved (tests, `io/dxf.py`). No golden moved.
 → **0.11.0** (D76-D78: topo 1.0 API, `detect_flat(doc)`, `Invalid`).
+
+### D79 — `flat.part_fields()`: the sheet-metal data topo used to give, now snapbend's (Federico, 13 Nov 2026)
+Before 8 November topo wrote material, thickness, quantity and the geometry
+facts for a CAM/ERP (`build_metadata` + `metadata_schema.py`); topo D230 took
+them out because they spoke the domain's language. They are snapbend's now:
+`part_fields(material=, thickness_mm=, quantity=1, extra=)` returns the
+`extra` callback of `topo.to_json`/`save_json`, so the file is still written by
+topo (geometry only) and snapbend adds per cluster: the caller's material,
+thickness and quantity (a value or `cluster -> value`; if the caller gives none, material and
+thickness are written as "N/D", never invented; an explicit `None` is not written), `plain_holes_count`, `countersink_count`,
+`threaded_holes_count`, `holes_count`, `bend_count`, `engrave_length_mm`,
+`marking_length_mm`, `total_perimeter_mm`. Area, bbox, perimeters, `inner_count`
+and `label` are topo's and are not repeated (a name topo writes raises
+`ValueError`). `bend_count` is bends, not strokes (`describe_features`); the
+rule "collinear strokes with material between stay separate" is not in yet.
+
+→ **0.12.0** (D79: `part_fields`, the sheet-metal data for the ERP/CAM JSON).
