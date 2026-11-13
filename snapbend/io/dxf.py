@@ -103,6 +103,9 @@ def to_json(
     Lo spessore viene da `flat.meta["thickness"]` (se > 0, altrimenti resta
     "N/D"); il materiale è il GRADO (es. "S275JR"), non la chiave di
     calibrazione `material="acciaio"` del generatore, che qui non c'entra.
+    `quantity` è il numero di pezzi INTERI; il JSON scrive `quantity * split`
+    (MAP.md D83): un cono in due metà uguali sono due pezzi da tagliare per
+    ogni cono. Senza `split` in `.meta` (profili, selle) vale 1.
     `extra`: come in `part_fields`, campi in più per pezzo.
     """
     import topo
@@ -113,7 +116,7 @@ def to_json(
     topo.save_json(result, path, extra=part_fields(
         material=material if material is not None else NOT_AVAILABLE,
         thickness_mm=thickness if thickness > 0 else NOT_AVAILABLE,
-        quantity=quantity, extra=extra,
+        quantity=quantity * ((flat.meta or {}).get("split") or 1), extra=extra,
     ))
     return result
 

@@ -30,6 +30,13 @@ class TestToJson(unittest.TestCase):
                     height=100, thickness=2).develop()
         self.assertEqual(self._carica(flat, material="S275JR")["bend_count"], 0)
 
+    def test_quantity_si_moltiplica_per_split(self):
+        # D83: un cono in due metà = due pezzi per ogni cono
+        flat = Cone(top_outer_diameter=100, bottom_outer_diameter=250,
+                    height=300, thickness=2, split=2).develop()
+        self.assertEqual(self._carica(flat, material="S275JR")["quantity"], 2)
+        self.assertEqual(self._carica(flat, material="S275JR", quantity=3)["quantity"], 6)
+
     def test_spessore_zero_resta_nd(self):
         flat = Cylinder(outer_diameter=150, height=500).develop()
         with self.assertWarns(UserWarning):

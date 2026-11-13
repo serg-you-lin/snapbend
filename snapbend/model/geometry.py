@@ -154,7 +154,8 @@ class FlatGeometry:
         """
         Scrive il JSON del pezzo dallo stesso Result in memoria di `to_dxf`
         (MAP.md D82). Spessore da `.meta`; `material` è il grado (es.
-        "S275JR"), "N/D" se non dato. Vedi `snapbend.io.dxf.to_json`.
+        "S275JR"), "N/D" se non dato. `quantity` = pezzi interi, nel JSON
+        moltiplicata per `meta["split"]` (D83). Vedi `snapbend.io.dxf.to_json`.
         """
         from ..io.dxf import to_json
         return to_json(self, path, material=material, quantity=quantity,

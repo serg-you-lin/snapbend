@@ -1904,8 +1904,19 @@ same `Result` (no file read back), `thickness_mm` from `flat.meta["thickness"]`
 those are two different things. No new JSON format: it is topo's, as
 `detect_flat` gives it. Lives in `io/dxf.py` (the one door to topo, D69).
 
+### D83 — `to_json`: the quantity multiplies by the pieces the generator makes (Federico, 13 Nov 2026)
+
+A cone with `split=2` is two equal pieces to cut, and the generator knows it:
+asking the caller to write `quantity=2` was manual work that can be forgotten.
+`flat.to_json(quantity=n)` now writes `n * meta["split"]` (`n` = whole parts,
+default 1; `split` absent → 1, so profiles and saddles do not change). The
+other half of the datum — how many whole parts the customer orders — stays the
+caller's. The material grade as a field of the generator is not done: it needs
+a name apart from `material` (the calibration key, D45).
+
 → **0.12.0** (D79: `part_fields`, the sheet-metal data for the ERP/CAM JSON).
 → **0.12.1** (D79: `UserWarning` when material or thickness are written as "N/D").
 → **0.12.2** (D80: collinear strokes with material between count as separate bends).
 → **0.12.3** (D81: `outer_diameter` / `inner_diameter` in `Cone` and `Cylinder`).
 → **0.12.4** (D82: `FlatGeometry.to_json`).
+→ **0.12.5** (D83: `to_json` quantity × split).

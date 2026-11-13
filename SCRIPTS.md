@@ -28,6 +28,7 @@ Quelli che generano il DXF richiedono topo installato a fianco
 | `11_split_pieces.py` | `Cone`/`Cylinder` — `split`, `calibration` | cono/cilindro divisi in N pezzi uguali saldati (`split=2`, liscio e sfaccettato — MAP.md D46), raggio/K sfaccettato dalla calibrazione dell'officina (MAP.md D45). Lo sfaccettato esportato CON e SENZA la vista in sezione quotata (costruita da una `Section` equivalente, come una L — MAP.md D48: non passa da `export_part()`, che ricalcolerebbe lo sviluppo con la formula sbagliata) |
 | `12_selle.py` | `Cylinder(sector_angle=…)` | una mezzaluna — settore LIBERO, non una frazione del giro (sella calandrata, MAP.md D42) — liscia e sfaccettata, quest'ultima anche lei con/senza vista in sezione |
 | `14_invalid_inner.py` | `snapbend.flat.detect_flat(min_inner_distance=…)`, `Invalid` | contorni interni che non vanno bene (MAP.md D76, D77): un inner a meno di N mm dall'outer (soglia del chiamante, default `None`) diventa un `Invalid` sul layer `Invalid`, non un foro, area netta invariata; un anello che tocca l'outer (la vaschetta con le sue quattro pieghe) non è un inner e le pieghe tornano lette. Pezzo costruito con `topo.geometry`, scrive `output/14_invalid_inner.dxf` e `output/14_vaschetta.dxf` |
+| `15_cono_a_settori_json.py` | `Cone(split=2, faceted=True)`, `FlatGeometry.to_dxf`, `.to_json` | cono in due metà a settori piani: scrive DXF di taglio e JSON dei metadati (D82); la `quantity` del JSON esce `× split` da sola (D83). Scrive in `_debug/`, fuori dal repo |
 
 ## Generatori — non sono script di esplorazione
 

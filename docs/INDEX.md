@@ -8,7 +8,7 @@ python tests/gen_index.py
 
 What this is: the lookup table of *what already exists* in the package, down to internal helpers. `docs/API.md` documents the public surface (`snapbend.<name>`) with full cards; this file lists every module-level function and class so nothing gets rewritten because it was not found. Signatures and docstring lines come straight from the source, so they cannot drift.
 
-`31` modules · `115` module-level functions · `25` classes · `5146` lines of code.
+`31` modules · `115` module-level functions · `25` classes · `5150` lines of code.
 
 Sections: [Lookup](#lookup) · [Duplicate names](#duplicate-names) · [Dependency rule](#dependency-rule) · [By module](#by-module) · [Internal dependencies](#internal-dependencies)
 
@@ -26,7 +26,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `Bend` | class | `snapbend/core/bend.py:104` | Una singola piega fra due flange consecutive. |
 | `bend_allowance_din6935` | func | `snapbend/rules/deduction.py:76` | Lunghezza dell'asse neutro dentro la piega, con K stimato DIN 6935. |
 | `bend_deduction` | func | `snapbend/rules/deduction.py:49` | Accorciamento di piega, formula della fibra neutra. |
-| `_bend_lines` | func | `snapbend/io/dxf.py:333` | Una riga per piega nell'header — gli stessi numeri che dice |
+| `_bend_lines` | func | `snapbend/io/dxf.py:336` | Una riga per piega nell'header — gli stessi numeri che dice |
 | `_bending_line` | func | `snapbend/flat/detect.py:443` |  |
 | `_bending_line_from_data` | func | `snapbend/flat/detect.py:881` |  |
 | `BendingLine` | class | `snapbend/flat/model/bending_line.py:22` |  |
@@ -73,7 +73,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_engraving_from_closed` | func | `snapbend/flat/detect.py:696` |  |
 | `_engraving_from_open` | func | `snapbend/flat/detect.py:681` |  |
 | `_ensure_overlay` | func | `snapbend/flat/detect.py:35` | `cluster.overlay`, creandolo alla prima scrittura. |
-| `_entities_bbox` | func | `snapbend/io/dxf.py:230` | Bbox degli entity grezzi (linee/archi, schema `FlatGeometry.entities`) |
+| `_entities_bbox` | func | `snapbend/io/dxf.py:233` | Bbox degli entity grezzi (linee/archi, schema `FlatGeometry.entities`) |
 | `_entity` | func | `snapbend/drawing/sections.py:87` | Segmento nativo di topo -> entità dello schema di `read_section()` |
 | `estimate_k_factor` | func | `snapbend/core/bend.py:84` | Stima un K-factor di partenza da materiale + rapporto R/T, secondo la |
 | `export_part` | func | `snapbend/human_layer.py:66` | Esporta un pezzo su un UNICO file DXF a livelli (Fase 3, MAP.md D32): |
@@ -103,7 +103,7 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `k_din6935` | func | `snapbend/rules/deduction.py:65` | Stima DIN 6935 del fattore K (in [0, 0.5]), dal SOLO rapporto |
 | `_labeled_hole_from_contour` | func | `snapbend/flat/detect.py:636` | `Contour` con ruolo foro da role_rules → `Hole(source="labeled")`. |
 | `_mark_invalid_inners` | func | `snapbend/flat/detect.py:126` | Un `inner` senza ruolo a meno di `min_distance` mm dall'outer (misura: |
-| `_meta_lines` | func | `snapbend/io/dxf.py:323` |  |
+| `_meta_lines` | func | `snapbend/io/dxf.py:326` |  |
 | `_mid` | func | `snapbend/rules/read_section.py:127` |  |
 | `_mode` | func | `snapbend/rules/read_section.py:374` | Il valore più frequente (entro 1e-3); con `weights`, quello di peso totale maggiore. |
 | `_normalize_features` | func | `snapbend/flat/detect.py:62` | Normalizza l'argomento `features` di detect_flat() in un set di stringhe. |
@@ -153,13 +153,13 @@ Every module-level name in the package, alphabetically. **Search here before wri
 | `_value` | func | `snapbend/flat/part_fields.py:38` |  |
 | `_weights` | func | `snapbend/rules/read_section.py:380` | valore -> peso totale (o conteggio), i valori entro 1e-3 contano come uno. |
 | `_write_entity` | func | `snapbend/flat/detect.py:795` | I dati dell'entità nell'overlay, sotto `<tipo>_entities`. La piega no: è |
-| `_write_flange_quotes` | func | `snapbend/io/dxf.py:286` |  |
-| `_write_meta_block` | func | `snapbend/io/dxf.py:372` |  |
-| `write_part_dxf` | func | `snapbend/io/dxf.py:160` | Esporta un pezzo su un unico file a LIVELLI impilati in VERTICALE |
-| `_write_reference_lines` | func | `snapbend/io/dxf.py:380` | Disegna il contorno PIENO (prima del margine) — non solo due lati |
-| `write_section_dxf` | func | `snapbend/io/dxf.py:121` | Esporta la vista in sezione (Fase 3.3/3.4, MAP.md D31): il contorno |
-| `_write_section_view_entities` | func | `snapbend/io/dxf.py:252` | Disegna la vista in sezione come linee/archi diretti, traslati di |
-| `_write_text_lines` | func | `snapbend/io/dxf.py:356` |  |
+| `_write_flange_quotes` | func | `snapbend/io/dxf.py:289` |  |
+| `_write_meta_block` | func | `snapbend/io/dxf.py:375` |  |
+| `write_part_dxf` | func | `snapbend/io/dxf.py:163` | Esporta un pezzo su un unico file a LIVELLI impilati in VERTICALE |
+| `_write_reference_lines` | func | `snapbend/io/dxf.py:383` | Disegna il contorno PIENO (prima del margine) — non solo due lati |
+| `write_section_dxf` | func | `snapbend/io/dxf.py:124` | Esporta la vista in sezione (Fase 3.3/3.4, MAP.md D31): il contorno |
+| `_write_section_view_entities` | func | `snapbend/io/dxf.py:255` | Disegna la vista in sezione come linee/archi diretti, traslati di |
+| `_write_text_lines` | func | `snapbend/io/dxf.py:359` |  |
 
 ## Duplicate names
 
@@ -387,23 +387,23 @@ _snapbend/io_
 
 No module-level function or class.
 
-#### `snapbend/io/dxf.py` — 415 lines
+#### `snapbend/io/dxf.py` — 418 lines
 
 _snapbend/io/dxf.py_
 
 - `to_topo_result(flat: 'FlatGeometry', tolerance: float=0.05)` — L26 — Traduce `flat` in un Result passando da topo.load_geometry() +
 - `to_dxf(flat: 'FlatGeometry', path: str, tolerance: float=0.05, annotate: bool=True, show_margin_reference: bool=False)` — L54 — Scrive `flat` su file DXF via topo_dxf.to_dxf() — layer/colori coerenti
 - `to_json(flat: 'FlatGeometry', path: str, material: Optional[str]=None, quantity: int=1, tolerance: float=0.05, extra=None)` — L90 — Scrive su file il JSON del pezzo, dallo stesso Result in memoria che
-- `write_section_dxf(section: 'Section', quotes: List['FlangeQuote'], path: str, tolerance: float=0.05, quote_clearance: float=8.0, annotate: bool=True)` — L121 — Esporta la vista in sezione (Fase 3.3/3.4, MAP.md D31): il contorno
-- `write_part_dxf(flat: 'FlatGeometry', path: str, section_flat: Optional['FlatGeometry']=None, quotes: Optional[List['FlangeQuote']]=None, thickness: Optional[float]=None, include_header: bool=False, tolerance: float=0.05, quote_clearance: float=8.0, margin: float=20.0)` — L160 — Esporta un pezzo su un unico file a LIVELLI impilati in VERTICALE
-- `_entities_bbox(entities: List[Dict[str, Any]])` — L230 — Bbox degli entity grezzi (linee/archi, schema `FlatGeometry.entities`)
-- `_write_section_view_entities(doc_out, entities: List[Dict[str, Any]], dx: float, dy: float, layer: str='SectionView') -> None` — L252 — Disegna la vista in sezione come linee/archi diretti, traslati di
-- `_write_flange_quotes(doc_out, quotes: List['FlangeQuote'], thickness: float, clearance: float) -> None` — L286
-- `_meta_lines(label: str, meta: Dict[str, Any], bends: Optional[List[Any]]=None) -> List[str]` — L323
-- `_bend_lines(bends: List[Any]) -> List[str]` — L333 — Una riga per piega nell'header — gli stessi numeri che dice
-- `_write_text_lines(doc_out, lines: List[str], x0: float, y0: float, layer: str='Notes') -> None` — L356
-- `_write_meta_block(doc_out, result, label: str, meta: Dict[str, Any], bends: Optional[List[Any]]=None) -> None` — L372
-- `_write_reference_lines(doc_out, reference_entities: List[Dict[str, Any]]) -> None` — L380 — Disegna il contorno PIENO (prima del margine) — non solo due lati
+- `write_section_dxf(section: 'Section', quotes: List['FlangeQuote'], path: str, tolerance: float=0.05, quote_clearance: float=8.0, annotate: bool=True)` — L124 — Esporta la vista in sezione (Fase 3.3/3.4, MAP.md D31): il contorno
+- `write_part_dxf(flat: 'FlatGeometry', path: str, section_flat: Optional['FlatGeometry']=None, quotes: Optional[List['FlangeQuote']]=None, thickness: Optional[float]=None, include_header: bool=False, tolerance: float=0.05, quote_clearance: float=8.0, margin: float=20.0)` — L163 — Esporta un pezzo su un unico file a LIVELLI impilati in VERTICALE
+- `_entities_bbox(entities: List[Dict[str, Any]])` — L233 — Bbox degli entity grezzi (linee/archi, schema `FlatGeometry.entities`)
+- `_write_section_view_entities(doc_out, entities: List[Dict[str, Any]], dx: float, dy: float, layer: str='SectionView') -> None` — L255 — Disegna la vista in sezione come linee/archi diretti, traslati di
+- `_write_flange_quotes(doc_out, quotes: List['FlangeQuote'], thickness: float, clearance: float) -> None` — L289
+- `_meta_lines(label: str, meta: Dict[str, Any], bends: Optional[List[Any]]=None) -> List[str]` — L326
+- `_bend_lines(bends: List[Any]) -> List[str]` — L336 — Una riga per piega nell'header — gli stessi numeri che dice
+- `_write_text_lines(doc_out, lines: List[str], x0: float, y0: float, layer: str='Notes') -> None` — L359
+- `_write_meta_block(doc_out, result, label: str, meta: Dict[str, Any], bends: Optional[List[Any]]=None) -> None` — L375
+- `_write_reference_lines(doc_out, reference_entities: List[Dict[str, Any]]) -> None` — L383 — Disegna il contorno PIENO (prima del margine) — non solo due lati
 
 ### `snapbend/model/`
 
@@ -413,7 +413,7 @@ _snapbend/model_
 
 No module-level function or class.
 
-#### `snapbend/model/geometry.py` — 188 lines
+#### `snapbend/model/geometry.py` — 189 lines
 
 _snapbend/model/geometry.py_
 
